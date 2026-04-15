@@ -1,0 +1,6 @@
+{
+  "file.type": "File Type",
+  "file.upload.success": "File uploaded successfully",
+  "file.download.success": "File downloaded successfully",
+  "file.object.name.not.found": "Please provide the file object name"
+}

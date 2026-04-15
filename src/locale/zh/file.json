@@ -1,0 +1,6 @@
+{
+  "file.type": "文件类型",
+  "file.upload.success": "文件上传成功",
+  "file.download.success": "获取下载链接成功",
+  "file.object.name.not.found": "请提供文件对象名称"
+}

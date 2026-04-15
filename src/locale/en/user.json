@@ -1,0 +1,15 @@
+{
+  "user._id": "User ID",
+  "user.account": "Account",
+  "user.password": "Password",
+  "user.salt": "Salt",
+  "user.nickname": "Nickname",
+  "user.birthday": "Birthday",
+  "user.gender": "Gender",
+  "user.email": "Email",
+  "user.roles": "Roles",
+  "user.login.success": "Login success",
+  "user.list.success": "Get user list success",
+  "user.update.roles.success": "Update user roles success",
+  "user.logout.success": "Logout success"
+}

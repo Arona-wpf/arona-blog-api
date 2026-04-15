@@ -1,0 +1,10 @@
+{
+  "config._id": "Config ID",
+  "config.name": "Config Name",
+  "config.key": "Config Key",
+  "config.value": "Config Value",
+  "config.description": "Config Description",
+  "config.creator": "Creator",
+  "config.updator": "Updator",
+  "config.create.success": "Create config success"
+}

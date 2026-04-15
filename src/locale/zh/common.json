@@ -1,0 +1,11 @@
+{
+  "common.current.page": "当前页",
+  "common.page.size": "分页大小",
+  "common.previous.page.indicator": "上一页标识",
+  "common.next.page.indicator": "下一页标识",
+  "common.start_at": "开始时间",
+  "common.end_at": "结束时间",
+  "common.created_at": "创建时间",
+  "common.updated_at": "更新时间",
+  "common.verify_code": "验证码"
+}

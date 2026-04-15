@@ -1,0 +1,15 @@
+{
+  "user._id": "用户 ID",
+  "user.account": "账号",
+  "user.password": "密码",
+  "user.salt": "盐",
+  "user.nickname": "昵称",
+  "user.birthday": "生日",
+  "user.gender": "性别",
+  "user.email": "邮箱",
+  "user.roles": "角色",
+  "user.login.success": "登录成功",
+  "user.list.success": "获取用户列表成功",
+  "user.update.roles.success": "更新用户角色成功",
+  "user.logout.success": "登出成功"
+}

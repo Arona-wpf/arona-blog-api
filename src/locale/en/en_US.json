@@ -1,0 +1,9 @@
+{
+    "ok": "OK",
+    "not.login": "Not Login",
+    "param.validate.failed": "\"{parameter}\" Parameter Validation Failed",
+    "unauthorized": "Unauthorized to access interface",
+    "forbidden": "Forbidden",
+    "request.path.not.found": "Request Path Not Found",
+    "internal.server.error": "Internal Server Error"
+}

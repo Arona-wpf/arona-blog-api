@@ -1,0 +1,10 @@
+{
+  "config._id": "配置 ID",
+  "config.name": "配置名称",
+  "config.key": "配置key",
+  "config.value": "配置value",
+  "config.description": "配置描述",
+  "config.creator": "创建人",
+  "config.updator": "更新人",
+  "config.create.success": "创建配置成功"
+}

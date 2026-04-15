@@ -1,0 +1,126 @@
+import { BusinessError } from '@/class/error/business.error';
+
+// 业务错误常量
+export const BUSINESS_ERROR_CONSTANT = {
+  // URL替换失败
+  URL_REPLACE_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000001, 'error.url.replace.failed', args),
+
+  // 验证码校验失败
+  CAPTCHA_VERIFY_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000101, 'error.captcha.verify.failed', args),
+  // 验证码不存在或已过期
+  CAPTCHA_VERIFY_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000102, 'error.captcha.verify.not.found', args),
+  // 验证码发送超时
+  CAPTCHA_SEND_TIMEOUT: (args?: Record<string, string>) =>
+    new BusinessError(1000103, 'error.captcha.send.timeout', args),
+  // 邮件发送失败
+  EMAIL_SEND_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000104, 'error.email.send.failed', args),
+  // 邮件模板不存在
+  EMAIL_TEMPLATE_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000105, 'error.email.template.not.found', args),
+
+  // 用户不存在
+  USER_NOT_EXIST: (args?: Record<string, string>) =>
+    new BusinessError(1000201, 'error.user.not.exist', args),
+  // 用户已存在
+  USER_ALREADY_EXISTS: (args?: Record<string, string>) =>
+    new BusinessError(1000202, 'error.user.already.exists', args),
+  // 用户登录密码错误
+  USER_LOGIN_FAILED_PASSWORD: (args?: Record<string, string>) =>
+    new BusinessError(1000203, 'error.user.login.failed.password', args),
+  // 用户登录验证码错误
+  USER_LOGIN_FAILED_VERIFY_CODE: (args?: Record<string, string>) =>
+    new BusinessError(1000204, 'error.user.login.failed.verify_code', args),
+  // 用户绑定角色不存在
+  USER_ROLE_NOT_EXIST: (args?: Record<string, string>) =>
+    new BusinessError(1000205, 'error.user.role.not.exist', args),
+  // 更新用户角色失败
+  USER_UPDATE_ROLE_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000206, 'error.user.update.role.failed', args),
+  // 登录参数缺失（password 与 cache_id 均为空）
+  USER_LOGIN_PARAM_MISSING: (args?: Record<string, string>) =>
+    new BusinessError(1000207, 'error.user.login.param.missing', args),
+  // 登录参数冲突（password 与 cache_id 同时存在）
+  USER_LOGIN_PARAM_CONFLICT: (args?: Record<string, string>) =>
+    new BusinessError(1000208, 'error.user.login.param.conflict', args),
+
+  // 文件上传缺失
+  FILE_UPLOAD_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000301, 'error.file.upload.not.found', args),
+  // 文件对象名称缺失
+  FILE_OBJECT_NAME_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000302, 'error.file.object.name.not.found', args),
+
+  // 权限已存在
+  PERMISSION_ALREADY_EXISTS: (args?: Record<string, string>) =>
+    new BusinessError(1000401, 'error.permission.already.exists', args),
+  // 权限不存在
+  PERMISSION_NOT_EXIST: (args?: Record<string, string>) =>
+    new BusinessError(1000402, 'error.permission.not.exist', args),
+  // 权限被引用，无法删除
+  PERMISSION_IN_USE: (args?: Record<string, string>) =>
+    new BusinessError(1000403, 'error.permission.in.use', args),
+
+  // 角色已存在
+  ROLE_ALREADY_EXISTS: (args?: Record<string, string>) =>
+    new BusinessError(1000501, 'error.role.already.exists', args),
+  // 角色不存在
+  ROLE_NOT_EXIST: (args?: Record<string, string>) =>
+    new BusinessError(1000502, 'error.role.not.exist', args),
+  // 角色被引用，无法删除
+  ROLE_IN_USE: (args?: Record<string, string>) =>
+    new BusinessError(1000503, 'error.role.in.use', args),
+  // 角色关联权限不存在
+  ROLE_PERMISSION_NOT_EXIST: (args?: Record<string, string>) =>
+    new BusinessError(1000504, 'error.role.permission.not.exist', args),
+
+  // SM3密钥未配置
+  CRYPTO_SM3_SECRET_NOT_SET: (args?: Record<string, string>) =>
+    new BusinessError(1000601, 'error.crypto.sm3.secret.not.set', args),
+  // SM3哈希失败
+  CRYPTO_SM3_HASH_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000602, 'error.crypto.sm3.hash.failed', args),
+  // SM4密钥未配置
+  CRYPTO_SM4_SECRET_NOT_SET: (args?: Record<string, string>) =>
+    new BusinessError(1000603, 'error.crypto.sm4.secret.not.set', args),
+  // SM4加密失败
+  CRYPTO_SM4_ENCRYPT_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000604, 'error.crypto.sm4.encrypt.failed', args),
+  // SM4解密失败
+  CRYPTO_SM4_DECRYPT_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000605, 'error.crypto.sm4.decrypt.failed', args),
+
+  // COS临时凭证获取失败
+  COS_CREDENTIAL_FETCH_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000701, 'error.cos.credential.fetch.failed', args),
+  // COS实例初始化失败
+  COS_INIT_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000702, 'error.cos.init.failed', args),
+  // COS文件上传失败
+  COS_UPLOAD_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000703, 'error.cos.upload.failed', args),
+  // COS无权限访问对象
+  COS_OBJECT_NO_ACCESS: (args?: Record<string, string>) =>
+    new BusinessError(1000704, 'error.cos.object.no.access', args),
+  // COS获取对象URL失败
+  COS_GET_URL_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000705, 'error.cos.get.url.failed', args),
+  // COS获取存储桶数据失败
+  COS_GET_BUCKET_DATA_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000706, 'error.cos.get.bucket.data.failed', args),
+  // COS对象已存在
+  COS_OBJECT_HAS_EXISTS: (args?: Record<string, string>) =>
+    new BusinessError(1000707, 'error.cos.object.has.exists', args),
+  // COS删除文件夹失败
+  COS_DELETE_FOLDER_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000708, 'error.cos.delete.folder.failed', args),
+  // COS文件夹下仍存在对象
+  COS_FOLDER_HAS_OBJECT: (args?: Record<string, string>) =>
+    new BusinessError(1000709, 'error.cos.folder.has.object', args),
+  // COS删除文件失败
+  COS_DELETE_FILE_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000710, 'error.cos.delete.file.failed', args),
+};

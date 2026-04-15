@@ -1,0 +1,11 @@
+{
+  "permission._id": "权限 ID",
+  "permission.name": "权限名称",
+  "permission.group": "权限组",
+  "permission.type": "权限类型",
+  "permission.code": "权限代码",
+  "permission.action": "权限动作",
+  "permission.create.success": "创建权限成功",
+  "permission.delete.success": "删除权限成功",
+  "permission.list.success": "获取权限列表成功"
+}

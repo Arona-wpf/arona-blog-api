@@ -1,0 +1,12 @@
+{
+  "captcha.email": "Email",
+  "captcha.type": "Captcha Type",
+  "captcha.cache_id": "Captcha Cache ID",
+  "captcha.captcha": "Captcha",
+  "captcha.email.register.title": "Arona's Cabin - User Register",
+  "captcha.email.login.title": "Arona's Cabin - User Login",
+  "captcha.email.verify.title": "Arona's Cabin - Verify User",
+  "captcha.email.bind.title": "Arona's Cabin - Bind Email",
+  "captcha.send.success": "The captcha has been sent to your mailbox. Please check",
+  "captcha.verify.success": "Verification passed"
+}

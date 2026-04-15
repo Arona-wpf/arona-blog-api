@@ -1,0 +1,9 @@
+{
+    "ok": "成功",
+    "not.login": "未登录",
+    "param.validate.failed": "\"{parameter}\"参数验证失败",
+    "unauthorized": "你没有权限访问接口",
+    "forbidden": "禁止访问",
+    "request.path.not.found": "请求路径不存在",
+    "internal.server.error": "内部服务器错误"
+}

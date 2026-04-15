@@ -1,0 +1,12 @@
+{
+  "captcha.email": "邮箱",
+  "captcha.type": "验证码类型",
+  "captcha.cache_id": "验证码缓存ID",
+  "captcha.captcha": "验证码",
+  "captcha.email.register.title": "Aronaの小屋 用户注册",
+  "captcha.email.login.title": "Aronaの小屋 用户登录",
+  "captcha.email.verify.title": "Aronaの小屋 验证身份",
+  "captcha.email.bind.title": "Aronaの小屋 绑定邮箱",
+  "captcha.send.success": "已发送验证码到邮箱，请注意查收",
+  "captcha.verify.success": "验证通过"
+}

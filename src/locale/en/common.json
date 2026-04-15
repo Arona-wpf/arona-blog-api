@@ -1,0 +1,11 @@
+{
+  "common.current.page": "Current Page",
+  "common.page.size": "Page Size",
+  "common.previous.page.indicator": "Previous page indicator",
+  "common.next.page.indicator": "Next page indicator",
+  "common.start_at": "Start At",
+  "common.end_at": "End At",
+  "common.created_at": "Created At",
+  "common.updated_at": "Updated At",
+  "common.verify_code": "Verify Code"
+}

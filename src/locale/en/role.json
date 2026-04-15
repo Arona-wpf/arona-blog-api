@@ -1,0 +1,11 @@
+{
+  "role._id": "Role ID",
+  "role.name": "Role Name",
+  "role.code": "Role Code",
+  "role.api_permissions": "API Permissions",
+  "role.menu_permissions": "Menu Permissions",
+  "role.create.success": "Create role success",
+  "role.update.success": "Update role success",
+  "role.delete.success": "Delete role success",
+  "role.list.success": "Get role list success"
+}

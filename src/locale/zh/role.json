@@ -1,0 +1,11 @@
+{
+  "role._id": "角色 ID",
+  "role.name": "角色名称",
+  "role.code": "角色代码",
+  "role.api_permissions": "接口权限",
+  "role.menu_permissions": "菜单权限",
+  "role.create.success": "创建角色成功",
+  "role.update.success": "更新角色成功",
+  "role.delete.success": "删除角色成功",
+  "role.list.success": "获取角色列表成功"
+}
