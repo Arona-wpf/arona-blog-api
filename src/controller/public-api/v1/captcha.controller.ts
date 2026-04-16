@@ -39,11 +39,11 @@ export class PubV1CaptchaController {
     const { text } = await this.captchaService.text();
     const cacheId = await this.captchaService.set(text);
 
-    // 设置超时时间（20秒），如果超过20秒，则抛出验证码发送超时错误
+    // 设置超时时间（30秒），如果超过30秒，则抛出验证码发送超时错误
     const timeoutPromise = new Promise<boolean>((resolve, reject) => {
       setTimeout(() => {
         reject(BUSINESS_ERROR_CONSTANT.CAPTCHA_SEND_TIMEOUT());
-      }, 20 * 1000);
+      }, 30 * 1000);
     });
 
     // 获取国际化语言
@@ -55,7 +55,10 @@ export class PubV1CaptchaController {
     const sendResult = await Promise.race([
       sendEmailWithTemplate(
         body.email,
-        this.resultHelper.translate(`captcha.email.${body.type}.title`),
+        this.resultHelper.translate(
+          `captcha.email.${body.type}.title`,
+          'captcha'
+        ),
         templateRelativePath,
         {
           username: body.email.split('@')[0] || body.email,

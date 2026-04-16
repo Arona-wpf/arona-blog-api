@@ -1,3 +1,4 @@
+import captcha from './captcha.json';
 import common from './common.json';
 import config from './config.json';
 import error from './error.json';
@@ -11,6 +12,7 @@ export const zh_CN = {
   default: locale,
   error,
   common,
+  captcha,
   config,
   file,
   user,

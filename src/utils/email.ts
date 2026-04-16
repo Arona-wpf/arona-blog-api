@@ -80,11 +80,13 @@ export async function sendEmailWithTemplate(
   templateRelativePath: string,
   variables: Record<string, string | number>
 ): Promise<boolean> {
+  let html: string;
   try {
-    const html = await renderEmailTemplate(templateRelativePath, variables);
-    return await sendEmail(to, title, html);
+    html = await renderEmailTemplate(templateRelativePath, variables);
   } catch (error) {
     console.error('Email template render failed: ', error);
     throw BUSINESS_ERROR_CONSTANT.EMAIL_TEMPLATE_NOT_FOUND();
   }
+
+  return await sendEmail(to, title, html);
 }

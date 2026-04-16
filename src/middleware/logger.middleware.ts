@@ -41,7 +41,7 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
         }
 
         this.logger.info(
-          `[${ctx.path}] ${ctx.method} ${realIp} ${realIpCountry} ${ctx.status} ${responseTime}ms`
+          `[${ctx.path}] ${ctx.method} ${realIp} ${realIpCountry} ${responseTime}ms`
         );
       }
     };

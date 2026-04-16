@@ -14,11 +14,6 @@ export class ResultMiddleware implements IMiddleware<Context, NextFunction> {
       const resultHelper = await ctx.requestContext.getAsync(ResultHelper);
       const result = await next();
 
-      // 允许控制器自行写入响应（如 redirect/stream/file download）
-      if (ctx.body !== undefined || ctx.status !== 404) {
-        return;
-      }
-
       const { data, group, msg } = result || {};
       ctx.status = 200;
       ctx.body = {

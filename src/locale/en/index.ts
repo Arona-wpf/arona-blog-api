@@ -1,3 +1,4 @@
+import captcha from './captcha.json';
 import common from './common.json';
 import config from './config.json';
 import locale from './en_US.json';
@@ -11,6 +12,7 @@ export const en_US = {
   default: locale,
   error,
   common,
+  captcha,
   config,
   file,
   user,

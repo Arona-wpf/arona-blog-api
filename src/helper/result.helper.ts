@@ -84,6 +84,7 @@ export class ResultHelper {
         args: {
           parameter: fieldLabel,
         },
+        locale: this.ctx.state.locale,
       }) +
       ':' +
       checkMessage;
