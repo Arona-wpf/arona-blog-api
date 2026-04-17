@@ -7,5 +7,7 @@
   "common.end_at": "End At",
   "common.created_at": "Created At",
   "common.updated_at": "Updated At",
-  "common.verify_code": "Verify Code"
+  "common.verify_code": "Verify Code",
+  "locale": "Locale",
+  "locale.switch.success": "Locale switched successfully"
 }

@@ -7,5 +7,7 @@
   "common.end_at": "结束时间",
   "common.created_at": "创建时间",
   "common.updated_at": "更新时间",
-  "common.verify_code": "验证码"
+  "common.verify_code": "验证码",
+  "locale": "语言",
+  "locale.switch.success": "切换语言成功"
 }

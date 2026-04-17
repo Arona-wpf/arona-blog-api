@@ -5,7 +5,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 
 import * as BasicConfig from '@/config/config.json';
-import { RedisStorageEnum } from '@/definition/enums/common.enum';
+import { LocaleEnum, RedisStorageEnum } from '@/definition/enums/common.enum';
 import { en_US } from '@/locale/en';
 import { zh_CN } from '@/locale/zh';
 
@@ -66,7 +66,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
 
     // 国际化
     i18n: {
-      defaultLocale: 'zh_CN',
+      defaultLocale: LocaleEnum.ZH_CN,
       localsField: 'i18n',
       localeTable: {
         en_US,
@@ -75,7 +75,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
       resolver: {
         cookieField: {
           fieldName: 'locale',
-          cookieDomain: 'www.arona-blog.com',
+          cookieDomain: 'arona-blog.com',
           cookieMaxAge: FORMAT.MS.ONE_YEAR,
         },
       },

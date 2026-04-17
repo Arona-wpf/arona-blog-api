@@ -11,3 +11,9 @@ export enum RedisStorageEnum {
   CAPTCHA = 'captcha',
   COS = 'cos',
 }
+
+// 国际化枚举
+export enum LocaleEnum {
+  ZH_CN = 'zh-cn',
+  EN_US = 'en-us',
+}
