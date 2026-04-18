@@ -38,11 +38,16 @@ export interface IEmailConfig {
  */
 export interface IUserSession extends ISession {
   locale: string;
-  user: {
+  user?: {
+    _id: string;
     account: string;
-    name: string;
+    nickname: string;
+    avatar?: string;
+    birthday: string;
+    gender: string;
+    email: string;
     roles: string[];
-    permissionKeys: string[];
+    permissions: string[];
   };
   tmpId?: string;
 }

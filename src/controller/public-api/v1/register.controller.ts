@@ -38,7 +38,7 @@ export class PubV1RegisterController {
     // 解析缓存值
     const cacheValue = JSON.parse(cacheValueString);
     // 如果缓存 ID 不匹配，则抛出验证码不存在错误
-    if (cacheValue.cacheId !== body.cache_id) {
+    if (cacheValue.cache_id !== body.cache_id) {
       throw BUSINESS_ERROR_CONSTANT.CAPTCHA_VERIFY_NOT_FOUND();
     }
     // 如果验证码未验证，则抛出验证码错误

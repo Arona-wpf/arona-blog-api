@@ -82,7 +82,7 @@ export class PubV1CaptchaController {
       redis.setex(cacheKey, 10 * 60, JSON.stringify(cacheValue));
     }
     return {
-      data: { cacheId, expiration: 10 * 60 },
+      data: { cache_id: cacheId, expiration: 10 * 60 },
       group: 'captcha',
       msg: 'captcha.send.success',
     };
@@ -107,9 +107,9 @@ export class PubV1CaptchaController {
     }
 
     // 解析缓存值
-    const { cacheId, text } = JSON.parse(cacheValueString);
+    const { cache_id, text } = JSON.parse(cacheValueString);
     // 如果缓存 ID 不匹配，则抛出验证码不存在错误
-    if (cacheId !== body.cache_id) {
+    if (cache_id !== body.cache_id) {
       throw BUSINESS_ERROR_CONSTANT.CAPTCHA_VERIFY_NOT_FOUND();
     }
     // 如果验证码不匹配，则抛出验证码错误
@@ -119,7 +119,7 @@ export class PubV1CaptchaController {
 
     // 更新缓存值
     const cacheValue = {
-      cacheId,
+      cache_id,
       text,
       verified: true,
     };

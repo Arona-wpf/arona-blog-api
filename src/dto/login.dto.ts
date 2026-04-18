@@ -3,7 +3,7 @@ import { Rule } from '@midwayjs/validate';
 import { createStringRuleType } from '.';
 
 export class LoginDto {
-  @Rule(createStringRuleType('user.account', true, 'user', { min: 8, max: 30 }))
+  @Rule(createStringRuleType('user.account', true, 'user', { min: 3, max: 20 }))
   account: string;
 
   @Rule(

@@ -26,6 +26,9 @@ export class UserEntity {
   @prop({ type: String, unique: true })
   nickname: string; // 昵称
 
+  @prop({ type: String, default: '' })
+  avatar: string; // 头像
+
   @prop({ type: String, required: true })
   birthday: string; // 性别
 

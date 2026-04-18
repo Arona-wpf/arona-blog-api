@@ -1,3 +1,4 @@
+/* eslint-disable n/no-unpublished-import */
 import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort';
 import mwtsConfig from 'mwts/eslint.config.js';
 
