@@ -1,6 +1,12 @@
-import { Body, Controller, Inject, Post } from '@midwayjs/core';
+import { Body, Controller, Inject, Post, Session } from '@midwayjs/core';
 
-import { GetUserListDto, UpdateUserRolesDto } from '@/dto/user.dto';
+import {
+  ChangePasswordDto,
+  GetUserListDto,
+  UpdateProfileDto,
+  UpdateUserRolesDto,
+} from '@/dto/user.dto';
+import { IUserSession } from '@/interface';
 import { UserService } from '@/service/user.service';
 
 @Controller('/private-api/v1/user')
@@ -25,6 +31,59 @@ export class PriV1UserController {
       data,
       group: 'user',
       msg: 'user.update.roles.success',
+    };
+  }
+
+  @Post('/update-profile')
+  async updateProfile(
+    @Body() body: UpdateProfileDto,
+    @Session() session: IUserSession
+  ) {
+    const userId = session.user?._id;
+    if (!userId) {
+      return {
+        data: null,
+        group: 'user',
+        msg: 'user.not.login',
+      };
+    }
+
+    const data = await this.userService.updateProfile(userId, body);
+    // 更新 session 中的用户信息
+    if (session.user) {
+      if (body.nickname !== undefined) session.user.nickname = body.nickname;
+      if (body.avatar !== undefined) session.user.avatar = body.avatar;
+      if (body.gender !== undefined) session.user.gender = body.gender;
+      if (body.birthday !== undefined) session.user.birthday = body.birthday;
+    }
+    return {
+      data,
+      group: 'user',
+      msg: 'user.update.profile.success',
+    };
+  }
+
+  @Post('/change-password')
+  async changePassword(
+    @Body() body: ChangePasswordDto,
+    @Session() session: IUserSession
+  ) {
+    const userId = session.user?._id;
+    if (!userId) {
+      return {
+        data: null,
+        group: 'user',
+        msg: 'user.not.login',
+      };
+    }
+
+    await this.userService.changePassword(userId, body);
+    // 销毁 session，强制重新登录
+    session.user = undefined;
+    return {
+      data: null,
+      group: 'user',
+      msg: 'user.change.password.success',
     };
   }
 }

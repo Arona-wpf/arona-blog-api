@@ -8,7 +8,12 @@ import { CaptchaTypeEnum } from '@/definition/enums/captcha.enum';
 import { RedisStorageEnum } from '@/definition/enums/common.enum';
 import { IPageResult } from '@/definition/types/page.type';
 import { RegisterDto } from '@/dto/register.dto';
-import { GetUserListDto, UpdateUserRolesDto } from '@/dto/user.dto';
+import {
+  ChangePasswordDto,
+  GetUserListDto,
+  UpdateProfileDto,
+  UpdateUserRolesDto,
+} from '@/dto/user.dto';
 import { UserEntity } from '@/entity/user.entity';
 import { RedisHelper } from '@/helper/redis.helper';
 import { ResultHelper } from '@/helper/result.helper';
@@ -205,5 +210,97 @@ export class UserService {
    */
   async countUsersByRoleId(roleId: string) {
     return this.userDao.count({ roles: roleId });
+  }
+
+  /**
+   * 更新用户资料
+   * @param userId 用户ID
+   * @param data 更新参数
+   * @returns 更新后的用户
+   */
+  async updateProfile(userId: string, data: UpdateProfileDto) {
+    const user = await this.userDao.findById(userId);
+    if (!user) {
+      throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
+    }
+
+    const updateData: Record<string, any> = {};
+    if (data.nickname !== undefined) {
+      updateData.nickname = data.nickname;
+    }
+    if (data.avatar !== undefined) {
+      updateData.avatar = data.avatar;
+    }
+    if (data.gender !== undefined) {
+      updateData.gender = data.gender;
+    }
+    if (data.birthday !== undefined) {
+      updateData.birthday = data.birthday;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return user;
+    }
+
+    const updatedUser = await this.userDao.findByIdAndUpdate(userId, {
+      $set: updateData,
+    });
+
+    if (!updatedUser) {
+      throw BUSINESS_ERROR_CONSTANT.USER_UPDATE_PROFILE_FAILED();
+    }
+
+    return updatedUser;
+  }
+
+  /**
+   * 修改用户密码
+   * @param userId 用户ID
+   * @param data 修改密码参数
+   * @returns 是否成功
+   */
+  async changePassword(userId: string, data: ChangePasswordDto) {
+    const { old_password, new_password, confirm_password } = data;
+
+    // 验证两次新密码是否一致
+    if (new_password !== confirm_password) {
+      throw BUSINESS_ERROR_CONSTANT.USER_PASSWORD_NOT_MATCH();
+    }
+
+    // 获取用户
+    const user = await this.userDao.findById(userId);
+    if (!user) {
+      throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
+    }
+
+    // 验证旧密码
+    const verifyOldPassword =
+      sm3Hash(old_password + user.salt) === user.password;
+    if (!verifyOldPassword) {
+      throw BUSINESS_ERROR_CONSTANT.USER_OLD_PASSWORD_ERROR();
+    }
+
+    // 新密码不能与旧密码相同
+    if (sm3Hash(new_password + user.salt) === user.password) {
+      throw BUSINESS_ERROR_CONSTANT.USER_PASSWORD_SAME_AS_OLD();
+    }
+
+    // 生成新盐并加密新密码
+    const newSalt = generateSalt();
+    const hashedNewPassword = sm3Hash(new_password + newSalt);
+
+    // 更新密码
+    const updatedUser = await this.userDao.findByIdAndUpdate(userId, {
+      $set: {
+        password: hashedNewPassword,
+        salt: newSalt,
+      },
+    });
+
+    if (!updatedUser) {
+      throw BUSINESS_ERROR_CONSTANT.USER_CHANGE_PASSWORD_FAILED();
+    }
+
+    return true;
   }
 }

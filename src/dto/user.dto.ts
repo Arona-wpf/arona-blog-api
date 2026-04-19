@@ -1,5 +1,7 @@
 import { Rule, RuleType } from '@midwayjs/validate';
 
+import { GenderEnum } from '@/definition/enums/common.enum';
+
 import { PageDto } from './page.dto';
 import { createArrayRuleType, createStringRuleType } from '.';
 
@@ -29,4 +31,33 @@ export class UpdateUserRolesDto {
     })
   )
   roles: string[];
+}
+
+export class UpdateProfileDto {
+  @Rule(createStringRuleType('user.nickname', false, 'user', { max: 20 }))
+  nickname?: string;
+
+  @Rule(createStringRuleType('user.avatar', false, 'user'))
+  avatar?: string;
+
+  @Rule(
+    createStringRuleType('user.gender', false, 'user', {
+      enum: Object.values(GenderEnum),
+    })
+  )
+  gender?: string;
+
+  @Rule(createStringRuleType('user.birthday', false, 'user'))
+  birthday?: string;
+}
+
+export class ChangePasswordDto {
+  @Rule(createStringRuleType('user.oldPassword', true, 'user'))
+  old_password: string;
+
+  @Rule(createStringRuleType('user.newPassword', true, 'user', { min: 8, max: 30 }))
+  new_password: string;
+
+  @Rule(createStringRuleType('user.confirmPassword', true, 'user'))
+  confirm_password: string;
 }

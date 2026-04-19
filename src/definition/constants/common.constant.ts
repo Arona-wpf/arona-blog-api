@@ -46,6 +46,21 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 登录参数冲突（password 与 cache_id 同时存在）
   USER_LOGIN_PARAM_CONFLICT: (args?: Record<string, string>) =>
     new BusinessError(1000208, 'error.user.login.param.conflict', args),
+  // 更新用户资料失败
+  USER_UPDATE_PROFILE_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000209, 'error.user.update.profile.failed', args),
+  // 修改密码失败
+  USER_CHANGE_PASSWORD_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000210, 'error.user.change.password.failed', args),
+  // 旧密码错误
+  USER_OLD_PASSWORD_ERROR: (args?: Record<string, string>) =>
+    new BusinessError(1000211, 'error.user.old.password.error', args),
+  // 两次输入的密码不一致
+  USER_PASSWORD_NOT_MATCH: (args?: Record<string, string>) =>
+    new BusinessError(1000212, 'error.user.password.not.match', args),
+  // 新密码与旧密码相同
+  USER_PASSWORD_SAME_AS_OLD: (args?: Record<string, string>) =>
+    new BusinessError(1000213, 'error.user.password.same.as.old', args),
 
   // 文件上传缺失
   FILE_UPLOAD_NOT_FOUND: (args?: Record<string, string>) =>
