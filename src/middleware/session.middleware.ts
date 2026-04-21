@@ -19,8 +19,8 @@ export class SessionMiddleware implements IMiddleware<Context, NextFunction> {
     return async (ctx: Context, next: NextFunction) => {
       const resultHelper = await ctx.requestContext.getAsync(ResultHelper);
       try {
-        // 公共api不进行session校验
-        if (ctx.path.startsWith('/public-api')) {
+        // 公共api/cdn 不进行session校验
+        if (ctx.path.startsWith('/public-api') || ctx.path.startsWith('/cdn')) {
           await next();
           return;
         }

@@ -1,4 +1,5 @@
 import captcha from './captcha.json';
+import cdn from './cdn.json';
 import common from './common.json';
 import config from './config.json';
 import locale from './en_US.json';
@@ -13,6 +14,7 @@ export const en_US = {
   error,
   common,
   captcha,
+  cdn,
   config,
   file,
   user,

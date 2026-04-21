@@ -89,7 +89,6 @@ export class MinioService {
 
     const url = await this.getDownloadUrl(key);
     return {
-      bucket: this.bucket,
       object_name: key,
       url,
     };
@@ -104,7 +103,6 @@ export class MinioService {
   async downloadFile(objectName: string, expiresIn?: number) {
     const url = await this.getDownloadUrl(objectName, expiresIn);
     return {
-      bucket: this.bucket,
       object_name: objectName,
       url,
     };

@@ -3,12 +3,14 @@ import { ISession } from '@midwayjs/session';
 /**
  * CDN配置
  * @param prefix 前缀
+ * @param allowedOrigins 允许的来源域名列表
  */
 export interface ICDNConfig {
   prefix: {
     file: string;
     media: string;
   };
+  allowedOrigins: string[];
 }
 
 /**

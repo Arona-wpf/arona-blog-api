@@ -40,5 +40,8 @@
   "error.cos.delete.folder.failed": "删除文件夹失败，请确保文件夹为空",
   "error.cos.folder.has.object": "文件夹下仍存在文件或子文件夹，无法删除",
   "error.cos.delete.file.failed": "删除文件失败，请稍后重试",
-  "error.url.replace.failed": "URL替换失败，请检查格式是否正确"
+  "error.url.replace.failed": "URL替换失败，请检查格式是否正确",
+  "error.cdn.origin.not.allowed": "无权限访问 CDN 资源",
+  "error.cdn.object.name.not.found": "请提供文件对象名称",
+  "error.cdn.get.url.failed": "获取文件访问链接失败，请稍后重试"
 }

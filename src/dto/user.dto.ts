@@ -55,7 +55,9 @@ export class ChangePasswordDto {
   @Rule(createStringRuleType('user.oldPassword', true, 'user'))
   old_password: string;
 
-  @Rule(createStringRuleType('user.newPassword', true, 'user', { min: 8, max: 30 }))
+  @Rule(
+    createStringRuleType('user.newPassword', true, 'user', { min: 8, max: 30 })
+  )
   new_password: string;
 
   @Rule(createStringRuleType('user.confirmPassword', true, 'user'))

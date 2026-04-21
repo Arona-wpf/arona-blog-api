@@ -14,7 +14,12 @@ export class ResultMiddleware implements IMiddleware<Context, NextFunction> {
       const resultHelper = await ctx.requestContext.getAsync(ResultHelper);
       const result = await next();
 
-      const { data, group, msg } = result || {};
+      const { data, group, msg, redirect } = result || {};
+      if (redirect) {
+        ctx.redirect(redirect);
+        return;
+      }
+      // 如果redirect为空，则返回正常结果
       ctx.status = 200;
       ctx.body = {
         code: 0,

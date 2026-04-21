@@ -1,4 +1,5 @@
 import captcha from './captcha.json';
+import cdn from './cdn.json';
 import common from './common.json';
 import config from './config.json';
 import error from './error.json';
@@ -13,6 +14,7 @@ export const zh_CN = {
   error,
   common,
   captcha,
+  cdn,
   config,
   file,
   user,
