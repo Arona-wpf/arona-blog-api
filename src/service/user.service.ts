@@ -18,6 +18,7 @@ import { UserEntity } from '@/entity/user.entity';
 import { RedisHelper } from '@/helper/redis.helper';
 import { ResultHelper } from '@/helper/result.helper';
 import { generateSalt, sm3Hash } from '@/utils/crypto';
+import { maskEmail } from '@/utils/common';
 
 import { CounterService } from './counter.service';
 import { RoleService } from './role.service';
@@ -302,5 +303,24 @@ export class UserService {
     }
 
     return true;
+  }
+
+  /**
+   * 检查账号是否存在，并返回隐藏后的邮箱
+   * @param account 账号
+   * @returns 隐藏后的邮箱地址
+   */
+  async checkAccountExists(account: string) {
+    // 检查账号是否存在
+    const user = await this.userDao.findOne({ account }, 'email');
+    if (!user) {
+      throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
+    }
+
+    // 返回隐藏后的邮箱
+    return {
+      masked_email: maskEmail(user.email),
+      email: user.email, // 完整邮箱用于后续验证码发送
+    };
   }
 }

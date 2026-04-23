@@ -23,7 +23,8 @@ export class PrivV1LogoutController {
     }
 
     // 销毁 session
-    this.ctx.session = null;
+    this.ctx.session.user = undefined;
+    this.ctx.session.tmpId = undefined;
 
     return {
       data: null,

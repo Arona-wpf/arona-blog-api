@@ -1,12 +1,16 @@
-import { Controller, Get, Inject, Session } from '@midwayjs/core';
+import { Controller, Get, Inject, Query, Session } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 
 import { IUserSession } from '@/interface';
+import { UserService } from '@/service/user.service';
 
 @Controller('/public-api/v1/user')
 export class PubV1UserController {
   @Inject()
   ctx: Context;
+
+  @Inject()
+  userService: UserService;
 
   @Get('/status')
   async status(@Session() session: IUserSession) {
@@ -34,6 +38,20 @@ export class PubV1UserController {
       },
       group: 'user',
       msg: 'user.status.success',
+    };
+  }
+
+  @Get('/check-account')
+  async checkAccount(@Query('account') account: string) {
+    const result = await this.userService.checkAccountExists(account);
+
+    return {
+      data: {
+        masked_email: result.masked_email,
+        email: result.email,
+      },
+      group: 'user',
+      msg: 'user.check.account.success',
     };
   }
 }

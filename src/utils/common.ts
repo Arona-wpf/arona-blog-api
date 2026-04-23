@@ -148,3 +148,27 @@ export function replaceUrl(url: string, replace: string) {
     throw BUSINESS_ERROR_CONSTANT.URL_REPLACE_FAILED();
   }
 }
+
+/**
+ * 隐藏邮箱地址的部分字符（用于隐私保护）
+ * @param email 原始邮箱地址
+ * @returns 隐藏后的邮箱地址（如：tes***ser@example.com）
+ */
+export function maskEmail(email: string): string {
+  if (!email || !email.includes('@')) {
+    return email;
+  }
+
+  const [localPart, domain] = email.split('@');
+
+  // 显示前三位和后三位，中间用***隐藏
+  let maskedLocal: string;
+  if (localPart.length <= 6) {
+    // 如果本地部分不超过6位，只显示第一位
+    maskedLocal = localPart.length > 0 ? localPart.charAt(0) + '***' : '***';
+  } else {
+    maskedLocal = localPart.slice(0, 3) + '***' + localPart.slice(-3);
+  }
+
+  return `${maskedLocal}@${domain}`;
+}

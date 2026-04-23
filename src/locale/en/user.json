@@ -19,5 +19,6 @@
   "user.change.password.success": "Change password success",
   "user.logout.success": "Logout success",
   "user.status.success": "Get login status success",
-  "user.not.login": "Not logged in"
+  "user.not.login": "Not logged in",
+  "user.check.account.success": "Account verification success"
 }

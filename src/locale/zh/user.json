@@ -19,5 +19,6 @@
   "user.change.password.success": "修改密码成功",
   "user.logout.success": "登出成功",
   "user.status.success": "获取登录状态成功",
-  "user.not.login": "未登录"
+  "user.not.login": "未登录",
+  "user.check.account.success": "账号验证成功"
 }
