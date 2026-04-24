@@ -46,11 +46,4 @@ gulp.task('zip', async () => {
   return await archive.finalize();
 });
 
-exports.default = gulp.series(
-  'clean',
-  'tsc',
-  'copy',
-  'del-dup-build',
-  'yarn',
-  'zip'
-);
+exports.default = gulp.series('clean','lint','tsc','copy','del-dup-build','yarn','zip');

@@ -1,10 +1,10 @@
+import * as STS from 'qcloud-cos-sts';
+
 import {
   CosBucketOperateObjectEnum,
   CosBucketSearchEnum,
   CosUploadStatusEnum,
 } from '../enums/cos.enum';
-
-import * as STS from 'qcloud-cos-sts';
 
 // 腾讯云 COS 配置
 export interface ICredentialData extends STS.CredentialData {

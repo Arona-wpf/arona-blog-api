@@ -1,3 +1,4 @@
+/* eslint-disable n/no-unpublished-import */
 import { createRedisStore } from '@midwayjs/cache-manager';
 import { FORMAT, MidwayAppInfo, MidwayConfig } from '@midwayjs/core';
 import { LoggerInfo } from '@midwayjs/logger';

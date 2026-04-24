@@ -1,3 +1,4 @@
+/* eslint-disable n/no-unpublished-import */
 import { FORMAT, MidwayConfig } from '@midwayjs/core';
 
 import * as BasicConfig from '@/config/config.json';

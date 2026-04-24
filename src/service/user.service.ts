@@ -17,8 +17,8 @@ import {
 import { UserEntity } from '@/entity/user.entity';
 import { RedisHelper } from '@/helper/redis.helper';
 import { ResultHelper } from '@/helper/result.helper';
-import { generateSalt, sm3Hash } from '@/utils/crypto';
 import { maskEmail } from '@/utils/common';
+import { generateSalt, sm3Hash } from '@/utils/crypto';
 
 import { CounterService } from './counter.service';
 import { RoleService } from './role.service';
