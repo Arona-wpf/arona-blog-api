@@ -25,7 +25,7 @@ import { flatten } from 'lodash';
 })
 class UploadConfiguration implements ILifeCycle {
   @Inject()
-  configService: MidwayConfigService;
+  midwayConfigService: MidwayConfigService;
 
   @Logger()
   logger: ILogger;
@@ -90,7 +90,7 @@ class UploadConfiguration implements ILifeCycle {
         },
       },
     };
-    this.configService.addObject(config);
+    this.midwayConfigService.addObject(config);
   }
 }
 
