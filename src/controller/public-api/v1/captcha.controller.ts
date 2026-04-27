@@ -9,6 +9,7 @@ import {
 } from '@midwayjs/core';
 
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
+import { CaptchaTypeEnum } from '@/definition/enums/captcha.enum';
 import { RedisStorageEnum } from '@/definition/enums/common.enum';
 import { GenerateCaptchaDto, VerifyCaptchaDto } from '@/dto/captcha.dto';
 import { RedisHelper } from '@/helper/redis.helper';
@@ -54,6 +55,7 @@ export class PubV1CaptchaController {
     // 发送邮件
     const sendResult = await Promise.race([
       sendEmailWithTemplate(
+        this.resultHelper.translate('website.title'),
         body.email,
         this.resultHelper.translate(
           `captcha.email.${body.type}.title`,
@@ -74,9 +76,9 @@ export class PubV1CaptchaController {
         RedisStorageEnum.CAPTCHA
       );
 
-      const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.tmpId}:${body.type}`;
+      const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.guest?.tmpId}:${body.type}`;
       const cacheValue = {
-        cacheId,
+        cache_id: cacheId,
         text,
       };
       redis.setex(cacheKey, 10 * 60, JSON.stringify(cacheValue));
@@ -98,7 +100,7 @@ export class PubV1CaptchaController {
       RedisStorageEnum.CAPTCHA
     );
     // 获取缓存键
-    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.tmpId}:${body.type}`;
+    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.guest?.tmpId}:${body.type}`;
     // 获取缓存值
     const cacheValueString = await redis.get(cacheKey);
     // 如果缓存值不存在，则抛出验证码不存在错误
@@ -125,6 +127,11 @@ export class PubV1CaptchaController {
     };
     // 更新缓存值
     redis.set(cacheKey, JSON.stringify(cacheValue), 'KEEPTTL');
+
+    // 如果类型为验证身份，则将邮箱保存到 session.guest 中
+    if (body.type === CaptchaTypeEnum.VERIFY_SELF) {
+      session.guest.email = body.email;
+    }
 
     return {
       data: null,

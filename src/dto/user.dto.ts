@@ -63,3 +63,16 @@ export class ChangePasswordDto {
   @Rule(createStringRuleType('user.confirmPassword', true, 'user'))
   confirm_password: string;
 }
+
+export class ResetPasswordDto {
+  @Rule(createStringRuleType('user.cacheId', true, 'user'))
+  cache_id: string;
+
+  @Rule(
+    createStringRuleType('user.password', true, 'user', { min: 8, max: 30 })
+  )
+  password: string;
+
+  @Rule(createStringRuleType('user.confirmPassword', true, 'user'))
+  confirm_password: string;
+}

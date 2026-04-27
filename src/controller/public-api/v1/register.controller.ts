@@ -27,7 +27,7 @@ export class PubV1RegisterController {
       RedisStorageEnum.CAPTCHA
     );
     // 获取缓存键
-    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.tmpId}:${CaptchaTypeEnum.REGISTER}`;
+    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.guest?.tmpId}:${CaptchaTypeEnum.REGISTER}`;
     // 获取缓存值
     const cacheValueString = await redis.get(cacheKey);
     // 如果缓存值不存在，则抛出验证码不存在错误

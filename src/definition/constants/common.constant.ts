@@ -61,6 +61,12 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 新密码与旧密码相同
   USER_PASSWORD_SAME_AS_OLD: (args?: Record<string, string>) =>
     new BusinessError(1000213, 'error.user.password.same.as.old', args),
+  // 重置密码验证信息缺失（session.guest.email不存在）
+  USER_RESET_PASSWORD_INFO_MISSING: (args?: Record<string, string>) =>
+    new BusinessError(1000214, 'error.user.reset.password.info.missing', args),
+  // 重置密码失败
+  USER_RESET_PASSWORD_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000215, 'error.user.reset.password.failed', args),
 
   // 文件上传缺失
   FILE_UPLOAD_NOT_FOUND: (args?: Record<string, string>) =>

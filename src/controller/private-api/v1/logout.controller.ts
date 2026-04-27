@@ -1,5 +1,4 @@
 import { Controller, Inject, Post, Session } from '@midwayjs/core';
-import { Context } from '@midwayjs/koa';
 
 import { IUserSession } from '@/interface';
 import { CosInstanceManager } from '@/manage/cos-instance.manage';
@@ -7,9 +6,6 @@ import { CosService } from '@/service/cos.service';
 
 @Controller('/private-api/v1/logout')
 export class PrivV1LogoutController {
-  @Inject()
-  ctx: Context;
-
   @Inject()
   cosService: CosService;
 
@@ -23,8 +19,8 @@ export class PrivV1LogoutController {
     }
 
     // 销毁 session
-    this.ctx.session.user = undefined;
-    this.ctx.session.tmpId = undefined;
+    session.user = undefined;
+    session.guest = undefined;
 
     return {
       data: null,

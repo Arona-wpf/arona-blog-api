@@ -11,13 +11,13 @@ import { RegisterDto } from '@/dto/register.dto';
 import {
   ChangePasswordDto,
   GetUserListDto,
+  ResetPasswordDto,
   UpdateProfileDto,
   UpdateUserRolesDto,
 } from '@/dto/user.dto';
 import { UserEntity } from '@/entity/user.entity';
 import { RedisHelper } from '@/helper/redis.helper';
 import { ResultHelper } from '@/helper/result.helper';
-import { maskEmail } from '@/utils/common';
 import { generateSalt, sm3Hash } from '@/utils/crypto';
 
 import { CounterService } from './counter.service';
@@ -131,6 +131,47 @@ export class UserService {
 
     // 检查账号是否存在
     const user = await this.userDao.findOne({ account });
+    if (!user) {
+      throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
+    }
+    // 返回用户信息
+    return user;
+  }
+
+  /**
+   * 通过邮箱+验证码登录
+   * @param email 邮箱
+   * @param cacheId 缓存ID
+   * @param tmpId 临时访问ID
+   * @returns 用户信息
+   */
+  async loginByEmail(email: string, cacheId: string, tmpId: string) {
+    // 获取redis实例
+    const redis = await this.redisHelper.getRedisInstance(
+      RedisStorageEnum.CAPTCHA
+    );
+    // 获取缓存键
+    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${tmpId}:${CaptchaTypeEnum.LOGIN}`;
+    // 获取缓存值
+    const cacheValueString = await redis.get(cacheKey);
+    // 如果缓存值不存在，则抛出验证码不存在错误
+    if (!cacheValueString) {
+      throw BUSINESS_ERROR_CONSTANT.CAPTCHA_VERIFY_NOT_FOUND();
+    }
+
+    // 解析缓存值
+    const cacheValue = JSON.parse(cacheValueString);
+    // 如果缓存 ID 不匹配，则抛出验证码不存在错误
+    if (cacheValue.cache_id !== cacheId) {
+      throw BUSINESS_ERROR_CONSTANT.CAPTCHA_VERIFY_NOT_FOUND();
+    }
+    // 如果验证码未验证，则抛出验证码错误
+    if (!cacheValue.verified) {
+      throw BUSINESS_ERROR_CONSTANT.CAPTCHA_VERIFY_FAILED();
+    }
+
+    // 检查邮箱是否存在
+    const user = await this.userDao.findOne({ email });
     if (!user) {
       throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
     }
@@ -306,9 +347,9 @@ export class UserService {
   }
 
   /**
-   * 检查账号是否存在，并返回隐藏后的邮箱
+   * 检查账号是否存在，并返回邮箱
    * @param account 账号
-   * @returns 隐藏后的邮箱地址
+   * @returns 邮箱地址
    */
   async checkAccountExists(account: string) {
     // 检查账号是否存在
@@ -317,10 +358,71 @@ export class UserService {
       throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
     }
 
-    // 返回隐藏后的邮箱
-    return {
-      masked_email: maskEmail(user.email),
-      email: user.email, // 完整邮箱用于后续验证码发送
-    };
+    return user.email;
+  }
+
+  /**
+   * 重置密码（通过邮箱）
+   * @param email 用户邮箱
+   * @param data 重置密码参数
+   * @param tmpId 临时访问ID
+   * @returns 是否成功
+   */
+  async resetPasswordByEmail(
+    email: string,
+    data: ResetPasswordDto,
+    tmpId: string
+  ) {
+    const { cache_id, password, confirm_password } = data;
+
+    // 验证两次密码是否一致
+    if (password !== confirm_password) {
+      throw BUSINESS_ERROR_CONSTANT.USER_PASSWORD_NOT_MATCH();
+    }
+
+    // 获取 redis 实例，验证 cache_id
+    const redis = await this.redisHelper.getRedisInstance(
+      RedisStorageEnum.CAPTCHA
+    );
+    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${tmpId}:${CaptchaTypeEnum.VERIFY_SELF}`;
+    const cacheValueString = await redis.get(cacheKey);
+
+    // 验证缓存是否存在
+    if (!cacheValueString) {
+      throw BUSINESS_ERROR_CONSTANT.CAPTCHA_VERIFY_NOT_FOUND();
+    }
+
+    // 解析缓存值并验证 cache_id
+    const cacheValue = JSON.parse(cacheValueString);
+    if (cacheValue.cache_id !== cache_id) {
+      throw BUSINESS_ERROR_CONSTANT.CAPTCHA_VERIFY_NOT_FOUND();
+    }
+
+    // 通过邮箱查找用户
+    const user = await this.userDao.findOne({ email });
+    if (!user) {
+      throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
+    }
+
+    // 生成新盐并加密新密码
+    const newSalt = generateSalt();
+    const hashedPassword = sm3Hash(password + newSalt);
+
+    // 更新密码
+    const updatedUser = await this.userDao.findByIdAndUpdate(user._id, {
+      $set: {
+        password: hashedPassword,
+        salt: newSalt,
+      },
+    });
+
+    if (!updatedUser) {
+      throw BUSINESS_ERROR_CONSTANT.USER_RESET_PASSWORD_FAILED();
+    }
+
+    // 密码更新成功后，销毁验证码缓存
+    await redis.del(cacheKey);
+
+    return true;
   }
 }

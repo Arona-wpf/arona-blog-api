@@ -18,25 +18,25 @@ export class PubV1LoginController {
 
   @Post('/')
   async login(@Body() body: LoginDto, @Session() session: IUserSession) {
-    const { account, password, cache_id } = body;
-    const hasPassword = !!password;
-    const hasCacheId = !!cache_id;
+    const { account, password, email, cache_id } = body;
+    const hasAccountPassword = !!account && !!password;
+    const hasEmailCaptcha = !!email && !!cache_id;
 
-    if (!hasPassword && !hasCacheId) {
+    if (!hasAccountPassword && !hasEmailCaptcha) {
       throw BUSINESS_ERROR_CONSTANT.USER_LOGIN_PARAM_MISSING();
     }
-    if (hasPassword && hasCacheId) {
+    if (hasAccountPassword && hasEmailCaptcha) {
       throw BUSINESS_ERROR_CONSTANT.USER_LOGIN_PARAM_CONFLICT();
     }
 
     let user: UserEntity;
-    if (hasPassword) {
+    if (hasAccountPassword) {
       user = await this.userService.loginByPassword(account, password);
     } else {
-      user = await this.userService.loginByCacheId(
-        account,
+      user = await this.userService.loginByEmail(
+        email,
         cache_id,
-        session.tmpId
+        session.guest?.tmpId
       );
     }
 
@@ -65,7 +65,7 @@ export class PubV1LoginController {
 
     // 设置session
     session.user = sessionUser;
-    session.tmpId = undefined;
+    session.guest = undefined;
 
     return {
       data: sessionUser,

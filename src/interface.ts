@@ -51,7 +51,11 @@ export interface IUserSession extends ISession {
     roles: string[];
     permissions: string[];
   };
-  tmpId?: string;
+  guest?: {
+    tmpId: string;
+    account?: string;
+    email?: string;
+  };
 }
 
 /**

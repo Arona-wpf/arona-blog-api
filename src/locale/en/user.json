@@ -12,6 +12,7 @@
   "user.oldPassword": "Old password",
   "user.newPassword": "New password",
   "user.confirmPassword": "Confirm password",
+  "user.cacheId": "Captcha cache ID",
   "user.login.success": "Login success",
   "user.list.success": "Get user list success",
   "user.update.roles.success": "Update user roles success",
@@ -20,5 +21,6 @@
   "user.logout.success": "Logout success",
   "user.status.success": "Get login status success",
   "user.not.login": "Not logged in",
-  "user.check.account.success": "Account verification success"
+  "user.check.account.success": "Account verification success",
+  "user.reset.password.success": "Reset password success"
 }

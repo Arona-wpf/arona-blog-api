@@ -12,6 +12,7 @@
   "user.oldPassword": "旧密码",
   "user.newPassword": "新密码",
   "user.confirmPassword": "确认密码",
+  "user.cacheId": "验证码缓存ID",
   "user.login.success": "登录成功",
   "user.list.success": "获取用户列表成功",
   "user.update.roles.success": "更新用户角色成功",
@@ -20,5 +21,6 @@
   "user.logout.success": "登出成功",
   "user.status.success": "获取登录状态成功",
   "user.not.login": "未登录",
-  "user.check.account.success": "账号验证成功"
+  "user.check.account.success": "账号验证成功",
+  "user.reset.password.success": "重置密码成功"
 }

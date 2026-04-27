@@ -38,8 +38,11 @@ export class SessionMiddleware implements IMiddleware<Context, NextFunction> {
 
         await next();
       } finally {
-        if (!ctx.session?.user && !ctx.session?.tmpId) {
-          ctx.session.tmpId = randomId();
+        if (!ctx.session?.user && !ctx.session?.guest) {
+          // 如果 session 中没有 user 和 guest 对象，初始化 guest 对象
+          ctx.session.guest = {
+            tmpId: randomId(),
+          };
         }
       }
     };

@@ -1,6 +1,16 @@
-import { Controller, Get, Inject, Query, Session } from '@midwayjs/core';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Post,
+  Query,
+  Session,
+} from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 
+import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
+import { ResetPasswordDto } from '@/dto/user.dto';
 import { IUserSession } from '@/interface';
 import { UserService } from '@/service/user.service';
 
@@ -43,15 +53,40 @@ export class PubV1UserController {
 
   @Get('/check-account')
   async checkAccount(@Query('account') account: string) {
-    const result = await this.userService.checkAccountExists(account);
+    const email = await this.userService.checkAccountExists(account);
 
     return {
       data: {
-        masked_email: result.masked_email,
-        email: result.email,
+        email,
       },
       group: 'user',
       msg: 'user.check.account.success',
+    };
+  }
+
+  @Post('/reset-password')
+  async resetPassword(
+    @Body() body: ResetPasswordDto,
+    @Session() session: IUserSession
+  ) {
+    // 从 session.guest 获取 email 和 tmpId
+    const guest = session.guest;
+    if (!guest?.email || !guest?.tmpId) {
+      throw BUSINESS_ERROR_CONSTANT.USER_RESET_PASSWORD_INFO_MISSING();
+    }
+
+    // 重置密码，并销毁验证码缓存
+    await this.userService.resetPasswordByEmail(guest.email, body, guest.tmpId);
+
+    // 清除邮箱验证状态
+    session.guest = {
+      tmpId: guest.tmpId,
+    };
+
+    return {
+      data: null,
+      group: 'user',
+      msg: 'user.reset.password.success',
     };
   }
 }

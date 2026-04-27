@@ -27,13 +27,14 @@ const transporter = createTransport(emailConfig);
  * @returns 是否发送成功
  */
 export async function sendEmail(
+  from: string,
   to: string,
   title: string,
   html?: string
 ): Promise<boolean> {
   try {
     const mailOptions = {
-      from: emailConfig.auth.user,
+      from: `${from} <${emailConfig.auth.user}>`,
       to,
       subject: title,
       html,
@@ -75,6 +76,7 @@ export async function renderEmailTemplate(
  * 基于模板发送邮件
  */
 export async function sendEmailWithTemplate(
+  from: string,
   to: string,
   title: string,
   templateRelativePath: string,
@@ -88,5 +90,5 @@ export async function sendEmailWithTemplate(
     throw BUSINESS_ERROR_CONSTANT.EMAIL_TEMPLATE_NOT_FOUND();
   }
 
-  return await sendEmail(to, title, html);
+  return await sendEmail(from, to, title, html);
 }
