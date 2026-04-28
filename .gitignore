@@ -16,3 +16,4 @@ src/config/*.json
 *.un~
 .tsbuildinfo
 .tsbuildinfo.*
+.eslintcache
