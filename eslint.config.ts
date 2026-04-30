@@ -7,7 +7,8 @@ export default [
   {
     ignores: [
       'node_modules',
-      'dist',
+      'build/**',
+      'dist/**',
       'test',
       'jest.config.js',
       'gulpfile.js',
