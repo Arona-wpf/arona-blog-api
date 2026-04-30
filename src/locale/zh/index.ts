@@ -6,6 +6,7 @@ import error from './error.json';
 import file from './file.json';
 import permission from './permission.json';
 import role from './role.json';
+import techStack from './tech-stack.json';
 import user from './user.json';
 import locale from './zh_CN.json';
 
@@ -20,4 +21,5 @@ export const zh_CN = {
   user,
   role,
   permission,
+  techStack,
 };

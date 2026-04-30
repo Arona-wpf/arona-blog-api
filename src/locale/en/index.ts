@@ -7,6 +7,7 @@ import error from './error.json';
 import file from './file.json';
 import permission from './permission.json';
 import role from './role.json';
+import techStack from './tech-stack.json';
 import user from './user.json';
 
 export const en_US = {
@@ -20,4 +21,5 @@ export const en_US = {
   user,
   role,
   permission,
+  techStack,
 };

@@ -1,0 +1,14 @@
+{
+  "techStack._id": "技术栈 ID",
+  "techStack.type": "技术栈类型",
+  "techStack.name": "技术名称",
+  "techStack.version": "版本号",
+  "techStack.descriptionKey": "国际化描述key",
+  "techStack.creator": "创建人",
+  "techStack.updator": "更新人",
+  "techStack.create.success": "创建技术栈成功",
+  "techStack.update.success": "更新技术栈成功",
+  "techStack.delete.success": "删除技术栈成功",
+  "techStack.list.success": "获取技术栈列表成功",
+  "techStack.detail.success": "获取技术栈详情成功"
+}
