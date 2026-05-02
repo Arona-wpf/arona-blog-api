@@ -100,6 +100,7 @@ export interface IMinioConfig {
   bucket: string;
   region: string;
   endpoint: string;
+  allowedOrigins: string[];
 }
 
 /**

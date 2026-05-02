@@ -1,0 +1,4 @@
+{
+  "minio.object.name": "Object Name",
+  "minio.get.url.success": "File access URL retrieved successfully"
+}

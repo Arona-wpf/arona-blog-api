@@ -46,7 +46,6 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
         file: BasicConfig.cdn.prefix.file,
         media: BasicConfig.cdn.prefix.media,
       },
-      allowedOrigins: BasicConfig.cdn.allowedOrigins,
     },
 
     // 腾讯云COS存储桶
@@ -176,6 +175,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
       bucket: BasicConfig.minio.bucket,
       region: BasicConfig.minio.region,
       endpoint: BasicConfig.minio.endpoint,
+      allowedOrigins: BasicConfig.minio.allowedOrigins,
     },
 
     // 上传

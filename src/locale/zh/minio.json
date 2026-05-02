@@ -1,0 +1,4 @@
+{
+  "minio.object.name": "文件对象名称",
+  "minio.get.url.success": "获取文件访问链接成功"
+}

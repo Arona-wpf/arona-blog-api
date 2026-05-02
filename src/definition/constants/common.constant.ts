@@ -145,13 +145,13 @@ export const BUSINESS_ERROR_CONSTANT = {
   COS_DELETE_FILE_FAILED: (args?: Record<string, string>) =>
     new BusinessError(1000710, 'error.cos.delete.file.failed', args),
 
-  // CDN Origin 不允许访问
-  CDN_ORIGIN_NOT_ALLOWED: (args?: Record<string, string>) =>
-    new BusinessError(1000801, 'error.cdn.origin.not.allowed', args),
-  // CDN 对象名称缺失
-  CDN_OBJECT_NAME_NOT_FOUND: (args?: Record<string, string>) =>
-    new BusinessError(1000802, 'error.cdn.object.name.not.found', args),
-  // CDN 获取 URL 失败
-  CDN_GET_URL_FAILED: (args?: Record<string, string>) =>
-    new BusinessError(1000803, 'error.cdn.get.url.failed', args),
+  // MinIO Origin 不允许访问
+  MINIO_ORIGIN_NOT_ALLOWED: (args?: Record<string, string>) =>
+    new BusinessError(1000801, 'error.minio.origin.not.allowed', args),
+  // MinIO 对象名称缺失
+  MINIO_OBJECT_NAME_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000802, 'error.minio.object.name.not.found', args),
+  // MinIO 获取 URL 失败
+  MINIO_GET_URL_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000803, 'error.minio.get.url.failed', args),
 };
