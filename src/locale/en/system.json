@@ -1,0 +1,4 @@
+{
+  "system.version.success": "Get backend version successfully",
+  "system.version.failed": "Failed to get backend version"
+}

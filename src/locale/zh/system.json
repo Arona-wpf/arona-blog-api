@@ -1,0 +1,4 @@
+{
+  "system.version.success": "获取后端版本成功",
+  "system.version.failed": "获取后端版本失败"
+}

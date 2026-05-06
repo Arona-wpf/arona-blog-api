@@ -6,6 +6,7 @@ import file from './file.json';
 import minio from './minio.json';
 import permission from './permission.json';
 import role from './role.json';
+import system from './system.json';
 import techStack from './tech-stack.json';
 import user from './user.json';
 import locale from './zh_CN.json';
@@ -21,5 +22,6 @@ export const zh_CN = {
   user,
   role,
   permission,
+  system,
   techStack,
 };
