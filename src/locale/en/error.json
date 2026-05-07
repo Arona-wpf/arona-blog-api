@@ -1,4 +1,6 @@
 {
+  "error.redis.instance.not.found": "Redis instance \"{name}\" not found, please contact the administrator",
+  "error.axios.instance.not.found": "Axios instance \"{name}\" not found, please contact the administrator",
   "error.captcha.verify.failed": "Please check whether the verification code is entered incorrectly",
   "error.captcha.verify.not.found": "The verification code has expired or does not exist. Please get it again",
   "error.captcha.send.timeout": "The captcha sending has timed out, please re-try",
@@ -45,5 +47,6 @@
   "error.url.replace.failed": "URL replacement failed, please check the format",
   "error.cdn.origin.not.allowed": "No permission to access CDN resources",
   "error.cdn.object.name.not.found": "Please provide the file object name",
-  "error.cdn.get.url.failed": "Failed to get file access URL, please try again later"
+  "error.cdn.get.url.failed": "Failed to get file access URL, please try again later",
+  "error.gacha.auth.key.not.found": "Gacha auth key not found"
 }

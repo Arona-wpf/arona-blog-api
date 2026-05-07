@@ -1,4 +1,6 @@
 {
+  "error.redis.instance.not.found": "Redis 实例 \"{name}\" 不存在，请联系管理员",
+  "error.axios.instance.not.found": "Axios 实例 \"{name}\" 不存在，请联系管理员",
   "error.captcha.verify.failed": "请检查验证码是否输入有误",
   "error.captcha.verify.not.found": "验证码已过期或不存在，请重新获取",
   "error.captcha.send.timeout": "验证码发送超时，请重试",
@@ -45,5 +47,6 @@
   "error.url.replace.failed": "URL替换失败，请检查格式是否正确",
   "error.cdn.origin.not.allowed": "无权限访问 CDN 资源",
   "error.cdn.object.name.not.found": "请提供文件对象名称",
-  "error.cdn.get.url.failed": "获取文件访问链接失败，请稍后重试"
+  "error.cdn.get.url.failed": "获取文件访问链接失败，请稍后重试",
+  "error.gacha.auth.key.not.found": "祈愿认证密钥不存在"
 }

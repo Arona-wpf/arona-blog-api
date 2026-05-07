@@ -28,4 +28,14 @@ export class ConfigService {
 
     return this.configDao.createOne(configEntity);
   }
+
+  /**
+   * 根据配置key获取配置
+   * @param key 配置key
+   * @returns 配置实体
+   */
+  async getConfigByKey(key: string) {
+    const config = await this.configDao.findOne({ key });
+    return config;
+  }
 }

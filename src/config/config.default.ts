@@ -7,6 +7,7 @@ import { join } from 'path';
 
 import * as BasicConfig from '@/config/config.json';
 import { LocaleEnum, RedisStorageEnum } from '@/definition/enums/common.enum';
+import { GameTypeEnum } from '@/definition/enums/gacha.enum';
 import { en_US } from '@/locale/en';
 import { zh_CN } from '@/locale/zh';
 
@@ -18,6 +19,37 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
   const tmpDir = join(tmpdir(), 'arona-blog');
 
   return {
+    // axios
+    axios: {
+      default: {
+        timeout: 15 * 1000, // 15秒
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      },
+      clients: {
+        [GameTypeEnum.GENSHIN_IMPACT]: {
+          baseURL: BasicConfig.gacha.genshin_impact.api_domain.cn,
+        },
+        [GameTypeEnum.HONKAI_STAR_RAIL]: {
+          baseURL: BasicConfig.gacha.honkai_star_rail.api_domain.cn,
+        },
+        [GameTypeEnum.ZENLESS_ZONE_ZERO]: {
+          baseURL: BasicConfig.gacha.zenless_zone_zero.api_domain.cn,
+        },
+        [GameTypeEnum.GENSHIN_IMPACT + '_global']: {
+          baseURL: BasicConfig.gacha.genshin_impact.api_domain.global,
+        },
+        [GameTypeEnum.HONKAI_STAR_RAIL + '_global']: {
+          baseURL: BasicConfig.gacha.honkai_star_rail.api_domain.global,
+        },
+        [GameTypeEnum.ZENLESS_ZONE_ZERO + '_global']: {
+          baseURL: BasicConfig.gacha.zenless_zone_zero.api_domain.global,
+        },
+      },
+    },
+
     // 缓存管理器
     cacheManager: {
       clients: {

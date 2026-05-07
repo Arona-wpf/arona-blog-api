@@ -1,3 +1,4 @@
+import { Logger, Singleton } from '@midwayjs/core';
 import { ILogger } from '@midwayjs/logger';
 import COS from 'cos-nodejs-sdk-v5';
 
@@ -11,22 +12,12 @@ interface CosInstanceRecord {
  * 按账号复用 COS 客户端实例，避免每次请求都重新初始化。
  * 内置过期自动清理机制。
  */
+@Singleton()
 export class CosInstanceManager {
-  private static instance: CosInstanceManager;
   private pool: Map<string, CosInstanceRecord> = new Map();
-  private logger: ILogger;
 
-  private constructor() {}
-
-  static getInstance(logger?: ILogger): CosInstanceManager {
-    if (!CosInstanceManager.instance) {
-      CosInstanceManager.instance = new CosInstanceManager();
-    }
-    if (logger) {
-      CosInstanceManager.instance.logger = logger;
-    }
-    return CosInstanceManager.instance;
-  }
+  @Logger()
+  logger: ILogger;
 
   /**
    * 获取指定账号的 COS 实例

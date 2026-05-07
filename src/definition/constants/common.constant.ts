@@ -5,6 +5,12 @@ export const BUSINESS_ERROR_CONSTANT = {
   // URL替换失败
   URL_REPLACE_FAILED: (args?: Record<string, string>) =>
     new BusinessError(1000001, 'error.url.replace.failed', args),
+  // Redis实例不存在
+  REDIS_INSTANCE_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000002, 'error.redis.instance.not.found', args),
+  // Axios实例不存在
+  AXIOS_INSTANCE_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000003, 'error.axios.instance.not.found', args),
 
   // 验证码校验失败
   CAPTCHA_VERIFY_FAILED: (args?: Record<string, string>) =>
@@ -154,4 +160,8 @@ export const BUSINESS_ERROR_CONSTANT = {
   // MinIO 获取 URL 失败
   MINIO_GET_URL_FAILED: (args?: Record<string, string>) =>
     new BusinessError(1000803, 'error.minio.get.url.failed', args),
+
+  // 祈愿auth key不存在
+  GACHA_AUTH_KEY_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000901, 'error.gacha.auth.key.not.found', args),
 };

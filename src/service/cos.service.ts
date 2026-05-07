@@ -35,11 +35,8 @@ export class CosService {
   @Inject()
   redisHelper: RedisHelper;
 
-  private readonly instanceManager: CosInstanceManager;
-
-  constructor() {
-    this.instanceManager = CosInstanceManager.getInstance(this.logger);
-  }
+  @Inject()
+  private instanceManager: CosInstanceManager;
 
   // ==================== 凭证管理 ====================
 

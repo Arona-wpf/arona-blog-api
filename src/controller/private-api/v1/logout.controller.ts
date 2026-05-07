@@ -9,13 +9,16 @@ export class PrivV1LogoutController {
   @Inject()
   cosService: CosService;
 
+  @Inject()
+  cosInstanceManager: CosInstanceManager;
+
   @Post('/')
   async logout(@Session() session: IUserSession) {
     const account = session.user?.account;
 
     if (account) {
       // 清除当前账号的 COS 实例
-      CosInstanceManager.getInstance().remove(account);
+      this.cosInstanceManager.remove(account);
     }
 
     // 销毁 session
