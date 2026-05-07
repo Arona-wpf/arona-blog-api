@@ -1,6 +1,6 @@
 import { Inject, Provide } from '@midwayjs/core';
 
-import { PermissionDao } from '@/dao/permission.entity';
+import { PermissionDao } from '@/dao/permission.dao';
 import { RoleDao } from '@/dao/role.dao';
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
 import { IPageResult } from '@/definition/types/page.type';

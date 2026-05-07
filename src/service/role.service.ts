@@ -1,7 +1,7 @@
 import { Inject, Provide } from '@midwayjs/core';
 import { uniq } from 'lodash';
 
-import { PermissionDao } from '@/dao/permission.entity';
+import { PermissionDao } from '@/dao/permission.dao';
 import { RoleDao } from '@/dao/role.dao';
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
 import { PermissionTypeEnum } from '@/definition/enums/permission.enum';
