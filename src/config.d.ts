@@ -26,6 +26,14 @@ export interface ConfigJson {
     secretId: string;
     secretKey: string;
   };
+  gacha: {
+    [key: string]: {
+      api_domain: {
+        cn: string;
+        global: string;
+      };
+    };
+  };
   koa: {
     keys: string[];
   };

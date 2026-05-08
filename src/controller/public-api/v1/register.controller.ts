@@ -24,10 +24,10 @@ export class PubV1RegisterController {
   async register(@Body() body: RegisterDto, @Session() session: IUserSession) {
     // 获取redis实例
     const redis = await this.redisHelper.getRedisInstance(
-      RedisStorageEnum.CAPTCHA
+      RedisStorageEnum.SCRIPT
     );
     // 获取缓存键
-    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.guest?.tmpId}:${CaptchaTypeEnum.REGISTER}`;
+    const cacheKey = `${RedisStorageEnum.SCRIPT}:${session.guest?.tmpId}:${CaptchaTypeEnum.REGISTER}`;
     // 获取缓存值
     const cacheValueString = await redis.get(cacheKey);
     // 如果缓存值不存在，则抛出验证码不存在错误

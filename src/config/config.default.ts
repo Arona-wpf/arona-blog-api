@@ -176,17 +176,17 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
           password: BasicConfig.redis.password,
           db: BasicConfig.redis['session-db'],
         },
-        [RedisStorageEnum.CAPTCHA]: {
+        [RedisStorageEnum.SCRIPT]: {
           host: BasicConfig.redis.host,
           port: BasicConfig.redis.port,
           password: BasicConfig.redis.password,
-          db: BasicConfig.redis['captcha-db'],
+          db: BasicConfig.redis['script-db'],
         },
-        [RedisStorageEnum.COS]: {
+        [RedisStorageEnum.TASK]: {
           host: BasicConfig.redis.host,
           port: BasicConfig.redis.port,
           password: BasicConfig.redis.password,
-          db: BasicConfig.redis['cos-db'],
+          db: BasicConfig.redis['task-db'],
         },
       },
     },

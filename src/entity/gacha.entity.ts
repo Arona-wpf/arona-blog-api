@@ -20,6 +20,9 @@ export class GachaEntity {
   server_region: string; // 服务器区域
 
   @prop({ type: String, required: true })
+  region_time_zone: number; // 服务器区域时区
+
+  @prop({ type: String, required: true })
   uid: string; // 用户ID
 
   @prop({ type: String, required: true })

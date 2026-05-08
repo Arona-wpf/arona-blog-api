@@ -164,4 +164,10 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿auth key不存在
   GACHA_AUTH_KEY_NOT_FOUND: (args?: Record<string, string>) =>
     new BusinessError(1000901, 'error.gacha.auth.key.not.found', args),
+  // 祈愿服务器区域不存在
+  GACHA_SERVER_REGION_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000902, 'error.gacha.server.region.not.found', args),
+  // 祈愿游戏类型不支持
+  GACHA_GAME_TYPE_NOT_SUPPORTED: (args?: Record<string, string>) =>
+    new BusinessError(1000903, 'error.gacha.game.type.not.supported', args),
 };

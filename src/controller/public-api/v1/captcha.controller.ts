@@ -73,10 +73,10 @@ export class PubV1CaptchaController {
     // 如果邮件发送成功，则将验证码缓存到 Redis
     if (sendResult) {
       const redis = await this.redisHelper.getRedisInstance(
-        RedisStorageEnum.CAPTCHA
+        RedisStorageEnum.SCRIPT
       );
 
-      const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.guest?.tmpId}:${body.type}`;
+      const cacheKey = `${RedisStorageEnum.SCRIPT}:${session.guest?.tmpId}:${body.type}`;
       const cacheValue = {
         cache_id: cacheId,
         text,
@@ -97,10 +97,10 @@ export class PubV1CaptchaController {
   ) {
     // 获取 Redis 实例
     const redis = await this.redisHelper.getRedisInstance(
-      RedisStorageEnum.CAPTCHA
+      RedisStorageEnum.SCRIPT
     );
     // 获取缓存键
-    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${session.guest?.tmpId}:${body.type}`;
+    const cacheKey = `${RedisStorageEnum.SCRIPT}:${session.guest?.tmpId}:${body.type}`;
     // 获取缓存值
     const cacheValueString = await redis.get(cacheKey);
     // 如果缓存值不存在，则抛出验证码不存在错误

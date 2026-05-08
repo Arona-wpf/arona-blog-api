@@ -8,8 +8,8 @@ export enum GenderEnum {
 // 定义 Redis 服务名称
 export enum RedisStorageEnum {
   SESSION = 'session',
-  CAPTCHA = 'captcha',
-  COS = 'cos',
+  SCRIPT = 'script',
+  TASK = 'task',
 }
 
 // 国际化枚举

@@ -107,10 +107,10 @@ export class UserService {
   async loginByCacheId(account: string, cacheId: string, tmpId: string) {
     // 获取redis实例
     const redis = await this.redisHelper.getRedisInstance(
-      RedisStorageEnum.CAPTCHA
+      RedisStorageEnum.SCRIPT
     );
     // 获取缓存键
-    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${tmpId}:${CaptchaTypeEnum.LOGIN}`;
+    const cacheKey = `${RedisStorageEnum.SCRIPT}:${tmpId}:${CaptchaTypeEnum.LOGIN}`;
     // 获取缓存值
     const cacheValueString = await redis.get(cacheKey);
     // 如果缓存值不存在，则抛出验证码不存在错误
@@ -148,10 +148,10 @@ export class UserService {
   async loginByEmail(email: string, cacheId: string, tmpId: string) {
     // 获取redis实例
     const redis = await this.redisHelper.getRedisInstance(
-      RedisStorageEnum.CAPTCHA
+      RedisStorageEnum.SCRIPT
     );
     // 获取缓存键
-    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${tmpId}:${CaptchaTypeEnum.LOGIN}`;
+    const cacheKey = `${RedisStorageEnum.SCRIPT}:${tmpId}:${CaptchaTypeEnum.LOGIN}`;
     // 获取缓存值
     const cacheValueString = await redis.get(cacheKey);
     // 如果缓存值不存在，则抛出验证码不存在错误
@@ -382,9 +382,9 @@ export class UserService {
 
     // 获取 redis 实例，验证 cache_id
     const redis = await this.redisHelper.getRedisInstance(
-      RedisStorageEnum.CAPTCHA
+      RedisStorageEnum.SCRIPT
     );
-    const cacheKey = `${RedisStorageEnum.CAPTCHA}:${tmpId}:${CaptchaTypeEnum.VERIFY_SELF}`;
+    const cacheKey = `${RedisStorageEnum.SCRIPT}:${tmpId}:${CaptchaTypeEnum.VERIFY_SELF}`;
     const cacheValueString = await redis.get(cacheKey);
 
     // 验证缓存是否存在

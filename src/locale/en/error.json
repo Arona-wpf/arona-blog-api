@@ -48,5 +48,7 @@
   "error.cdn.origin.not.allowed": "No permission to access CDN resources",
   "error.cdn.object.name.not.found": "Please provide the file object name",
   "error.cdn.get.url.failed": "Failed to get file access URL, please try again later",
-  "error.gacha.auth.key.not.found": "Gacha auth key not found"
+  "error.gacha.auth.key.not.found": "Gacha auth key not found",
+  "error.gacha.server.region.not.found": "Gacha server region not found",
+  "error.gacha.game.type.not.supported": "Gacha game type not supported"
 }

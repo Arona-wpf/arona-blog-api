@@ -53,10 +53,10 @@ export class CosService {
 
     // 尝试从 Redis 缓存中读取已有凭证
     const redisService = await this.redisHelper.getRedisInstance(
-      RedisStorageEnum.COS
+      RedisStorageEnum.SCRIPT
     );
     const token = await redisService.get(
-      `${RedisStorageEnum.COS}.token:${account}`
+      `${RedisStorageEnum.SCRIPT}.token:${account}`
     );
     if (token) {
       return JSON.parse(token);
@@ -155,7 +155,7 @@ export class CosService {
         };
         // 缓存到 Redis
         redisService.setex(
-          `${RedisStorageEnum.COS}.token:${account}`,
+          `${RedisStorageEnum.SCRIPT}.token:${account}`,
           this.cosConfig.durationSeconds,
           JSON.stringify(resolveResult)
         );

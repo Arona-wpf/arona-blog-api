@@ -48,5 +48,7 @@
   "error.cdn.origin.not.allowed": "无权限访问 CDN 资源",
   "error.cdn.object.name.not.found": "请提供文件对象名称",
   "error.cdn.get.url.failed": "获取文件访问链接失败，请稍后重试",
-  "error.gacha.auth.key.not.found": "祈愿认证密钥不存在"
+  "error.gacha.auth.key.not.found": "祈愿认证密钥不存在",
+  "error.gacha.server.region.not.found": "祈愿服务器区域不存在",
+  "error.gacha.game.type.not.supported": "祈愿游戏类型不支持"
 }

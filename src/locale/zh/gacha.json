@@ -1,3 +1,21 @@
 {
-  "error.gacha.auth.key.not.found": "祈愿auth key不存在"
+  "gacha.game_type.genshin_impact": "原神",
+  "gacha.game_type.honkai_star_rail": "崩坏：星穹铁道",
+  "gacha.game_type.zenless_zone_zero": "绝区零",
+  "gacha.type.genshin_impact.novice_wish": "新手祈愿",
+  "gacha.type.genshin_impact.permanent_wish": "常驻祈愿",
+  "gacha.type.genshin_impact.character_event_wish": "角色活动祈愿",
+  "gacha.type.genshin_impact.weapon_event_wish": "武器活动祈愿",
+  "gacha.type.genshin_impact.character_event_wish_2": "角色活动祈愿-2",
+  "gacha.type.genshin_impact.chronicled_wish": "集录祈愿",
+  "gacha.type.honkai_star_rail.regular_warp": "常驻跃迁",
+  "gacha.type.honkai_star_rail.starter_warp": "新手跃迁",
+  "gacha.type.honkai_star_rail.character_event_warp": "角色活动跃迁",
+  "gacha.type.honkai_star_rail.light_cone_event_warp": "光锥活动跃迁",
+  "gacha.type.honkai_star_rail.character_collaboration_warp": "角色联动跃迁",
+  "gacha.type.honkai_star_rail.light_cone_collaboration_warp": "光锥联动跃迁",
+  "gacha.type.zenless_zone_zero.stable_channel": "常驻频段",
+  "gacha.type.zenless_zone_zero.exclusive_channel": "独家频段",
+  "gacha.type.zenless_zone_zero.w_engine_channel": "音擎频段",
+  "gacha.type.zenless_zone_zero.banboo_channel": "邦布频段"
 }
