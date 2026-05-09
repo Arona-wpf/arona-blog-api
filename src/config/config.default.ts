@@ -143,11 +143,15 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
       clients: {
         coreLogger: {
           fileLogName: `${pkg.name}-core.log`,
-          errorLogName: `${pkg.name}-error.log`,
+          errorLogName: `${pkg.name}-core-error.log`,
         },
         appLogger: {
           fileLogName: `${pkg.name}-app.log`,
-          errorLogName: `${pkg.name}-error.log`,
+          errorLogName: `${pkg.name}-app-error.log`,
+        },
+        wsLogger: {
+          fileLogName: `${pkg.name}-ws.log`,
+          errorLogName: `${pkg.name}-ws-error.log`,
         },
       },
     },
@@ -225,6 +229,15 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
       validationOptions: {
         allowUnknown: true, // validate 允许出现未定义字段
       },
+    },
+
+    // WebSocket
+    webSocket: {
+      // 不配置 port 时会复用 Koa HTTP Server（即 22333）
+      enableServerHeartbeatCheck: true,
+      serverHeartbeatInterval: 30 * 1000,
+      maxPayload: 1 * 1024 * 1024, // 最大消息大小为 1MB
+      perMessageDeflate: false, // 不启用消息压缩
     },
   };
 };

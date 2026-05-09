@@ -17,6 +17,8 @@ import { RedisServiceFactory } from '@midwayjs/redis';
 import * as session from '@midwayjs/session';
 import * as typegoose from '@midwayjs/typegoose';
 import * as validate from '@midwayjs/validate';
+import * as ws from '@midwayjs/ws';
+import { Framework } from '@midwayjs/ws';
 import * as Typegoose from '@typegoose/typegoose';
 import redisStore from 'koa-redis';
 import { join } from 'path';
@@ -32,9 +34,11 @@ import { DefaultErrorFilter } from '@/filter/default.filter';
 import { NotFoundFilter } from '@/filter/not-found.filter';
 import { ValidateErrorFilter } from '@/filter/validate.filter';
 import { RouterHelper } from '@/helper/router.helper';
+import { IUserSession } from '@/interface';
 import { LoggerMiddleware } from '@/middleware/logger.middleware';
 import { ResultMiddleware } from '@/middleware/result.middleware';
 import { SessionMiddleware } from '@/middleware/session.middleware';
+import { parseCookie } from '@/utils/common';
 
 @Configuration({
   imports: [
@@ -46,6 +50,7 @@ import { SessionMiddleware } from '@/middleware/session.middleware';
     typegoose,
     upload,
     validate,
+    ws,
     {
       component: info,
       enabledEnvironment: ['local'],
@@ -58,10 +63,16 @@ export class MainConfiguration {
   app: koa.Application;
 
   @Inject()
+  wsFramework: Framework;
+
+  @Inject()
   midwayDecoratorService: MidwayDecoratorService;
 
-  @Logger()
-  logger: ILogger;
+  @Inject()
+  redisServiceFactory: RedisServiceFactory;
+
+  @Logger('wsLogger')
+  wsLogger: ILogger;
 
   async onConfigLoad() {
     Typegoose.setGlobalOptions({
@@ -116,5 +127,73 @@ export class MainConfiguration {
         return registerPermissionMethod(options);
       }
     );
+
+    // WebSocket 升级鉴权（连接建立前）
+    this.wsFramework.onWebSocketUpgrade(async request => {
+      try {
+        const cookieHeader = request.headers.cookie;
+
+        if (!cookieHeader) {
+          this.wsLogger.warn(
+            '[WS Upgrade] Authentication failed: missing cookie'
+          );
+          return false;
+        }
+
+        // 解析 cookie
+        const cookies = parseCookie(cookieHeader);
+        const sessionId = cookies['arona-blog-api.sid'];
+
+        if (!sessionId) {
+          this.wsLogger.warn(
+            '[WS Upgrade] Authentication failed: missing session ID'
+          );
+          return false;
+        }
+
+        // 从 Redis 获取 session 数据
+        const redisService = this.redisServiceFactory.get(
+          RedisStorageEnum.SESSION
+        );
+        if (!redisService) {
+          this.wsLogger.error(
+            '[WS Upgrade] Redis session service is unavailable'
+          );
+          return false;
+        }
+
+        const sessionData = await redisService.get(
+          `arona-blog-api.sess:${sessionId}`
+        );
+
+        if (!sessionData) {
+          this.wsLogger.warn(
+            '[WS Upgrade] Authentication failed: session not found or expired'
+          );
+          return false;
+        }
+
+        // 解析 session 数据
+        const session: IUserSession = JSON.parse(sessionData);
+
+        if (!session?.user?.account) {
+          this.wsLogger.warn(
+            '[WS Upgrade] Authentication failed: user is not logged in'
+          );
+          return false;
+        }
+
+        // 将用户信息附加到 request 对象上，供后续 WsGateway 使用
+        request['wsUser'] = session.user;
+
+        this.wsLogger.info(
+          `[WS Upgrade] Authentication succeeded: user ${session.user.account}`
+        );
+        return true;
+      } catch (error) {
+        this.wsLogger.error('[WS Upgrade] Authentication error:', error);
+        return false;
+      }
+    });
   }
 }

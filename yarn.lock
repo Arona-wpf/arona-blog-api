@@ -1821,6 +1821,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@midwayjs/ws@npm:^3.20.22":
+  version: 3.20.24
+  resolution: "@midwayjs/ws@npm:3.20.24"
+  dependencies:
+    "@types/ws": "npm:8.5.14"
+    ws: "npm:8.18.0"
+  checksum: 10c0/f3cb76922fc3f4b313003f72f5c8af334918dfc653a7ba736579f579009df9ac6c85b42ed7f93fd2c6f93b09433e0a9277f90cecfcb04d5d7d89c088b7b353b5
+  languageName: node
+  linkType: hard
+
 "@mongodb-js/saslprep@npm:^1.3.0":
   version: 1.4.6
   resolution: "@mongodb-js/saslprep@npm:1.4.6"
@@ -3115,6 +3125,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ws@npm:8.5.14":
+  version: 8.5.14
+  resolution: "@types/ws@npm:8.5.14"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/be88a0b6252f939cb83340bd1b4d450287f752c19271195cd97564fd94047259a9bb8c31c585a61b69d8a1b069a99df9dd804db0132d3359c54d3890c501416a
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.3
   resolution: "@types/yargs-parser@npm:21.0.3"
@@ -3665,6 +3684,7 @@ __metadata:
     "@midwayjs/typegoose": "npm:^3.20.22"
     "@midwayjs/upload": "npm:^3.20.22"
     "@midwayjs/validate": "npm:^3.20.22"
+    "@midwayjs/ws": "npm:^3.20.22"
     "@typegoose/typegoose": "npm:^11.8.1"
     "@types/archiver": "npm:^7.0.0"
     "@types/jest": "npm:^30.0.0"
@@ -12089,6 +12109,21 @@ __metadata:
     imurmurhash: "npm:^0.1.4"
     signal-exit: "npm:^4.0.1"
   checksum: 10c0/ae2f1c27474758a9aca92037df6c1dd9cb94c4e4983451210bd686bfe341f142662f6aa5913095e572ab037df66b1bfe661ed4ce4c0369ed0e8219e28e141786
+  languageName: node
+  linkType: hard
+
+"ws@npm:8.18.0":
+  version: 8.18.0
+  resolution: "ws@npm:8.18.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 10c0/25eb33aff17edcb90721ed6b0eb250976328533ad3cd1a28a274bd263682e7296a6591ff1436d6cbc50fa67463158b062f9d1122013b361cec99a05f84680e06
   languageName: node
   linkType: hard
 

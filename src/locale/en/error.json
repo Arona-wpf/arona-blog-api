@@ -51,5 +51,6 @@
   "error.gacha.auth.key.not.found": "Gacha auth key not found",
   "error.gacha.server.region.not.found": "Gacha server region not found",
   "error.gacha.game.type.not.supported": "Gacha game type not supported",
-  "error.gacha.task.not.found": "Gacha task not found"
+  "error.gacha.task.not.found": "Gacha task not found",
+  "error.ws.unauthorized": "WebSocket connection unauthorized, please login first"
 }

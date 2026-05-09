@@ -11,6 +11,9 @@ export const BUSINESS_ERROR_CONSTANT = {
   // Axios实例不存在
   AXIOS_INSTANCE_NOT_FOUND: (args?: Record<string, string>) =>
     new BusinessError(1000003, 'error.axios.instance.not.found', args),
+  // WebSocket 连接未授权（用户未登录）
+  WS_UNAUTHORIZED: (args?: Record<string, string>) =>
+    new BusinessError(1000004, 'error.ws.unauthorized', args),
 
   // 验证码校验失败
   CAPTCHA_VERIFY_FAILED: (args?: Record<string, string>) =>

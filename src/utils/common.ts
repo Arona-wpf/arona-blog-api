@@ -38,6 +38,27 @@ export function getErrorMessage(error: unknown): string {
 }
 
 /**
+ * 解析 cookie 字符串
+ * @param cookieStr cookie 字符串
+ * @returns 解析后的 cookie 对象
+ */
+export function parseCookie(cookieStr: string): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieStr) return cookies;
+
+  cookieStr.split(';').forEach(cookie => {
+    const parts = cookie.trim().split('=');
+    if (parts.length >= 2) {
+      const key = parts[0].trim();
+      const value = parts.slice(1).join('=').trim();
+      cookies[key] = value;
+    }
+  });
+
+  return cookies;
+}
+
+/**
  * 从 cookies 中解析指定 key 的值
  * @param cookies cookies
  * @param key 指定 key
