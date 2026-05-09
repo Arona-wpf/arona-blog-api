@@ -17,5 +17,10 @@
   "gacha.type.zenless_zone_zero.stable_channel": "常驻频段",
   "gacha.type.zenless_zone_zero.exclusive_channel": "独家频段",
   "gacha.type.zenless_zone_zero.w_engine_channel": "音擎频段",
-  "gacha.type.zenless_zone_zero.banboo_channel": "邦布频段"
+  "gacha.type.zenless_zone_zero.banboo_channel": "邦布频段",
+  "gacha.dto.uid": "游戏UID",
+  "gacha.dto.game_type": "游戏类型",
+  "gacha.dto.gacha_url": "祈愿URL",
+  "gacha.task.create.success": "祈愿任务创建成功",
+  "gacha.task.get.success": "祈愿任务查询成功"
 }

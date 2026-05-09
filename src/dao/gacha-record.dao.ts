@@ -2,21 +2,21 @@ import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 
-import { GachaEntity } from '@/entity/gacha.entity';
+import { GachaRecordEntity } from '@/entity/gacha-record.entity';
 
 import { BaseDao } from './base.dao';
 
 @Provide()
-export class GachaDao extends BaseDao<GachaEntity> {
-  @InjectEntityModel(GachaEntity)
-  gachaEntity: ReturnModelType<typeof GachaEntity>;
+export class GachaRecordDao extends BaseDao<GachaRecordEntity> {
+  @InjectEntityModel(GachaRecordEntity)
+  gachaRecordEntity: ReturnModelType<typeof GachaRecordEntity>;
 
-  protected get model(): ReturnModelType<typeof GachaEntity> {
-    return this.gachaEntity;
+  protected get model(): ReturnModelType<typeof GachaRecordEntity> {
+    return this.gachaRecordEntity;
   }
 
   constructor() {
-    super('Gacha');
+    super('GachaRecord');
   }
 
   async findOne(
@@ -25,22 +25,22 @@ export class GachaDao extends BaseDao<GachaEntity> {
     sort?: Record<string, any>
   ) {
     try {
-      return await this.gachaEntity
+      return await this.gachaRecordEntity
         .findOne(queryCondition)
         .select(select)
         .sort(sort)
         .lean();
     } catch (error) {
-      this.logger.error('[GachaDao] findOne error', error);
+      this.logger.error('[GachaRecordDao] findOne error', error);
       throw error;
     }
   }
 
   async findById(id: string, select?: string) {
     try {
-      return await this.gachaEntity.findById(id).select(select).lean();
+      return await this.gachaRecordEntity.findById(id).select(select).lean();
     } catch (error) {
-      this.logger.error('[GachaDao] findById error', error);
+      this.logger.error('[GachaRecordDao] findById error', error);
       throw error;
     }
   }
@@ -53,7 +53,7 @@ export class GachaDao extends BaseDao<GachaEntity> {
     sort?: Record<string, any>
   ) {
     try {
-      return await this.gachaEntity
+      return await this.gachaRecordEntity
         .find(queryCondition)
         .skip((currentPage - 1) * pageSize)
         .limit(pageSize)
@@ -61,7 +61,7 @@ export class GachaDao extends BaseDao<GachaEntity> {
         .sort(sort)
         .lean();
     } catch (error) {
-      this.logger.error('[GachaDao] findMany error', error);
+      this.logger.error('[GachaRecordDao] findMany error', error);
       throw error;
     }
   }

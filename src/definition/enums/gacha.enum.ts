@@ -56,6 +56,13 @@ export enum ZenlessZoneZeroGachaTypeEnum {
   BANBOO_CHANNEL = '5', // 邦布频段
 }
 
+export enum GachaTaskStatusEnum {
+  PENDING = 'pending', // 待处理
+  PROCESSING = 'processing', // 处理中
+  COMPLETED = 'completed', // 已完成
+  FAILED = 'failed', // 失败
+}
+
 // 原神祈愿类型国际化 key 映射
 export const GenshinImpactGachaTypeI18nKeyMap: Record<string, string> = {
   [GenshinImpactGachaTypeEnum.NOVICE_WISH]:

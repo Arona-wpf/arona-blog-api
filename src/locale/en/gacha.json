@@ -17,5 +17,10 @@
   "gacha.type.zenless_zone_zero.stable_channel": "Stable Channel",
   "gacha.type.zenless_zone_zero.exclusive_channel": "Exclusive Channel",
   "gacha.type.zenless_zone_zero.w_engine_channel": "W-Engine Channel",
-  "gacha.type.zenless_zone_zero.banboo_channel": "Bangboo Channel"
+  "gacha.type.zenless_zone_zero.banboo_channel": "Bangboo Channel",
+  "gacha.dto.uid": "Game UID",
+  "gacha.dto.game_type": "Game Type",
+  "gacha.dto.gacha_url": "Gacha URL",
+  "gacha.task.create.success": "Gacha task created successfully",
+  "gacha.task.get.success": "Gacha task retrieved successfully"
 }

@@ -170,4 +170,7 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿游戏类型不支持
   GACHA_GAME_TYPE_NOT_SUPPORTED: (args?: Record<string, string>) =>
     new BusinessError(1000903, 'error.gacha.game.type.not.supported', args),
+  // 祈愿任务不存在
+  GACHA_TASK_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000904, 'error.gacha.task.not.found', args),
 };
