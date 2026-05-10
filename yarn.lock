@@ -1615,51 +1615,51 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midwayjs/async-hooks-context-manager@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/async-hooks-context-manager@npm:3.20.22"
-  checksum: 10c0/e7496a6d16dcffc767ef70292fb216ab11d8356fe8c14efe4aeb8a49d7db4305d5365976d6dee6653ea7d1b1a2fa5f1ae3912b8e3de06957e67b74d759b28df5
+"@midwayjs/async-hooks-context-manager@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/async-hooks-context-manager@npm:3.20.24"
+  checksum: 10c0/67b6ed956b02615d978218d93df91beb406d8f232ae89f1b9a23c9d6827a04d12e3c75966e2feb3fe4297cb481fdbba9b111e2c5707332d21f500ca41476e3fc
   languageName: node
   linkType: hard
 
-"@midwayjs/axios@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/axios@npm:3.20.22"
+"@midwayjs/axios@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/axios@npm:3.20.24"
   dependencies:
     axios: "npm:1.8.4"
-  checksum: 10c0/a8da0d777729c49744384eba1752425e800bbd0ede145396c7a3382fb478dc9cf89f85723ed03e5d4391be2ef9c04fbd0b2cdf2060b65ecd35842ded5f2031b1
+  checksum: 10c0/9be78517ce88cf1e3096123f05fbb8a7c5a48cb142c940cdf0e52c74652ca72da80137f07cfa66816dcb38ab9e88de49e1b17e8c1f5feb88cddf25679a65b9d8
   languageName: node
   linkType: hard
 
-"@midwayjs/bootstrap@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/bootstrap@npm:3.20.22"
+"@midwayjs/bootstrap@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/bootstrap@npm:3.20.24"
   dependencies:
-    "@midwayjs/async-hooks-context-manager": "npm:^3.20.22"
+    "@midwayjs/async-hooks-context-manager": "npm:^3.20.24"
     "@midwayjs/event-bus": "npm:1.11.1"
-  checksum: 10c0/21c749076e430f087a8058462b08cc5c978c9cad81cfa3693b8ac1ffd4c95ccb697ccadd36717c587529a26b99818b65a9eabd65a0f8d95e8148aeca112cb577
+  checksum: 10c0/edda17617527f81b879b7d1f2dcd6b8418db3c343b2099ad6bfecb7db1d11743b00502ee8c7ff0896105d29b7ba67887a10b59937c1a308754a13c7a1283416c
   languageName: node
   linkType: hard
 
-"@midwayjs/cache-manager@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/cache-manager@npm:3.20.22"
+"@midwayjs/cache-manager@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/cache-manager@npm:3.20.24"
   dependencies:
     lodash.clonedeep: "npm:4.5.0"
     lru-cache: "npm:7.18.3"
-  checksum: 10c0/86fa028fcae32a1d7d469e3226ce55ae3e5dc6ac54c23312435c2feb0a99151e880515e2440c44c24206b00092325819377e65712ff90d47f6c3e82c0b7d7049
+  checksum: 10c0/5ca41ba80077eb67f169098376a28569c374e9dab118ea2ab35f293a16d94d7dd563bbda8093c73ec3a953f3e910f7d8b663b01818308d8b75bfd93d34b93f9c
   languageName: node
   linkType: hard
 
-"@midwayjs/captcha@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/captcha@npm:3.20.22"
+"@midwayjs/captcha@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/captcha@npm:3.20.24"
   dependencies:
-    "@midwayjs/cache-manager": "npm:^3.20.22"
+    "@midwayjs/cache-manager": "npm:^3.20.24"
     mini-svg-data-uri: "npm:1.4.4"
     nanoid: "npm:3.3.11"
     svg-captcha-fixed: "npm:1.5.2"
-  checksum: 10c0/c4610210746ed966a8dc2b750899edf815b473c00b9970f350dfd0986bd2766e424e558a107d3fc14ee71646f158860f9b5acf638fa15f6f462032b9dc58ca6d
+  checksum: 10c0/a17c85c45baf28620fc56c2b07590b2f164bafef965be438738b9cd6eb83a377699f947e29a4fab9ab145d8688424f338721d953c7d23c3ee0b6c6515d99f40e
   languageName: node
   linkType: hard
 
@@ -1673,15 +1673,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midwayjs/core@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/core@npm:3.20.22"
+"@midwayjs/core@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/core@npm:3.20.24"
   dependencies:
     "@midwayjs/glob": "npm:^1.0.2"
     class-transformer: "npm:0.5.1"
     picomatch: "npm:2.3.1"
     reflect-metadata: "npm:0.2.2"
-  checksum: 10c0/a575b223eb76bb83dbdb462b969ce0adf4b5f2eae8fb9840cce08bf13244c2e6e2f1e72a1277f43c01d6d3297e12a70611138e1557425b78a050ad9db7084a1f
+  checksum: 10c0/aa47e728b65f5a478b9ed75be08318625689eb2d058fb70cf0aeb3e8d034220fbce5a807adab52f095e784cb3dd4ac89604d4fb7a4faae27b771f14114a1feb4
   languageName: node
   linkType: hard
 
@@ -1701,38 +1701,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midwayjs/i18n@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/i18n@npm:3.20.22"
+"@midwayjs/i18n@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/i18n@npm:3.20.24"
   dependencies:
     picomatch: "npm:2.3.1"
-  checksum: 10c0/2deb14cced4da387eb2bf1803183e376deb9e54afe8a8f150e3aef6b87efa3b44d19738e16c9539e1e21a9c0a755c4169910e9fa3b8a3dc9008f7eb1a3396bc4
+  checksum: 10c0/e2b2729ceb3adb1a1f810c003653667e08832676613241aa489aa3b9572f18cc3601bcb40e5816ec4e607de9f8870f511148cd0994e3aeb9091ab4cad38b5ddb
   languageName: node
   linkType: hard
 
-"@midwayjs/info@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/info@npm:3.20.22"
+"@midwayjs/info@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/info@npm:3.20.24"
   dependencies:
     picomatch: "npm:2.3.1"
-  checksum: 10c0/c188f5114dffeeea5748a16f920d68d3e7a973cfde27f52875b8ecb49497d605cc24add2402fbb83c6c00b4a8e3f0829ef0ecd75914da1270c350b89e673e3e5
+  checksum: 10c0/54fecc483643626995493245637838d153344a84bb3f3f8e3f200aaa379c572d9aaaeef815b1de9a2f951a60fba8ba33804b7919f5ce9e6b7abf405e03b27174
   languageName: node
   linkType: hard
 
-"@midwayjs/koa@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/koa@npm:3.20.22"
+"@midwayjs/koa@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/koa@npm:3.20.24"
   dependencies:
     "@koa/router": "npm:^12.0.0"
     "@midwayjs/cookies": "npm:^1.3.0"
-    "@midwayjs/core": "npm:^3.20.22"
-    "@midwayjs/session": "npm:^3.20.22"
+    "@midwayjs/core": "npm:^3.20.24"
+    "@midwayjs/session": "npm:^3.20.24"
     "@types/koa": "npm:2.15.0"
     "@types/qs": "npm:6.9.18"
-    koa: "npm:2.16.2"
+    koa: "npm:2.16.4"
     koa-bodyparser: "npm:4.4.1"
     qs: "npm:6.14.0"
-  checksum: 10c0/43c6f9aaec6b8ea9ea302d82a0596fe55b79f47ebc38a8b040e72ade68bb9eb6dd3dd0e189dd2782f1309800a8eecc81512a2109d32a2da94cf23a93d1a0eda7
+  checksum: 10c0/ecb9346cb0fd50b787292199b77b0eee4f93a4359ad1e5ddc47e9cd0efc716aee204e3568150cbcd157717db62e3cada134e769eca0c4f1f093f53fed0a92f95
   languageName: node
   linkType: hard
 
@@ -1746,82 +1746,82 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@midwayjs/mock@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/mock@npm:3.20.22"
+"@midwayjs/mock@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/mock@npm:3.20.24"
   dependencies:
-    "@midwayjs/async-hooks-context-manager": "npm:^3.20.22"
+    "@midwayjs/async-hooks-context-manager": "npm:^3.20.24"
     "@types/superagent": "npm:4.1.14"
     "@types/supertest": "npm:2.0.16"
     js-yaml: "npm:4.1.0"
     raw-body: "npm:2.5.2"
     supertest: "npm:6.3.3"
-  checksum: 10c0/a49c51cd489a114b1ddc869551a498cabe387d0a8cc5875c2c1df0e9685975e3dc30b40eb893a237be7991cc7a41b5d2e9ce70e2021db759c6483f49e7605916
+  checksum: 10c0/2ae2bdbd599d7d6050ff84500aa41f85589d53b174bc7aa44d9833164e1341a78bb8c92cacb71bfaa88d308a4e2ee893d17e8cff12d0ed9e8dce7ad57e941795
   languageName: node
   linkType: hard
 
-"@midwayjs/mongoose@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/mongoose@npm:3.20.22"
-  checksum: 10c0/600112dfaec93d592d044fa2fe4409c602d3abea083cb1764ac5fea8165b46f69c42bbc60891aba78729f1a9b1c9c3fe8211ce468554983d6b2986097e0622aa
+"@midwayjs/mongoose@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/mongoose@npm:3.20.24"
+  checksum: 10c0/3251534fb9475896eab78fbb41a3fc5f1015343e3fe9085ec557ca274bd057cedbe7896f746db78ef1508949a132386681ec0f3cbc0bbee72e9a97c67e121581
   languageName: node
   linkType: hard
 
-"@midwayjs/redis@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/redis@npm:3.20.22"
+"@midwayjs/redis@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/redis@npm:3.20.24"
   dependencies:
     ioredis: "npm:5.4.2"
-  checksum: 10c0/d6a5946315726e74d16acb93be7fe5110541ba097e3ee3b56477da9fab80512b5bced5fa337217cc06860ed05fc74d1696da3a5ec8864b0e552747eccfdfbac1
+  checksum: 10c0/9f32a7d59c68d6e521d8d36ca583c10fa6683f2ee391dfdeb7cc21ba43faf9a753e89cadfabd2b1cbed706fabd910fae453c4b3d130819e88738a4f745282d0d
   languageName: node
   linkType: hard
 
-"@midwayjs/sequelize@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/sequelize@npm:3.20.22"
-  checksum: 10c0/dd42c78bdd94a31657274eceee3b88057166823bc3b0bf99457adacb2d280246c2809c70ff116e7a5a998222a5719c98d8f72a8df86a8604370a1d29b83e98a6
+"@midwayjs/sequelize@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/sequelize@npm:3.20.24"
+  checksum: 10c0/ee175b293806df5af8ef438d263df1ac4cbb23811f52a25f2cb5b6cb84638dd09bcb768d98842e52bd6e396eb50e451f608f24f3636203aac05f905332338443
   languageName: node
   linkType: hard
 
-"@midwayjs/session@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/session@npm:3.20.22"
+"@midwayjs/session@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/session@npm:3.20.24"
   dependencies:
     "@midwayjs/cookies": "npm:^1.3.0"
-  checksum: 10c0/43ce0146f864760cb38a9475532e9c8b2219f7574e7d4275cfe7ca3133905b30cc4d18d753100fecfeb46df7c66e425d3eedd8902a0148c33755147028c901df
+  checksum: 10c0/c765f354c12b310d7a9b500363294d8bff8f41099802e1ad4c6bd54f0295d3025837ee6026bcc9b66368e5edbaebc42394e6243828751ad53e254103bd8b3f45
   languageName: node
   linkType: hard
 
-"@midwayjs/typegoose@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/typegoose@npm:3.20.22"
+"@midwayjs/typegoose@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/typegoose@npm:3.20.24"
   dependencies:
-    "@midwayjs/mongoose": "npm:^3.20.22"
-  checksum: 10c0/50f6aa18788afa5128808f8b7d9c832eca0c7634be80619b0fd29e5c793ccd8dd0fe95a07664a6b4fbad702e02d2443516920ac67e75a2b75f21bf9ca440556a
+    "@midwayjs/mongoose": "npm:^3.20.24"
+  checksum: 10c0/6492a76ac7f781fb42a8dc4c4e3144a583046c1c267af3a0f40b966c5eedc3bef268f271567e7d95d2897215e355730c7b6d1a2a01a1375590251e21f0a7475c
   languageName: node
   linkType: hard
 
-"@midwayjs/upload@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/upload@npm:3.20.22"
+"@midwayjs/upload@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/upload@npm:3.20.24"
   dependencies:
     file-type: "npm:16.5.4"
     raw-body: "npm:2.5.2"
-  checksum: 10c0/ab789e8c451574a8a6f5b8d73a6d8b7fe8dc3b870cc1d8cdf8276eaf2e1e3a9e2dc2d8d2ae6205abe8f214f0e44de7612f821bc37d8399135937c7be9b3ed68c
+  checksum: 10c0/f33b879e21e56aec924472097aa8c083d2ea5a630d16cb51711dc20bdf1216a95e4b06bc783db92d80ce0c08fad1883d2625998db51ac52e653f888ce39aa205
   languageName: node
   linkType: hard
 
-"@midwayjs/validate@npm:^3.20.22":
-  version: 3.20.22
-  resolution: "@midwayjs/validate@npm:3.20.22"
+"@midwayjs/validate@npm:^3.20.24":
+  version: 3.20.24
+  resolution: "@midwayjs/validate@npm:3.20.24"
   dependencies:
-    "@midwayjs/i18n": "npm:^3.20.22"
+    "@midwayjs/i18n": "npm:^3.20.24"
     joi: "npm:17.13.3"
-  checksum: 10c0/86a42e3847a880b5c9fd8c3be15a52395c435964baeefdadd7f3d3490e22c5e5f7d04f073be4088e83479a6a0cab5b4df993f5b6e30ca43d65df77a3eca43a08
+  checksum: 10c0/d4b7bd81cc8daca224b8253ed37980ce218ebb8b49c8739890ee33ba3c6364fe13e521aab964a903a32005d5ea34200761fde061b35b119b9e9763ac3456507a
   languageName: node
   linkType: hard
 
-"@midwayjs/ws@npm:^3.20.22":
+"@midwayjs/ws@npm:^3.20.24":
   version: 3.20.24
   resolution: "@midwayjs/ws@npm:3.20.24"
   dependencies:
@@ -3668,23 +3668,23 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.1022.0"
     "@aws-sdk/s3-request-presigner": "npm:^3.1022.0"
-    "@midwayjs/axios": "npm:^3.20.22"
-    "@midwayjs/bootstrap": "npm:^3.20.22"
-    "@midwayjs/cache-manager": "npm:^3.20.22"
-    "@midwayjs/captcha": "npm:^3.20.22"
-    "@midwayjs/core": "npm:^3.20.22"
-    "@midwayjs/i18n": "npm:^3.20.22"
-    "@midwayjs/info": "npm:^3.20.22"
-    "@midwayjs/koa": "npm:^3.20.22"
+    "@midwayjs/axios": "npm:^3.20.24"
+    "@midwayjs/bootstrap": "npm:^3.20.24"
+    "@midwayjs/cache-manager": "npm:^3.20.24"
+    "@midwayjs/captcha": "npm:^3.20.24"
+    "@midwayjs/core": "npm:^3.20.24"
+    "@midwayjs/i18n": "npm:^3.20.24"
+    "@midwayjs/info": "npm:^3.20.24"
+    "@midwayjs/koa": "npm:^3.20.24"
     "@midwayjs/logger": "npm:^4.0.1"
-    "@midwayjs/mock": "npm:^3.20.22"
-    "@midwayjs/redis": "npm:^3.20.22"
-    "@midwayjs/sequelize": "npm:^3.20.22"
-    "@midwayjs/session": "npm:^3.20.22"
-    "@midwayjs/typegoose": "npm:^3.20.22"
-    "@midwayjs/upload": "npm:^3.20.22"
-    "@midwayjs/validate": "npm:^3.20.22"
-    "@midwayjs/ws": "npm:^3.20.22"
+    "@midwayjs/mock": "npm:^3.20.24"
+    "@midwayjs/redis": "npm:^3.20.24"
+    "@midwayjs/sequelize": "npm:^3.20.24"
+    "@midwayjs/session": "npm:^3.20.24"
+    "@midwayjs/typegoose": "npm:^3.20.24"
+    "@midwayjs/upload": "npm:^3.20.24"
+    "@midwayjs/validate": "npm:^3.20.24"
+    "@midwayjs/ws": "npm:^3.20.24"
     "@typegoose/typegoose": "npm:^11.8.1"
     "@types/archiver": "npm:^7.0.0"
     "@types/jest": "npm:^30.0.0"
@@ -8339,9 +8339,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"koa@npm:2.16.2":
-  version: 2.16.2
-  resolution: "koa@npm:2.16.2"
+"koa@npm:2.16.4":
+  version: 2.16.4
+  resolution: "koa@npm:2.16.4"
   dependencies:
     accepts: "npm:^1.3.5"
     cache-content-type: "npm:^1.0.0"
@@ -8366,7 +8366,7 @@ __metadata:
     statuses: "npm:^1.5.0"
     type-is: "npm:^1.6.16"
     vary: "npm:^1.1.2"
-  checksum: 10c0/42bc74e5283bd9251ad8fe67d65af52c68c23a1000fc66e9015b830da6dae55c88da9bdd2402de849ca30066e8b5b55a5f2820159261044aea460c1f25ef5250
+  checksum: 10c0/bf21ffcf409bf847dca3f60349fc64a3b33e725e0ced3f405192a22fa51b4211cac29748f51df9674df82ca87691b3bdda64bbf80755ba6cdc6b2f35e878b0f5
   languageName: node
   linkType: hard
 

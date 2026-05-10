@@ -5,8 +5,8 @@ import { GameType } from '@/definition/types/gacha.type';
 import { CreateGachaTaskDTO } from '@/dto/gacha.dto';
 import { GachaTaskService } from '@/service/gacha-task.service';
 
-@Controller('/public-api/v1/gacha')
-export class PubV1GachaController {
+@Controller('/private-api/v1/gacha')
+export class PriV1GachaController {
   @Inject()
   ctx: Context;
 

@@ -196,9 +196,9 @@ export class GachaRecordService {
       case GameTypeEnum.GENSHIN_IMPACT:
         return '/gacha_info/api/getGachaLog';
       case GameTypeEnum.HONKAI_STAR_RAIL:
-        return '/common/hkrpg_gacha_record/api/getGachaLog';
+        return '/common/gacha_record/api/getGachaLog';
       case GameTypeEnum.ZENLESS_ZONE_ZERO:
-        return '/common/nap_gacha_record/api/getGachaLog';
+        return '/common/gacha_record/api/getGachaLog';
       default:
         throw BUSINESS_ERROR_CONSTANT.GACHA_GAME_TYPE_NOT_SUPPORTED;
     }

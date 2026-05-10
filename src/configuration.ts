@@ -162,9 +162,7 @@ export class MainConfiguration {
           return false;
         }
 
-        const sessionData = await redisService.get(
-          `arona-blog-api.sess:${sessionId}`
-        );
+        const sessionData = await redisService.get(sessionId);
 
         if (!sessionData) {
           this.wsLogger.warn(
