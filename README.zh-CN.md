@@ -11,10 +11,10 @@ Aronaの小屋 网站的后端 API 服务。功能还在逐步开发中……
 | 框架 | Midway.js 3 |
 | 语言 | TypeScript 5.9.3 |
 | 服务器 | Koa 2 |
-| 通信协议 | HTTP |
-| 缓存 | Redis 8.2.3 |
-| 数据库 | MongoDB 7.0.28 |
-| 文件存储 | Minio 2025.4.22 |
+| 通信协议 | HTTP / WebSocket |
+| 缓存 | Redis (koa-redis) |
+| 数据库 | MongoDB 8 (mongoose) |
+| 文件存储 | Minio / 腾讯云 COS |
 | 打包工具 | Gulp |
 
 ## 开发命令
@@ -57,12 +57,14 @@ filter/                   — 异常捕获与统一错误响应
 decorator/                — 自定义装饰器（如 @Permission）
 helper/                   — 带框架上下文的工具（i18n 翻译、路由元数据、Redis 获取、Result 响应）
 utils/                    — 纯函数工具（加密、邮件、通用方法）
+websocket/                — WebSocket 控制器，用于实时通信
 definition/               — 常量、枚举、类型定义
   constants/              — 运行时常量（业务错误常量）
   enums/                  — 枚举定义
   types/                  — TypeScript 类型定义
 locale/                   — 国际化词条（zh/、en/ 目录，按模块分文件）
 template/                 — 邮件等模板文件（中/英文目录）
+typings/                  — 全局类型声明
 interface.ts              — 全局接口定义（IUserSession、ICosConfig、IMinioConfig 等）
 class/                    — 自定义类（BusinessError、ValidationError）
 ```
