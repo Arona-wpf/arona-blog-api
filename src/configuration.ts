@@ -1,4 +1,5 @@
 import * as axios from '@midwayjs/axios';
+import * as bullmq from '@midwayjs/bullmq';
 import * as cacheManager from '@midwayjs/cache-manager';
 import * as captcha from '@midwayjs/captcha';
 import {
@@ -47,6 +48,7 @@ import { parseCookie } from '@/utils/common';
     cacheManager,
     captcha,
     redis,
+    bullmq,
     typegoose,
     upload,
     validate,

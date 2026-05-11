@@ -50,6 +50,17 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
       },
     },
 
+    // 任务队列
+    bullmq: {
+      defaultConnection: {
+        host: BasicConfig.redis.host,
+        port: BasicConfig.redis.port,
+        password: BasicConfig.redis.password,
+        db: BasicConfig.redis['task-db'],
+      },
+      defaultPrefix: 'arona-blog-bullmq-',
+    },
+
     // 缓存管理器
     cacheManager: {
       clients: {
