@@ -3,8 +3,20 @@ import { index, modelOptions, prop } from '@typegoose/typegoose';
 import { randomId } from '@/utils/common';
 import { GameType } from '@/definition/types/gacha.type';
 
-@index({ game_type: 1, server_region: 1, uid: 1, gacha_id: 1 }, { unique: true })
-@index({ game_type: 1, server_region: 1, uid: 1, gacha_type: 1, gacha_time: -1 })
+@index(
+  { game_type: 1, server_region: 1, uid: 1, gacha_id: 1 },
+  { unique: true, background: true }
+)
+@index(
+  {
+    game_type: 1,
+    server_region: 1,
+    uid: 1,
+    gacha_type: 1,
+    gacha_time: -1,
+  },
+  { background: true }
+)
 @modelOptions({
   schemaOptions: { collection: 'gacha_record' },
 })
@@ -12,6 +24,9 @@ import { GameType } from '@/definition/types/gacha.type';
 export class GachaRecordEntity {
   @prop({ type: String, default: randomId })
   _id?: string;
+
+  @prop({ type: String, required: true })
+  account: string; // 账号
 
   @prop({ type: String, required: true })
   game_type: GameType; // 游戏类型
@@ -23,7 +38,7 @@ export class GachaRecordEntity {
   region_time_zone: number; // 服务器区域时区
 
   @prop({ type: String, required: true })
-  uid: string; // 用户ID
+  uid: string; // 游戏uid
 
   @prop({ type: String, required: true })
   gacha_id: string; // 祈愿ID

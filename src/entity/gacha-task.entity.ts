@@ -1,11 +1,12 @@
 import { index, modelOptions, prop } from '@typegoose/typegoose';
 
 import { GachaTaskStatusEnum } from '@/definition/enums/gacha.enum';
+import { GachaTaskStatusType } from '@/definition/types/gacha.type';
 import { GameType } from '@/definition/types/gacha.type';
 import { randomId } from '@/utils/common';
 
-@index({ game_type: 1, uid: 1, created_at: -1 })
-@index({ status: 1, created_at: -1 })
+@index({ game_type: 1, uid: 1, created_at: -1 }, { background: true })
+@index({ status: 1, created_at: -1 }, { background: true })
 @modelOptions({
   schemaOptions: { collection: 'gacha_task' },
 })
@@ -28,7 +29,7 @@ export class GachaTaskEntity {
     required: true,
     default: GachaTaskStatusEnum.PENDING,
   })
-  status: GachaTaskStatusEnum; // 任务状态
+  status: GachaTaskStatusType; // 任务状态
 
   @prop({ type: String })
   server_region?: string; // 服务器区域（后台填充）

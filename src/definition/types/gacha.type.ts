@@ -1,7 +1,19 @@
-import { GameTypeEnum } from '../enums/gacha.enum';
+import {
+  GachaItemTypeEnum,
+  GachaTaskStatusEnum,
+  GameTypeEnum,
+} from '../enums/gacha.enum';
 
 // 抽卡类型
 export type GameType = (typeof GameTypeEnum)[keyof typeof GameTypeEnum];
+
+// 抽卡物品类型
+export type GachaItemType =
+  (typeof GachaItemTypeEnum)[keyof typeof GachaItemTypeEnum];
+
+// 祈愿任务状态
+export type GachaTaskStatusType =
+  (typeof GachaTaskStatusEnum)[keyof typeof GachaTaskStatusEnum];
 
 // 米哈游祈愿配置
 export interface MihoyoGachaConfig {
@@ -32,7 +44,7 @@ export interface IMihoyoGachaLogFetchData {
 }
 
 export interface IMihoyoGachaLogItem {
-  uid: string; // 用户ID
+  uid: string; // 游戏uid
   gacha_id: string; // 祈愿ID
   gacha_type: string; // 祈愿类型
   item_id: string; // 物品ID

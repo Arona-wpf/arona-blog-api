@@ -69,7 +69,8 @@
     "dev": "cross-env NODE_ENV=dev mwtsc --watch --run @midwayjs/mock/app.js",
     "test": "cross-env NODE_ENV=unittest jest",
     "cov": "jest --coverage",
-    "lint": "eslint . --fix --cache --ignore-pattern .gitignore",
+    "lint": "mwts lint --ignore-pattern .gitignore",
+    "fix": "mwts fix",
     "ci": "npm run cov",
     "build": "gulp"
   },

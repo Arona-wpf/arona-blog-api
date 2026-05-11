@@ -4,6 +4,12 @@ export enum GameTypeEnum {
   ZENLESS_ZONE_ZERO = 'zenless_zone_zero',
 }
 
+export enum GachaItemTypeEnum {
+  CHARACTER = 'character',
+  WEAPON = 'weapon',
+  BANBOO = 'banboo',
+}
+
 export enum GenshinImpactServerRegionEnum {
   CN_GF01 = 'cn_gf01', // 国服
   CN_QD01 = 'cn_qd01', // 渠道服

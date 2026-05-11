@@ -12,6 +12,8 @@ const buildZip = `${projectName}-${projectVersion}.zip`;
 
 gulp.task('clean', () => deleteAsync(['build/**', '!*.zip']));
 
+gulp.task('fix', shell.task(['yarn fix']));
+
 gulp.task('lint', shell.task(['yarn lint']));
 
 gulp.task('tsc', shell.task(['mwtsc --cleanOutDir']));
@@ -46,4 +48,13 @@ gulp.task('zip', async () => {
   return await archive.finalize();
 });
 
-exports.default = gulp.series('clean','lint','tsc','copy','del-dup-build','yarn','zip');
+exports.default = gulp.series(
+  'clean',
+  'fix',
+  'lint',
+  'tsc',
+  'copy',
+  'del-dup-build',
+  'yarn',
+  'zip'
+);
