@@ -47,6 +47,9 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
         [GameTypeEnum.ZENLESS_ZONE_ZERO + '_global']: {
           baseURL: BasicConfig.gacha.zenless_zone_zero.api_domain.global,
         },
+        uigf: {
+          baseURL: BasicConfig.uigf.api_domain,
+        },
       },
     },
 
@@ -152,13 +155,17 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
         },
       },
       clients: {
+        appLogger: {
+          fileLogName: `${pkg.name}-app.log`,
+          errorLogName: `${pkg.name}-app-error.log`,
+        },
         coreLogger: {
           fileLogName: `${pkg.name}-core.log`,
           errorLogName: `${pkg.name}-core-error.log`,
         },
-        appLogger: {
-          fileLogName: `${pkg.name}-app.log`,
-          errorLogName: `${pkg.name}-app-error.log`,
+        queueLogger: {
+          fileLogName: `${pkg.name}-queue.log`,
+          errorLogName: `${pkg.name}-queue-error.log`,
         },
         wsLogger: {
           fileLogName: `${pkg.name}-ws.log`,
