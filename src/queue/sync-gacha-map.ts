@@ -1,10 +1,11 @@
 import { IProcessor, Processor } from '@midwayjs/bullmq';
-import { FORMAT, Inject, Logger } from '@midwayjs/core';
+import { Config, FORMAT, Inject, Logger } from '@midwayjs/core';
 import { ILogger } from '@midwayjs/logger';
 import { AxiosInstance } from 'axios';
 
 import { QueueNameEnum } from '@/definition/enums/queue.enum';
 import { AxiosHelper } from '@/helper/axios.helper';
+import { ISyncGachaMapConfig } from '@/interface';
 import { GachaMapService } from '@/service/gacha-map.service';
 
 @Processor(QueueNameEnum.SYNC_GACHA_MAP, {
@@ -13,6 +14,9 @@ import { GachaMapService } from '@/service/gacha-map.service';
   },
 })
 export class SyncGachaMapProcessor implements IProcessor {
+  @Config('syncGachaMap')
+  syncGachaMapConfig: ISyncGachaMapConfig;
+
   @Inject()
   axiosHelper: AxiosHelper;
 

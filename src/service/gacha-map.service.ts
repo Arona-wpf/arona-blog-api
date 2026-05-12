@@ -2,6 +2,7 @@ import { Inject, Logger, Provide } from '@midwayjs/core';
 import { ILogger } from '@midwayjs/logger';
 
 import { GachaMapDao } from '@/dao/gacha-map.dao';
+import { GameType } from '@/definition/types/gacha.type';
 import { GetGachaMapDTO } from '@/dto/gacha.dto';
 import { GachaMapEntity } from '@/entity/gacha-map.entity';
 
@@ -25,6 +26,15 @@ export class GachaMapService {
       current_page,
       page_size
     );
+  }
+
+  /**
+   * 查询祈愿物品映射数量
+   * @param game_type 游戏类型
+   * @returns 祈愿物品映射数量
+   */
+  async getGachaMapCount(game_type: GameType) {
+    return this.gachaMapDao.count({ game_type: game_type });
   }
 
   /**

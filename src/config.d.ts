@@ -60,6 +60,21 @@ export interface ConfigJson {
     'session-db': number;
     'captcha-db': number;
   };
+  sync_gacha_map: {
+    api_domain: string;
+    api_path: {
+      genshin_impact: {
+        character: string;
+        weapon: string;
+      };
+      honkai_star_rail: {
+        all: string;
+      };
+      zenless_zone_zero: {
+        all: string;
+      };
+    };
+  };
   upload: {
     fileSize: string;
     fileTypeLimit: string[];

@@ -124,3 +124,24 @@ export interface I18nConfig {
   };
   writeCookie: boolean;
 }
+
+/**
+ * 米游社API配置
+ * @param api_domain API域名
+ * @param api_path API路径
+ */
+export interface ISyncGachaMapConfig {
+  api_domain: string;
+  api_path: {
+    genshin_impact: {
+      character: string;
+      weapon: string;
+    };
+    honkai_star_rail: {
+      all: string;
+    };
+    zenless_zone_zero: {
+      all: string;
+    };
+  };
+}
