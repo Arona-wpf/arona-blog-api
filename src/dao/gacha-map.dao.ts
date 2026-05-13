@@ -65,4 +65,21 @@ export class GachaMapDao extends BaseDao<GachaMapEntity> {
       throw error;
     }
   }
+
+  async findManyByCondition(
+    queryCondition: Record<string, any>,
+    select?: string,
+    sort?: Record<string, any>
+  ) {
+    try {
+      return await this.gachaMapEntity
+        .find(queryCondition)
+        .select(select)
+        .sort(sort)
+        .lean();
+    } catch (error) {
+      this.logger.error('[GachaMapDao] findManyByCondition error', error);
+      throw error;
+    }
+  }
 }

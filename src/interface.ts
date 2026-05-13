@@ -126,6 +126,18 @@ export interface I18nConfig {
 }
 
 /**
+ * 米哈游祈愿配置
+ */
+export interface IMihoyoGachaConfig {
+  [key: string]: {
+    api_domain: {
+      cn: string;
+      global: string;
+    };
+  };
+}
+
+/**
  * 米游社API配置
  * @param api_domain API域名
  * @param api_path API路径

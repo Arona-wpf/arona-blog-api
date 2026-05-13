@@ -5,16 +5,18 @@ import { AxiosInstance, AxiosResponse } from 'axios';
 
 import { GachaRecordDao } from '@/dao/gacha-record.dao';
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
+import {
+  GameTypeI18nKeyMap,
+  GenshinImpactGachaTypeI18nKeyMap,
+  HonkaiStarRailGachaTypeI18nKeyMap,
+  ZenlessZoneZeroGachaTypeI18nKeyMap,
+} from '@/definition/constants/gacha.constant';
 import { RedisStorageEnum } from '@/definition/enums/common.enum';
 import {
   GameTypeEnum,
-  GameTypeI18nKeyMap,
   GenshinImpactGachaTypeEnum,
-  GenshinImpactGachaTypeI18nKeyMap,
   HonkaiStarRailGachaTypeEnum,
-  HonkaiStarRailGachaTypeI18nKeyMap,
   ZenlessZoneZeroGachaTypeEnum,
-  ZenlessZoneZeroGachaTypeI18nKeyMap,
 } from '@/definition/enums/gacha.enum';
 import {
   GameType,

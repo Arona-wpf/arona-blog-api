@@ -69,53 +69,66 @@ export enum GachaTaskStatusEnum {
   FAILED = 'failed', // 失败
 }
 
-// 原神祈愿类型国际化 key 映射
-export const GenshinImpactGachaTypeI18nKeyMap: Record<string, string> = {
-  [GenshinImpactGachaTypeEnum.NOVICE_WISH]:
-    'gacha.type.genshin_impact.novice_wish',
-  [GenshinImpactGachaTypeEnum.PERMANENT_WISH]:
-    'gacha.type.genshin_impact.permanent_wish',
-  [GenshinImpactGachaTypeEnum.CHARACTER_EVENT_WISH]:
-    'gacha.type.genshin_impact.character_event_wish',
-  [GenshinImpactGachaTypeEnum.WEAPON_EVENT_WISH]:
-    'gacha.type.genshin_impact.weapon_event_wish',
-  [GenshinImpactGachaTypeEnum.CHARACTER_EVENT_WISH_2]:
-    'gacha.type.genshin_impact.character_event_wish_2',
-  [GenshinImpactGachaTypeEnum.CHRONICLED_WISH]:
-    'gacha.type.genshin_impact.chronicled_wish',
-};
+export enum GenshinImpactGachaItemElementEnum {
+  ANEMO = 'Anemo',
+  GEO = 'Geo',
+  ELECTRO = 'Electro',
+  DENDRO = 'Dendro',
+  HYDRO = 'Hydro',
+  PYRO = 'Pyro',
+  CRYO = 'Cryo',
+}
 
-// 崩坏：星穹铁道跃迁类型国际化 key 映射
-export const HonkaiStarRailGachaTypeI18nKeyMap: Record<string, string> = {
-  [HonkaiStarRailGachaTypeEnum.REGULAR_WARP]:
-    'gacha.type.honkai_star_rail.regular_warp',
-  [HonkaiStarRailGachaTypeEnum.STARTER_WARP]:
-    'gacha.type.honkai_star_rail.starter_warp',
-  [HonkaiStarRailGachaTypeEnum.CHARACTER_EVENT_WARP]:
-    'gacha.type.honkai_star_rail.character_event_warp',
-  [HonkaiStarRailGachaTypeEnum.LIGHT_CONE_EVENT_WARP]:
-    'gacha.type.honkai_star_rail.light_cone_event_warp',
-  [HonkaiStarRailGachaTypeEnum.CHARACTER_COLLABORATION_WARP]:
-    'gacha.type.honkai_star_rail.character_collaboration_warp',
-  [HonkaiStarRailGachaTypeEnum.LIGHT_CONE_COLLABORATION_WARP]:
-    'gacha.type.honkai_star_rail.light_cone_collaboration_warp',
-};
+export enum GenshinImpactGachaItemWeaponTypeEnum {
+  SWORD = 'Sword',
+  CLAYMORE = 'Claymore',
+  POLEARM = 'Polearm',
+  CATALYST = 'Catalyst',
+  BOW = 'Bow',
+}
 
-// 绝区零频段类型国际化 key 映射
-export const ZenlessZoneZeroGachaTypeI18nKeyMap: Record<string, string> = {
-  [ZenlessZoneZeroGachaTypeEnum.STABLE_CHANNEL]:
-    'gacha.type.zenless_zone_zero.stable_channel',
-  [ZenlessZoneZeroGachaTypeEnum.EXCLUSIVE_CHANNEL]:
-    'gacha.type.zenless_zone_zero.exclusive_channel',
-  [ZenlessZoneZeroGachaTypeEnum.W_ENGINE_CHANNEL]:
-    'gacha.type.zenless_zone_zero.w_engine_channel',
-  [ZenlessZoneZeroGachaTypeEnum.BANBOO_CHANNEL]:
-    'gacha.type.zenless_zone_zero.banboo_channel',
-};
+export enum HonkaiStarRailGachaItemPathEnum {
+  DESTRUCTION = 'Destruction',
+  THE_HUNT = 'The Hunt',
+  ERUDITION = 'Erudition',
+  HARMONY = 'Harmony',
+  NIHILITY = 'Nihility',
+  PRESERVATION = 'Preservation',
+  ABUNDANCE = 'Abundance',
+  REMEMBRANCE = 'Remembrance',
+  ELATION = 'Elation',
+  PROPAGATION = 'Propagation',
+  VORACITY = 'Voracity',
+  ORDER = 'Order',
+  TRAILBLAZE = 'Trailblaze',
+  EQUILIBRIUM = 'Equilibrium',
+  FINALITY = 'Finality',
+  ENIGMATA = 'Enigmata',
+}
 
-// 游戏类型国际化 key 映射
-export const GameTypeI18nKeyMap: Record<string, string> = {
-  [GameTypeEnum.GENSHIN_IMPACT]: 'gacha.game_type.genshin_impact',
-  [GameTypeEnum.HONKAI_STAR_RAIL]: 'gacha.game_type.honkai_star_rail',
-  [GameTypeEnum.ZENLESS_ZONE_ZERO]: 'gacha.game_type.zenless_zone_zero',
-};
+export enum HonkaiStarRailGachaItemCombatTypeEnum {
+  PHYSICAL = 'Physical',
+  FIRE = 'Fire',
+  ICE = 'Ice',
+  LIGHTNING = 'Lightning',
+  WIND = 'Wind',
+  QUANTUM = 'Quantum',
+  IMAGINARY = 'Imaginary',
+}
+
+export enum ZenlessZoneZeroGachaItemAttributeEnum {
+  PHYSICAL = 'Physical',
+  FIRE = 'Fire',
+  ICE = 'Ice',
+  ELECTRIC = 'Electric',
+  ETHER = 'Ether',
+}
+
+export enum ZenlessZoneZeroGachaItemSpecialtyEnum {
+  ATTACK = 'Attack',
+  STUN = 'Stun',
+  ANOMALY = 'Anomaly',
+  SUPPORT = 'Support',
+  DEFENSE = 'Defense',
+  RUPTURE = 'Rupture',
+}

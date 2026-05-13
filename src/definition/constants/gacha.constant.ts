@@ -1,0 +1,352 @@
+import {
+  GameTypeEnum,
+  GenshinImpactGachaTypeEnum,
+  HonkaiStarRailGachaTypeEnum,
+  ZenlessZoneZeroGachaTypeEnum,
+} from '../enums/gacha.enum';
+
+// 原神祈愿类型国际化 key 映射
+export const GenshinImpactGachaTypeI18nKeyMap: Record<string, string> = {
+  [GenshinImpactGachaTypeEnum.NOVICE_WISH]:
+    'gacha.type.genshin_impact.novice_wish',
+  [GenshinImpactGachaTypeEnum.PERMANENT_WISH]:
+    'gacha.type.genshin_impact.permanent_wish',
+  [GenshinImpactGachaTypeEnum.CHARACTER_EVENT_WISH]:
+    'gacha.type.genshin_impact.character_event_wish',
+  [GenshinImpactGachaTypeEnum.WEAPON_EVENT_WISH]:
+    'gacha.type.genshin_impact.weapon_event_wish',
+  [GenshinImpactGachaTypeEnum.CHARACTER_EVENT_WISH_2]:
+    'gacha.type.genshin_impact.character_event_wish_2',
+  [GenshinImpactGachaTypeEnum.CHRONICLED_WISH]:
+    'gacha.type.genshin_impact.chronicled_wish',
+};
+
+// 崩坏：星穹铁道跃迁类型国际化 key 映射
+export const HonkaiStarRailGachaTypeI18nKeyMap: Record<string, string> = {
+  [HonkaiStarRailGachaTypeEnum.REGULAR_WARP]:
+    'gacha.type.honkai_star_rail.regular_warp',
+  [HonkaiStarRailGachaTypeEnum.STARTER_WARP]:
+    'gacha.type.honkai_star_rail.starter_warp',
+  [HonkaiStarRailGachaTypeEnum.CHARACTER_EVENT_WARP]:
+    'gacha.type.honkai_star_rail.character_event_warp',
+  [HonkaiStarRailGachaTypeEnum.LIGHT_CONE_EVENT_WARP]:
+    'gacha.type.honkai_star_rail.light_cone_event_warp',
+  [HonkaiStarRailGachaTypeEnum.CHARACTER_COLLABORATION_WARP]:
+    'gacha.type.honkai_star_rail.character_collaboration_warp',
+  [HonkaiStarRailGachaTypeEnum.LIGHT_CONE_COLLABORATION_WARP]:
+    'gacha.type.honkai_star_rail.light_cone_collaboration_warp',
+};
+
+// 绝区零频段类型国际化 key 映射
+export const ZenlessZoneZeroGachaTypeI18nKeyMap: Record<string, string> = {
+  [ZenlessZoneZeroGachaTypeEnum.STABLE_CHANNEL]:
+    'gacha.type.zenless_zone_zero.stable_channel',
+  [ZenlessZoneZeroGachaTypeEnum.EXCLUSIVE_CHANNEL]:
+    'gacha.type.zenless_zone_zero.exclusive_channel',
+  [ZenlessZoneZeroGachaTypeEnum.W_ENGINE_CHANNEL]:
+    'gacha.type.zenless_zone_zero.w_engine_channel',
+  [ZenlessZoneZeroGachaTypeEnum.BANBOO_CHANNEL]:
+    'gacha.type.zenless_zone_zero.banboo_channel',
+};
+
+// 游戏类型国际化 key 映射
+export const GameTypeI18nKeyMap: Record<string, string> = {
+  [GameTypeEnum.GENSHIN_IMPACT]: 'gacha.game_type.genshin_impact',
+  [GameTypeEnum.HONKAI_STAR_RAIL]: 'gacha.game_type.honkai_star_rail',
+  [GameTypeEnum.ZENLESS_ZONE_ZERO]: 'gacha.game_type.zenless_zone_zero',
+};
+
+// 星级名称到数字的映射
+const GENSIN_AND_STAR_RAIL_RANK_TYPE_MAP: Record<string, string> = {
+  五星: '5',
+  四星: '4',
+  三星: '3',
+  二星: '2',
+  一星: '1',
+};
+
+// 原神 元素类型映射
+export const GENSHIN_IMPACT_ELEMENT_TYPE_MAP: Record<string, string> = {
+  风: 'Anemo',
+  岩: 'Geo',
+  雷: 'Electro',
+  草: 'Dendro',
+  水: 'Hydro',
+  火: 'Pyro',
+  冰: 'Cryo',
+};
+
+// 原神 元素类型 i18n key 映射（英文到 i18n key）
+export const GENSHIN_IMPACT_ELEMENT_TYPE_I18N_KEY_MAP: Record<string, string> =
+  {
+    Anemo: 'gacha.element.genshin_impact.anemo',
+    Geo: 'gacha.element.genshin_impact.geo',
+    Electro: 'gacha.element.genshin_impact.electro',
+    Dendro: 'gacha.element.genshin_impact.dendro',
+    Hydro: 'gacha.element.genshin_impact.hydro',
+    Pyro: 'gacha.element.genshin_impact.pyro',
+    Cryo: 'gacha.element.genshin_impact.cryo',
+  };
+
+// 原神 武器类型映射
+export const GENSHIN_IMPACT_WEAPON_TYPE_MAP: Record<string, string> = {
+  单手剑: 'Sword',
+  双手剑: 'Claymore',
+  长柄武器: 'Polearm',
+  法器: 'Catalyst',
+  弓: 'Bow',
+};
+
+// 原神 武器类型 i18n key 映射（英文到 i18n key）
+export const GENSHIN_IMPACT_WEAPON_TYPE_I18N_KEY_MAP: Record<string, string> = {
+  Sword: 'gacha.weapon.genshin_impact.sword',
+  Claymore: 'gacha.weapon.genshin_impact.claymore',
+  Polearm: 'gacha.weapon.genshin_impact.polearm',
+  Catalyst: 'gacha.weapon.genshin_impact.catalyst',
+  Bow: 'gacha.weapon.genshin_impact.bow',
+};
+
+// 崩坏：星穹铁道 命途类型映射
+export const HONKAI_STAR_RAIL_PATH_TYPE_MAP: Record<string, string> = {
+  毁灭: 'Destruction',
+  巡猎: 'The Hunt',
+  智识: 'Erudition',
+  同谐: 'Harmony',
+  虚无: 'Nihility',
+  存护: 'Preservation',
+  丰饶: 'Abundance',
+  记忆: 'Remembrance',
+  欢愉: 'Elation',
+  繁育: 'Propagation',
+  贪饕: 'Voracity',
+  秩序: 'Order',
+  开拓: 'Trailblaze',
+  均衡: 'Equilibrium',
+  终末: 'Finality',
+  神秘: 'Enigmata',
+};
+
+// 崩坏：星穹铁道 属性类型映射
+export const HONKAI_STAR_RAIL_COMBAT_TYPE_MAP: Record<string, string> = {
+  物理: 'Physical',
+  火: 'Fire',
+  冰: 'Ice',
+  雷: 'Lightning',
+  风: 'Wind',
+  量子: 'Quantum',
+  虚数: 'Imaginary',
+};
+
+// 绝区零 稀有度类型映射
+export const ZENLESS_ZONE_ZERO_RANK_TYPE_MAP: Record<string, string> = {
+  S: 'S',
+  A: 'A',
+  B: 'B',
+};
+
+// 绝区零 属性类型映射
+export const ZENLESS_ZONE_ZERO_ATTRIBUTE_MAP: Record<string, string> = {
+  物理: 'Physical',
+  火: 'Fire',
+  冰: 'Ice',
+  电: 'Electric',
+  以太: 'Ether',
+};
+
+// 绝区零 特性类型映射
+export const ZENLESS_ZONE_ZERO_SPECIALTY_MAP: Record<string, string> = {
+  强攻: 'Attack',
+  击破: 'Stun',
+  异常: 'Anomaly',
+  支援: 'Support',
+  防护: 'Defense',
+  命破: 'Rupture',
+};
+
+/**
+ * 从 ext 字段中解析 rank_type
+ * @param ext ext JSON字符串
+ * @param categoryId 分类ID（原神：角色为25，武器为5；崩坏：星穹铁道：角色为18，光锥为19）
+ * @returns rank_type 星级数值字符串，解析失败返回空字符串
+ */
+export function parseGenshinAndStarRailRankType(
+  ext: string,
+  categoryId: number
+): string {
+  try {
+    const extData = JSON.parse(ext);
+    const categoryKey = `c_${categoryId}`;
+    const filterText = extData?.[categoryKey]?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const rankItem = filterArray.find((item: string) => item.includes('星级/'));
+
+    if (!rankItem) {
+      return '';
+    }
+
+    const rankName = rankItem.replace('星级/', '');
+    return GENSIN_AND_STAR_RAIL_RANK_TYPE_MAP[rankName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析原神角色的元素类型
+ * @param ext ext JSON字符串
+ * @returns 元素类型（英文），解析失败返回空字符串
+ */
+export function parseGenshinImpactCharacterElement(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_25?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const elementItem = filterArray.find((item: string) =>
+      item.includes('元素/')
+    );
+
+    if (!elementItem) {
+      return '';
+    }
+
+    const elementName = elementItem.replace('元素/', '');
+    return GENSHIN_IMPACT_ELEMENT_TYPE_MAP[elementName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析原神角色的武器类型
+ * @param ext ext JSON字符串
+ * @returns 武器类型（英文），解析失败返回空字符串
+ */
+export function parseGenshinImpactCharacterWeaponType(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_25?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const weaponItem = filterArray.find((item: string) =>
+      item.includes('武器/')
+    );
+
+    if (!weaponItem) {
+      return '';
+    }
+
+    const weaponName = weaponItem.replace('武器/', '');
+    return GENSHIN_IMPACT_WEAPON_TYPE_MAP[weaponName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析原神武器的星级
+ * @param ext ext JSON字符串
+ * @returns 星级数值字符串，解析失败返回空字符串
+ */
+export function parseGenshinImpactWeaponRankType(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_5?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const rankItem = filterArray.find((item: string) =>
+      item.includes('武器星级/')
+    );
+
+    if (!rankItem) {
+      return '';
+    }
+
+    const rankName = rankItem.replace('武器星级/', '');
+    return GENSIN_AND_STAR_RAIL_RANK_TYPE_MAP[rankName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析原神武器的武器类型
+ * @param ext ext JSON字符串
+ * @returns 武器类型（英文），解析失败返回空字符串
+ */
+export function parseGenshinImpactWeaponType(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_5?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const weaponItem = filterArray.find((item: string) =>
+      item.includes('武器类型/')
+    );
+
+    if (!weaponItem) {
+      return '';
+    }
+
+    const weaponName = weaponItem.replace('武器类型/', '');
+    return GENSHIN_IMPACT_WEAPON_TYPE_MAP[weaponName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析 rank_type
+ * @param ext ext JSON字符串
+ * @param categoryId 分类ID（代理人为43，邦布为44，音擎为45）
+ * @returns rank_type 稀有度数值字符串，解析失败返回空字符串
+ */
+export function parseZenlessZoneZeroRankType(
+  ext: string,
+  categoryId: number
+): string {
+  try {
+    const extData = JSON.parse(ext);
+    const categoryKey = `c_${categoryId}`;
+    const filterText = extData?.[categoryKey]?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const rankItem = filterArray.find((item: string) =>
+      item.includes('稀有度/')
+    );
+
+    if (!rankItem) {
+      return '';
+    }
+
+    const rankName = rankItem.replace('稀有度/', '');
+    return ZENLESS_ZONE_ZERO_RANK_TYPE_MAP[rankName] || '';
+  } catch {
+    return '';
+  }
+}

@@ -1,5 +1,6 @@
 import { ILogger, Logger } from '@midwayjs/core';
 import { ReturnModelType } from '@typegoose/typegoose';
+import { AnyBulkWriteOperation } from 'mongoose';
 
 /**
  * 基础数据访问对象
@@ -228,6 +229,23 @@ export abstract class BaseDao<T> {
       return await this.model.deleteMany(queryCondition);
     } catch (error) {
       this.logger.error(`[${this.daoName}] deleteMany error`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 批量写入操作
+   * @param operations 批量操作列表
+   * @returns 批量写入结果
+   */
+  async bulkWrite(operations: AnyBulkWriteOperation[]) {
+    try {
+      if (operations.length === 0) {
+        return null;
+      }
+      return await this.model.bulkWrite(operations);
+    } catch (error) {
+      this.logger.error(`[${this.daoName}] bulkWrite error`, error);
       throw error;
     }
   }

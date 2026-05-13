@@ -63,4 +63,65 @@ export class GachaMapService {
   async deleteGachaMap(ids: string[]) {
     return this.gachaMapDao.deleteMany({ _id: { $in: ids } });
   }
+
+  /**
+   * 根据游戏类型和内容ID查找祈愿物品映射
+   * @param game_type 游戏类型
+   * @param content_id 内容ID
+   * @returns 祈愿物品映射
+   */
+  async findByContentId(game_type: GameType, content_id: number) {
+    return this.gachaMapDao.findOne({ game_type, content_id });
+  }
+
+  /**
+   * 根据游戏类型和内容ID列表批量查找祈愿物品映射
+   * @param game_type 游戏类型
+   * @param content_ids 内容ID列表
+   * @returns 祈愿物品映射列表
+   */
+  async findByContentIds(game_type: GameType, content_ids: number[]) {
+    return this.gachaMapDao.findManyByCondition({
+      game_type,
+      content_id: { $in: content_ids },
+    });
+  }
+
+  /**
+   * 根据游戏类型和内容ID更新祈愿物品映射
+   * @param game_type 游戏类型
+   * @param content_id 内容ID
+   * @param updateData 更新数据
+   * @returns 更新结果
+   */
+  async updateByContentId(
+    game_type: GameType,
+    content_id: number,
+    updateData: Record<string, any>
+  ) {
+    return this.gachaMapDao.findOneAndUpdate(
+      { game_type, content_id },
+      updateData
+    );
+  }
+
+  /**
+   * 批量根据游戏类型和内容ID更新祈愿物品映射
+   * @param game_type 游戏类型
+   * @param updates 更新数据列表
+   * @returns 更新结果
+   */
+  async batchUpdateByContentIds(
+    game_type: GameType,
+    updates: Array<{ content_id: number; updateData: Record<string, any> }>
+  ) {
+    const bulkOps = updates.map(({ content_id, updateData }) => ({
+      updateOne: {
+        filter: { game_type, content_id },
+        update: { $set: updateData },
+      },
+    }));
+
+    return this.gachaMapDao.bulkWrite(bulkOps);
+  }
 }

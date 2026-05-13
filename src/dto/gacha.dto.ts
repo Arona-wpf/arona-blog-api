@@ -25,7 +25,6 @@ export class CreateGachaTaskDTO {
   gacha_url: string;
 }
 
-
 export class GetGachaMapDTO extends PageDto {
   @Rule(
     createStringRuleType('gacha.dto.game_type', true, 'gacha', {
