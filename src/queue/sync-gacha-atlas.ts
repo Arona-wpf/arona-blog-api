@@ -30,26 +30,26 @@ import {
   IMiyousheGenshinImpactWikiResponse,
   IMiyousheWikiResponse,
 } from '@/definition/types/gacha.type';
-import { GachaMapEntity } from '@/entity/gacha-map.entity';
+import { GachaAtlasEntity } from '@/entity/gacha-atlas.entity';
 import { AxiosHelper } from '@/helper/axios.helper';
-import { ISyncGachaMapConfig } from '@/interface';
-import { GachaMapService } from '@/service/gacha-map.service';
+import { ISyncGachaAtlasConfig } from '@/interface';
+import { GachaAtlasService } from '@/service/gacha-atlas.service';
 
-@Processor(QueueNameEnum.SYNC_GACHA_MAP, {
+@Processor(QueueNameEnum.SYNC_GACHA_ATLAS, {
   repeat: {
     immediately: true,
     pattern: FORMAT.CRONTAB.EVERY_HOUR,
   },
 })
-export class SyncGachaMapProcessor implements IProcessor {
-  @Config('syncGachaMap')
-  syncGachaMapConfig: ISyncGachaMapConfig;
+export class SyncGachaAtlasProcessor implements IProcessor {
+  @Config('syncGachaAtlas')
+  syncGachaAtlasConfig: ISyncGachaAtlasConfig;
 
   @Inject()
   axiosHelper: AxiosHelper;
 
   @Inject()
-  gachaMapService: GachaMapService;
+  gachaAtlasService: GachaAtlasService;
 
   @Inject()
   i18nService: MidwayI18nService;
@@ -79,73 +79,73 @@ export class SyncGachaMapProcessor implements IProcessor {
 
   async execute() {
     this.queueLogger.info(
-      '[SyncGachaMapProcessor] Starting sync gacha map processor'
+      '[SyncGachaAtlasProcessor] Starting sync gacha atlas processor'
     );
 
     const axiosInstance = await this.axiosHelper.getAxiosInstance('miyoushe');
 
-    // 同步原神祈愿物品映射
+    // 同步原神祈愿物品图鉴
     try {
-      await this.syncGenshinImpactGachaMap(axiosInstance);
+      await this.syncGenshinImpactGachaAtlas(axiosInstance);
     } catch (error) {
       this.queueLogger.error(
-        '[SyncGachaMapProcessor] Sync genshin impact gacha map error',
+        '[SyncGachaAtlasProcessor] Sync genshin impact gacha atlas error',
         error
       );
     }
 
-    // 同步崩坏：星穹铁道祈愿物品映射
+    // 同步崩坏：星穹铁道祈愿物品图鉴
     try {
-      await this.syncHonkaiStarRailGachaMap(axiosInstance);
+      await this.syncHonkaiStarRailGachaAtlas(axiosInstance);
     } catch (error) {
       this.queueLogger.error(
-        '[SyncGachaMapProcessor] Sync honkai star rail gacha map error',
+        '[SyncGachaAtlasProcessor] Sync honkai star rail gacha atlas error',
         error
       );
     }
 
-    // 同步绝区零祈愿物品映射
+    // 同步绝区零祈愿物品图鉴
     try {
-      await this.syncZenlessZoneZeroGachaMap(axiosInstance);
+      await this.syncZenlessZoneZeroGachaAtlas(axiosInstance);
     } catch (error) {
       this.queueLogger.error(
-        '[SyncGachaMapProcessor] Sync zenless zone zero gacha map error',
+        '[SyncGachaAtlasProcessor] Sync zenless zone zero gacha atlas error',
         error
       );
     }
 
     this.queueLogger.info(
-      '[SyncGachaMapProcessor] Sync gacha map processor completed'
+      '[SyncGachaAtlasProcessor] Sync gacha atlas processor completed'
     );
   }
 
   /**
-   * 同步原神祈愿物品映射
+   * 同步原神祈愿物品图鉴
    * @param axiosInstance Axios实例
    */
-  async syncGenshinImpactGachaMap(axiosInstance: AxiosInstance) {
+  async syncGenshinImpactGachaAtlas(axiosInstance: AxiosInstance) {
     let skipCharacterSync = false;
     let skipWeaponSync = false;
     const characterPath =
-      this.syncGachaMapConfig.api_path.genshin_impact.character;
-    const weaponPath = this.syncGachaMapConfig.api_path.genshin_impact.weapon;
+      this.syncGachaAtlasConfig.api_path.genshin_impact.character;
+    const weaponPath = this.syncGachaAtlasConfig.api_path.genshin_impact.weapon;
 
     if (!characterPath) {
       this.queueLogger.warn(
-        '[SyncGachaMapProcessor] Character path is not set, skipping character sync'
+        '[SyncGachaAtlasProcessor] Character path is not set, skipping character sync'
       );
       skipCharacterSync = true;
     }
     if (!weaponPath) {
       this.queueLogger.warn(
-        '[SyncGachaMapProcessor] Weapon path is not set, skipping weapon sync'
+        '[SyncGachaAtlasProcessor] Weapon path is not set, skipping weapon sync'
       );
       skipWeaponSync = true;
     }
 
     const currentTime = Date.now().valueOf();
 
-    // 同步角色祈愿物品映射
+    // 同步角色祈愿物品图鉴
     let newCharacterCount = 0;
     let updatedCharacterCount = 0;
     if (!skipCharacterSync) {
@@ -157,7 +157,7 @@ export class SyncGachaMapProcessor implements IProcessor {
 
         if (characterResponse.data.retcode !== 0) {
           this.queueLogger.error(
-            '[SyncGachaMapProcessor] Character API returned error: retcode=%d, message=%s',
+            '[SyncGachaAtlasProcessor] Character API returned error: retcode=%d, message=%s',
             characterResponse.data.retcode,
             characterResponse.data.message
           );
@@ -170,7 +170,7 @@ export class SyncGachaMapProcessor implements IProcessor {
 
         if (!characterCategory || !characterCategory.list) {
           this.queueLogger.error(
-            '[SyncGachaMapProcessor] Character category not found in response'
+            '[SyncGachaAtlasProcessor] Character category not found in response'
           );
           return;
         }
@@ -185,10 +185,11 @@ export class SyncGachaMapProcessor implements IProcessor {
         );
 
         // 获取现有数据库中的角色数据
-        const existingCharacters = await this.gachaMapService.findByContentIds(
-          GameTypeEnum.GENSHIN_IMPACT,
-          validCharacters.map(item => item.content_id)
-        );
+        const existingCharacters =
+          await this.gachaAtlasService.findByContentIds(
+            GameTypeEnum.GENSHIN_IMPACT,
+            validCharacters.map(item => item.content_id)
+          );
 
         const existingMap = new Map(
           existingCharacters.map(item => [item.content_id, item])
@@ -217,45 +218,51 @@ export class SyncGachaMapProcessor implements IProcessor {
         });
 
         if (newCharacters.length > 0) {
-          // 创建新增角色的映射数据
-          const gachaMapEntities: GachaMapEntity[] = newCharacters.map(item => {
-            const rankType = parseGenshinAndStarRailRankType(item.ext, 25);
-            const characterElement = parseGenshinImpactCharacterElement(
-              item.ext
-            );
-            const weaponType = parseGenshinImpactCharacterWeaponType(item.ext);
-            this.queueLogger.info(
-              '[SyncGachaMapProcessor] Creating new character: %s, rank_type: %s, element: %s, weapon: %s',
-              item.title,
-              rankType,
-              this.getEnZhText(
-                characterElement,
-                GENSHIN_IMPACT_ELEMENT_TYPE_I18N_KEY_MAP
-              ),
-              this.getEnZhText(
-                weaponType,
-                GENSHIN_IMPACT_WEAPON_TYPE_I18N_KEY_MAP
-              )
-            );
-            const gachaMapEntity = new GachaMapEntity();
-            Object.assign(gachaMapEntity, {
-              game_type: GameTypeEnum.GENSHIN_IMPACT,
-              content_id: item.content_id,
-              item_id: '', // 暂时为空，后续会通过别的地方同步
-              item_name: item.title,
-              item_type: GachaItemTypeEnum.CHARACTER,
-              rank_type: rankType,
-              character_element: characterElement,
-              weapon_type: weaponType,
-              icon_url: item.icon,
-              created_at: currentTime,
-              updated_at: currentTime,
-            });
-            return gachaMapEntity;
-          });
+          // 创建新增角色的图鉴数据
+          const gachaAtlasEntities: GachaAtlasEntity[] = newCharacters.map(
+            item => {
+              const rankType = parseGenshinAndStarRailRankType(item.ext, 25);
+              const characterElement = parseGenshinImpactCharacterElement(
+                item.ext
+              );
+              const weaponType = parseGenshinImpactCharacterWeaponType(
+                item.ext
+              );
+              this.queueLogger.info(
+                '[SyncGachaAtlasProcessor] Creating new character: %s, rank_type: %s, element: %s, weapon: %s',
+                item.title,
+                rankType,
+                this.getEnZhText(
+                  characterElement,
+                  GENSHIN_IMPACT_ELEMENT_TYPE_I18N_KEY_MAP
+                ),
+                this.getEnZhText(
+                  weaponType,
+                  GENSHIN_IMPACT_WEAPON_TYPE_I18N_KEY_MAP
+                )
+              );
+              const gachaAtlasEntity = new GachaAtlasEntity();
+              Object.assign(gachaAtlasEntity, {
+                game_type: GameTypeEnum.GENSHIN_IMPACT,
+                content_id: item.content_id,
+                item_id: '', // 暂时为空，后续会通过别的地方同步
+                item_name: item.title,
+                item_type: GachaItemTypeEnum.CHARACTER,
+                rank_type: rankType,
+                character_element: characterElement,
+                weapon_type: weaponType,
+                icon_url: item.icon,
+                created_at: currentTime,
+                updated_at: currentTime,
+              });
+              return gachaAtlasEntity;
+            }
+          );
 
-          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
-          newCharacterCount = gachaMapEntities.length;
+          await this.gachaAtlasService.batchCreateGachaAtlas(
+            gachaAtlasEntities
+          );
+          newCharacterCount = gachaAtlasEntities.length;
         }
 
         if (charactersToUpdate.length > 0) {
@@ -271,7 +278,7 @@ export class SyncGachaMapProcessor implements IProcessor {
             },
           }));
 
-          await this.gachaMapService.batchUpdateByContentIds(
+          await this.gachaAtlasService.batchUpdateByContentIds(
             GameTypeEnum.GENSHIN_IMPACT,
             updates
           );
@@ -279,13 +286,13 @@ export class SyncGachaMapProcessor implements IProcessor {
         }
       } catch (error) {
         this.queueLogger.error(
-          '[SyncGachaMapProcessor] Error syncing characters',
+          '[SyncGachaAtlasProcessor] Error syncing characters',
           error
         );
       }
     }
 
-    // 同步武器祈愿物品映射
+    // 同步武器祈愿物品图鉴
     let newWeaponCount = 0;
     let updatedWeaponCount = 0;
     if (!skipWeaponSync) {
@@ -297,7 +304,7 @@ export class SyncGachaMapProcessor implements IProcessor {
 
         if (weaponResponse.data.retcode !== 0) {
           this.queueLogger.error(
-            '[SyncGachaMapProcessor] Weapon API returned error: retcode=%d, message=%s',
+            '[SyncGachaAtlasProcessor] Weapon API returned error: retcode=%d, message=%s',
             weaponResponse.data.retcode,
             weaponResponse.data.message
           );
@@ -310,13 +317,13 @@ export class SyncGachaMapProcessor implements IProcessor {
 
         if (!weaponCategory || !weaponCategory.list) {
           this.queueLogger.error(
-            '[SyncGachaMapProcessor] Weapon category not found in response'
+            '[SyncGachaAtlasProcessor] Weapon category not found in response'
           );
           return;
         }
 
         // 获取现有数据库中的武器数据
-        const existingWeapons = await this.gachaMapService.findByContentIds(
+        const existingWeapons = await this.gachaAtlasService.findByContentIds(
           GameTypeEnum.GENSHIN_IMPACT,
           weaponCategory.list.map(item => item.content_id)
         );
@@ -344,37 +351,41 @@ export class SyncGachaMapProcessor implements IProcessor {
         });
 
         if (newWeapons.length > 0) {
-          // 创建新增武器的映射数据
-          const gachaMapEntities: GachaMapEntity[] = newWeapons.map(item => {
-            const rankType = parseGenshinImpactWeaponRankType(item.ext);
-            const weaponType = parseGenshinImpactWeaponType(item.ext);
-            this.queueLogger.info(
-              '[SyncGachaMapProcessor] Creating new weapon: %s, rank_type: %s, weapon_type: %s',
-              item.title,
-              rankType,
-              this.getEnZhText(
-                weaponType,
-                GENSHIN_IMPACT_WEAPON_TYPE_I18N_KEY_MAP
-              )
-            );
-            const gachaMapEntity = new GachaMapEntity();
-            Object.assign(gachaMapEntity, {
-              game_type: GameTypeEnum.GENSHIN_IMPACT,
-              content_id: item.content_id,
-              item_id: '', // 暂时为空，后续会通过别的地方同步
-              item_name: item.title,
-              item_type: GachaItemTypeEnum.WEAPON,
-              rank_type: rankType,
-              weapon_type: weaponType,
-              icon_url: item.icon,
-              created_at: currentTime,
-              updated_at: currentTime,
-            });
-            return gachaMapEntity;
-          });
+          // 创建新增武器的图鉴数据
+          const gachaAtlasEntities: GachaAtlasEntity[] = newWeapons.map(
+            item => {
+              const rankType = parseGenshinImpactWeaponRankType(item.ext);
+              const weaponType = parseGenshinImpactWeaponType(item.ext);
+              this.queueLogger.info(
+                '[SyncGachaAtlasProcessor] Creating new weapon: %s, rank_type: %s, weapon_type: %s',
+                item.title,
+                rankType,
+                this.getEnZhText(
+                  weaponType,
+                  GENSHIN_IMPACT_WEAPON_TYPE_I18N_KEY_MAP
+                )
+              );
+              const gachaAtlasEntity = new GachaAtlasEntity();
+              Object.assign(gachaAtlasEntity, {
+                game_type: GameTypeEnum.GENSHIN_IMPACT,
+                content_id: item.content_id,
+                item_id: '', // 暂时为空，后续会通过别的地方同步
+                item_name: item.title,
+                item_type: GachaItemTypeEnum.WEAPON,
+                rank_type: rankType,
+                weapon_type: weaponType,
+                icon_url: item.icon,
+                created_at: currentTime,
+                updated_at: currentTime,
+              });
+              return gachaAtlasEntity;
+            }
+          );
 
-          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
-          newWeaponCount = gachaMapEntities.length;
+          await this.gachaAtlasService.batchCreateGachaAtlas(
+            gachaAtlasEntities
+          );
+          newWeaponCount = gachaAtlasEntities.length;
         }
 
         if (weaponsToUpdate.length > 0) {
@@ -389,7 +400,7 @@ export class SyncGachaMapProcessor implements IProcessor {
             },
           }));
 
-          await this.gachaMapService.batchUpdateByContentIds(
+          await this.gachaAtlasService.batchUpdateByContentIds(
             GameTypeEnum.GENSHIN_IMPACT,
             updates
           );
@@ -397,14 +408,14 @@ export class SyncGachaMapProcessor implements IProcessor {
         }
       } catch (error) {
         this.queueLogger.error(
-          '[SyncGachaMapProcessor] Error syncing weapons',
+          '[SyncGachaAtlasProcessor] Error syncing weapons',
           error
         );
       }
     }
 
     this.queueLogger.info(
-      '[SyncGachaMapProcessor] Genshin impact gacha map sync completed: %d new characters, %d updated characters, %d new weapons, %d updated weapons',
+      '[SyncGachaAtlasProcessor] Genshin impact gacha atlas sync completed: %d new characters, %d updated characters, %d new weapons, %d updated weapons',
       newCharacterCount,
       updatedCharacterCount,
       newWeaponCount,
@@ -413,19 +424,19 @@ export class SyncGachaMapProcessor implements IProcessor {
   }
 
   /**
-   * 同步崩坏：星穹铁道祈愿物品映射
+   * 同步崩坏：星穹铁道祈愿物品图鉴
    * @param axiosInstance Axios实例
    */
-  async syncHonkaiStarRailGachaMap(axiosInstance: AxiosInstance) {
+  async syncHonkaiStarRailGachaAtlas(axiosInstance: AxiosInstance) {
     this.queueLogger.info(
-      '[SyncGachaMapProcessor] Syncing honkai star rail gacha map'
+      '[SyncGachaAtlasProcessor] Syncing honkai star rail gacha atlas'
     );
 
-    const allPath = this.syncGachaMapConfig.api_path.honkai_star_rail.all;
+    const allPath = this.syncGachaAtlasConfig.api_path.honkai_star_rail.all;
 
     if (!allPath) {
       this.queueLogger.warn(
-        '[SyncGachaMapProcessor] Honkai star rail path is not set, skipping sync'
+        '[SyncGachaAtlasProcessor] Honkai star rail path is not set, skipping sync'
       );
       return;
     }
@@ -437,7 +448,7 @@ export class SyncGachaMapProcessor implements IProcessor {
 
       if (response.data.retcode !== 0) {
         this.queueLogger.error(
-          '[SyncGachaMapProcessor] Honkai star rail API returned error: retcode=%d, message=%s',
+          '[SyncGachaAtlasProcessor] Honkai star rail API returned error: retcode=%d, message=%s',
           response.data.retcode,
           response.data.message
         );
@@ -451,7 +462,7 @@ export class SyncGachaMapProcessor implements IProcessor {
 
       if (!gameWikiCategory || !gameWikiCategory.children) {
         this.queueLogger.error(
-          '[SyncGachaMapProcessor] Game wiki category not found in response'
+          '[SyncGachaAtlasProcessor] Game wiki category not found in response'
         );
         return;
       }
@@ -471,10 +482,11 @@ export class SyncGachaMapProcessor implements IProcessor {
             !item.title.includes('前瞻')
         );
 
-        const existingCharacters = await this.gachaMapService.findByContentIds(
-          GameTypeEnum.HONKAI_STAR_RAIL,
-          validCharacters.map(item => item.content_id)
-        );
+        const existingCharacters =
+          await this.gachaAtlasService.findByContentIds(
+            GameTypeEnum.HONKAI_STAR_RAIL,
+            validCharacters.map(item => item.content_id)
+          );
 
         const existingMap = new Map(
           existingCharacters.map(item => [item.content_id, item])
@@ -485,7 +497,7 @@ export class SyncGachaMapProcessor implements IProcessor {
           const rankType = parseGenshinAndStarRailRankType(item.ext, 18);
           if (!rankType) {
             this.queueLogger.warn(
-              '[SyncGachaMapProcessor] Skipping honkai star rail character %s: rank_type not found (may be preview/satellite)',
+              '[SyncGachaAtlasProcessor] Skipping honkai star rail character %s: rank_type not found (may be preview/satellite)',
               item.title
             );
             return false;
@@ -511,39 +523,45 @@ export class SyncGachaMapProcessor implements IProcessor {
         });
 
         if (newCharacters.length > 0) {
-          const gachaMapEntities: GachaMapEntity[] = newCharacters.map(item => {
-            const rankType = parseGenshinAndStarRailRankType(item.ext, 18);
-            const path = parseHonkaiStarRailCharacterPath(item.ext);
-            const combatType = parseHonkaiStarRailCharacterCombatType(item.ext);
-            this.queueLogger.info(
-              '[SyncGachaMapProcessor] Creating new honkai star rail character: %s, rank_type: %s, path: %s, combat_type: %s',
-              item.title,
-              rankType,
-              this.getEnZhText(path, HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP),
-              this.getEnZhText(
-                combatType,
-                HONKAI_STAR_RAIL_COMBAT_TYPE_I18N_KEY_MAP
-              )
-            );
-            const gachaMapEntity = new GachaMapEntity();
-            Object.assign(gachaMapEntity, {
-              game_type: GameTypeEnum.HONKAI_STAR_RAIL,
-              content_id: item.content_id,
-              item_id: '',
-              item_name: item.title,
-              item_type: GachaItemTypeEnum.CHARACTER,
-              rank_type: rankType,
-              path: path,
-              combat_type: combatType,
-              icon_url: item.icon,
-              created_at: currentTime,
-              updated_at: currentTime,
-            });
-            return gachaMapEntity;
-          });
+          const gachaAtlasEntities: GachaAtlasEntity[] = newCharacters.map(
+            item => {
+              const rankType = parseGenshinAndStarRailRankType(item.ext, 18);
+              const path = parseHonkaiStarRailCharacterPath(item.ext);
+              const combatType = parseHonkaiStarRailCharacterCombatType(
+                item.ext
+              );
+              this.queueLogger.info(
+                '[SyncGachaAtlasProcessor] Creating new honkai star rail character: %s, rank_type: %s, path: %s, combat_type: %s',
+                item.title,
+                rankType,
+                this.getEnZhText(path, HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP),
+                this.getEnZhText(
+                  combatType,
+                  HONKAI_STAR_RAIL_COMBAT_TYPE_I18N_KEY_MAP
+                )
+              );
+              const gachaAtlasEntity = new GachaAtlasEntity();
+              Object.assign(gachaAtlasEntity, {
+                game_type: GameTypeEnum.HONKAI_STAR_RAIL,
+                content_id: item.content_id,
+                item_id: '',
+                item_name: item.title,
+                item_type: GachaItemTypeEnum.CHARACTER,
+                rank_type: rankType,
+                path: path,
+                combat_type: combatType,
+                icon_url: item.icon,
+                created_at: currentTime,
+                updated_at: currentTime,
+              });
+              return gachaAtlasEntity;
+            }
+          );
 
-          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
-          newCharacterCount = gachaMapEntities.length;
+          await this.gachaAtlasService.batchCreateGachaAtlas(
+            gachaAtlasEntities
+          );
+          newCharacterCount = gachaAtlasEntities.length;
         }
 
         if (charactersToUpdate.length > 0) {
@@ -558,7 +576,7 @@ export class SyncGachaMapProcessor implements IProcessor {
             },
           }));
 
-          await this.gachaMapService.batchUpdateByContentIds(
+          await this.gachaAtlasService.batchUpdateByContentIds(
             GameTypeEnum.HONKAI_STAR_RAIL,
             updates
           );
@@ -574,10 +592,11 @@ export class SyncGachaMapProcessor implements IProcessor {
       let updatedLightConeCount = 0;
 
       if (lightConeCategory && lightConeCategory.list) {
-        const existingLightCones = await this.gachaMapService.findByContentIds(
-          GameTypeEnum.HONKAI_STAR_RAIL,
-          lightConeCategory.list.map(item => item.content_id)
-        );
+        const existingLightCones =
+          await this.gachaAtlasService.findByContentIds(
+            GameTypeEnum.HONKAI_STAR_RAIL,
+            lightConeCategory.list.map(item => item.content_id)
+          );
 
         const existingMap = new Map(
           existingLightCones.map(item => [item.content_id, item])
@@ -588,7 +607,7 @@ export class SyncGachaMapProcessor implements IProcessor {
           const rankType = parseGenshinAndStarRailRankType(item.ext, 19);
           if (!rankType) {
             this.queueLogger.warn(
-              '[SyncGachaMapProcessor] Skipping honkai star rail light cone %s: rank_type not found (may be preview/satellite)',
+              '[SyncGachaAtlasProcessor] Skipping honkai star rail light cone %s: rank_type not found (may be preview/satellite)',
               item.title
             );
             return false;
@@ -610,33 +629,37 @@ export class SyncGachaMapProcessor implements IProcessor {
         });
 
         if (newLightCones.length > 0) {
-          const gachaMapEntities: GachaMapEntity[] = newLightCones.map(item => {
-            const rankType = parseGenshinAndStarRailRankType(item.ext, 19);
-            const path = parseHonkaiStarRailLightConePath(item.ext);
-            this.queueLogger.info(
-              '[SyncGachaMapProcessor] Creating new honkai star rail light cone: %s, rank_type: %s, path: %s',
-              item.title,
-              rankType,
-              this.getEnZhText(path, HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP)
-            );
-            const gachaMapEntity = new GachaMapEntity();
-            Object.assign(gachaMapEntity, {
-              game_type: GameTypeEnum.HONKAI_STAR_RAIL,
-              content_id: item.content_id,
-              item_id: '',
-              item_name: item.title,
-              item_type: GachaItemTypeEnum.WEAPON,
-              rank_type: rankType,
-              path: path,
-              icon_url: item.icon,
-              created_at: currentTime,
-              updated_at: currentTime,
-            });
-            return gachaMapEntity;
-          });
+          const gachaAtlasEntities: GachaAtlasEntity[] = newLightCones.map(
+            item => {
+              const rankType = parseGenshinAndStarRailRankType(item.ext, 19);
+              const path = parseHonkaiStarRailLightConePath(item.ext);
+              this.queueLogger.info(
+                '[SyncGachaAtlasProcessor] Creating new honkai star rail light cone: %s, rank_type: %s, path: %s',
+                item.title,
+                rankType,
+                this.getEnZhText(path, HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP)
+              );
+              const gachaAtlasEntity = new GachaAtlasEntity();
+              Object.assign(gachaAtlasEntity, {
+                game_type: GameTypeEnum.HONKAI_STAR_RAIL,
+                content_id: item.content_id,
+                item_id: '',
+                item_name: item.title,
+                item_type: GachaItemTypeEnum.WEAPON,
+                rank_type: rankType,
+                path: path,
+                icon_url: item.icon,
+                created_at: currentTime,
+                updated_at: currentTime,
+              });
+              return gachaAtlasEntity;
+            }
+          );
 
-          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
-          newLightConeCount = gachaMapEntities.length;
+          await this.gachaAtlasService.batchCreateGachaAtlas(
+            gachaAtlasEntities
+          );
+          newLightConeCount = gachaAtlasEntities.length;
         }
 
         if (lightConesToUpdate.length > 0) {
@@ -650,7 +673,7 @@ export class SyncGachaMapProcessor implements IProcessor {
             },
           }));
 
-          await this.gachaMapService.batchUpdateByContentIds(
+          await this.gachaAtlasService.batchUpdateByContentIds(
             GameTypeEnum.HONKAI_STAR_RAIL,
             updates
           );
@@ -659,7 +682,7 @@ export class SyncGachaMapProcessor implements IProcessor {
       }
 
       this.queueLogger.info(
-        '[SyncGachaMapProcessor] Honkai star rail gacha map sync completed: %d new characters, %d updated characters, %d new light cones, %d updated light cones',
+        '[SyncGachaAtlasProcessor] Honkai star rail gacha atlas sync completed: %d new characters, %d updated characters, %d new light cones, %d updated light cones',
         newCharacterCount,
         updatedCharacterCount,
         newLightConeCount,
@@ -667,26 +690,26 @@ export class SyncGachaMapProcessor implements IProcessor {
       );
     } catch (error) {
       this.queueLogger.error(
-        '[SyncGachaMapProcessor] Error syncing honkai star rail gacha map',
+        '[SyncGachaAtlasProcessor] Error syncing honkai star rail gacha atlas',
         error
       );
     }
   }
 
   /**
-   * 同步绝区零祈愿物品映射
+   * 同步绝区零祈愿物品图鉴
    * @param axiosInstance Axios实例
    */
-  async syncZenlessZoneZeroGachaMap(axiosInstance: AxiosInstance) {
+  async syncZenlessZoneZeroGachaAtlas(axiosInstance: AxiosInstance) {
     this.queueLogger.info(
-      '[SyncGachaMapProcessor] Syncing zenless zone zero gacha map'
+      '[SyncGachaAtlasProcessor] Syncing zenless zone zero gacha atlas'
     );
 
-    const allPath = this.syncGachaMapConfig.api_path.zenless_zone_zero.all;
+    const allPath = this.syncGachaAtlasConfig.api_path.zenless_zone_zero.all;
 
     if (!allPath) {
       this.queueLogger.warn(
-        '[SyncGachaMapProcessor] Zenless zone zero path is not set, skipping sync'
+        '[SyncGachaAtlasProcessor] Zenless zone zero path is not set, skipping sync'
       );
       return;
     }
@@ -698,7 +721,7 @@ export class SyncGachaMapProcessor implements IProcessor {
 
       if (response.data.retcode !== 0) {
         this.queueLogger.error(
-          '[SyncGachaMapProcessor] Zenless zone zero API returned error: retcode=%d, message=%s',
+          '[SyncGachaAtlasProcessor] Zenless zone zero API returned error: retcode=%d, message=%s',
           response.data.retcode,
           response.data.message
         );
@@ -712,7 +735,7 @@ export class SyncGachaMapProcessor implements IProcessor {
 
       if (!gameWikiCategory || !gameWikiCategory.children) {
         this.queueLogger.error(
-          '[SyncGachaMapProcessor] Game wiki category not found in response'
+          '[SyncGachaAtlasProcessor] Game wiki category not found in response'
         );
         return;
       }
@@ -725,7 +748,7 @@ export class SyncGachaMapProcessor implements IProcessor {
       let updatedAgentCount = 0;
 
       if (agentCategory && agentCategory.list) {
-        const existingAgents = await this.gachaMapService.findByContentIds(
+        const existingAgents = await this.gachaAtlasService.findByContentIds(
           GameTypeEnum.ZENLESS_ZONE_ZERO,
           agentCategory.list.map(item => item.content_id)
         );
@@ -739,7 +762,7 @@ export class SyncGachaMapProcessor implements IProcessor {
           const rankType = parseZenlessZoneZeroRankType(item.ext, 43);
           if (!rankType) {
             this.queueLogger.warn(
-              '[SyncGachaMapProcessor] Skipping zenless zone zero agent %s: rank_type not found (may be preview/satellite)',
+              '[SyncGachaAtlasProcessor] Skipping zenless zone zero agent %s: rank_type not found (may be preview/satellite)',
               item.title
             );
             return false;
@@ -763,12 +786,12 @@ export class SyncGachaMapProcessor implements IProcessor {
         });
 
         if (newAgents.length > 0) {
-          const gachaMapEntities: GachaMapEntity[] = newAgents.map(item => {
+          const gachaAtlasEntities: GachaAtlasEntity[] = newAgents.map(item => {
             const rankType = parseZenlessZoneZeroRankType(item.ext, 43);
             const attribute = parseZenlessZoneZeroAgentAttribute(item.ext);
             const specialty = parseZenlessZoneZeroAgentSpecialty(item.ext);
             this.queueLogger.info(
-              '[SyncGachaMapProcessor] Creating new zenless zone zero agent: %s, rank_type: %s, attribute: %s, specialty: %s',
+              '[SyncGachaAtlasProcessor] Creating new zenless zone zero agent: %s, rank_type: %s, attribute: %s, specialty: %s',
               item.title,
               rankType,
               this.getEnZhText(
@@ -780,8 +803,8 @@ export class SyncGachaMapProcessor implements IProcessor {
                 ZENLESS_ZONE_ZERO_SPECIALTY_I18N_KEY_MAP
               )
             );
-            const gachaMapEntity = new GachaMapEntity();
-            Object.assign(gachaMapEntity, {
+            const gachaAtlasEntity = new GachaAtlasEntity();
+            Object.assign(gachaAtlasEntity, {
               game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
               content_id: item.content_id,
               item_id: '',
@@ -794,11 +817,13 @@ export class SyncGachaMapProcessor implements IProcessor {
               created_at: currentTime,
               updated_at: currentTime,
             });
-            return gachaMapEntity;
+            return gachaAtlasEntity;
           });
 
-          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
-          newAgentCount = gachaMapEntities.length;
+          await this.gachaAtlasService.batchCreateGachaAtlas(
+            gachaAtlasEntities
+          );
+          newAgentCount = gachaAtlasEntities.length;
         }
 
         if (agentsToUpdate.length > 0) {
@@ -813,7 +838,7 @@ export class SyncGachaMapProcessor implements IProcessor {
             },
           }));
 
-          await this.gachaMapService.batchUpdateByContentIds(
+          await this.gachaAtlasService.batchUpdateByContentIds(
             GameTypeEnum.ZENLESS_ZONE_ZERO,
             updates
           );
@@ -829,7 +854,7 @@ export class SyncGachaMapProcessor implements IProcessor {
       let updatedBanbooCount = 0;
 
       if (banbooCategory && banbooCategory.list) {
-        const existingBanboos = await this.gachaMapService.findByContentIds(
+        const existingBanboos = await this.gachaAtlasService.findByContentIds(
           GameTypeEnum.ZENLESS_ZONE_ZERO,
           banbooCategory.list.map(item => item.content_id)
         );
@@ -843,7 +868,7 @@ export class SyncGachaMapProcessor implements IProcessor {
           const rankType = parseZenlessZoneZeroRankType(item.ext, 44);
           if (!rankType) {
             this.queueLogger.warn(
-              '[SyncGachaMapProcessor] Skipping zenless zone zero banboo %s: rank_type not found (may be preview/satellite)',
+              '[SyncGachaAtlasProcessor] Skipping zenless zone zero banboo %s: rank_type not found (may be preview/satellite)',
               item.title
             );
             return false;
@@ -863,30 +888,34 @@ export class SyncGachaMapProcessor implements IProcessor {
         });
 
         if (newBanboos.length > 0) {
-          const gachaMapEntities: GachaMapEntity[] = newBanboos.map(item => {
-            const rankType = parseZenlessZoneZeroRankType(item.ext, 44);
-            this.queueLogger.info(
-              '[SyncGachaMapProcessor] Creating new zenless zone zero banboo: %s, rank_type: %s',
-              item.title,
-              rankType
-            );
-            const gachaMapEntity = new GachaMapEntity();
-            Object.assign(gachaMapEntity, {
-              game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
-              content_id: item.content_id,
-              item_id: '',
-              item_name: item.title,
-              item_type: GachaItemTypeEnum.BANBOO,
-              rank_type: rankType,
-              icon_url: item.icon,
-              created_at: currentTime,
-              updated_at: currentTime,
-            });
-            return gachaMapEntity;
-          });
+          const gachaAtlasEntities: GachaAtlasEntity[] = newBanboos.map(
+            item => {
+              const rankType = parseZenlessZoneZeroRankType(item.ext, 44);
+              this.queueLogger.info(
+                '[SyncGachaAtlasProcessor] Creating new zenless zone zero banboo: %s, rank_type: %s',
+                item.title,
+                rankType
+              );
+              const gachaAtlasEntity = new GachaAtlasEntity();
+              Object.assign(gachaAtlasEntity, {
+                game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
+                content_id: item.content_id,
+                item_id: '',
+                item_name: item.title,
+                item_type: GachaItemTypeEnum.BANBOO,
+                rank_type: rankType,
+                icon_url: item.icon,
+                created_at: currentTime,
+                updated_at: currentTime,
+              });
+              return gachaAtlasEntity;
+            }
+          );
 
-          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
-          newBanbooCount = gachaMapEntities.length;
+          await this.gachaAtlasService.batchCreateGachaAtlas(
+            gachaAtlasEntities
+          );
+          newBanbooCount = gachaAtlasEntities.length;
         }
 
         if (banboosToUpdate.length > 0) {
@@ -899,7 +928,7 @@ export class SyncGachaMapProcessor implements IProcessor {
             },
           }));
 
-          await this.gachaMapService.batchUpdateByContentIds(
+          await this.gachaAtlasService.batchUpdateByContentIds(
             GameTypeEnum.ZENLESS_ZONE_ZERO,
             updates
           );
@@ -915,7 +944,7 @@ export class SyncGachaMapProcessor implements IProcessor {
       let updatedWEngineCount = 0;
 
       if (wEngineCategory && wEngineCategory.list) {
-        const existingWEngines = await this.gachaMapService.findByContentIds(
+        const existingWEngines = await this.gachaAtlasService.findByContentIds(
           GameTypeEnum.ZENLESS_ZONE_ZERO,
           wEngineCategory.list.map(item => item.content_id)
         );
@@ -929,7 +958,7 @@ export class SyncGachaMapProcessor implements IProcessor {
           const rankType = parseZenlessZoneZeroRankType(item.ext, 45);
           if (!rankType) {
             this.queueLogger.warn(
-              '[SyncGachaMapProcessor] Skipping zenless zone zero w-engine %s: rank_type not found (may be preview/satellite)',
+              '[SyncGachaAtlasProcessor] Skipping zenless zone zero w-engine %s: rank_type not found (may be preview/satellite)',
               item.title
             );
             return false;
@@ -951,36 +980,40 @@ export class SyncGachaMapProcessor implements IProcessor {
         });
 
         if (newWEngines.length > 0) {
-          const gachaMapEntities: GachaMapEntity[] = newWEngines.map(item => {
-            const rankType = parseZenlessZoneZeroRankType(item.ext, 45);
-            const specialty = parseZenlessZoneZeroWEngineSpecialty(item.ext);
-            this.queueLogger.info(
-              '[SyncGachaMapProcessor] Creating new zenless zone zero w-engine: %s, rank_type: %s, specialty: %s',
-              item.title,
-              rankType,
-              this.getEnZhText(
-                specialty,
-                ZENLESS_ZONE_ZERO_SPECIALTY_I18N_KEY_MAP
-              )
-            );
-            const gachaMapEntity = new GachaMapEntity();
-            Object.assign(gachaMapEntity, {
-              game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
-              content_id: item.content_id,
-              item_id: '',
-              item_name: item.title,
-              item_type: GachaItemTypeEnum.WEAPON,
-              rank_type: rankType,
-              specialty: specialty,
-              icon_url: item.icon,
-              created_at: currentTime,
-              updated_at: currentTime,
-            });
-            return gachaMapEntity;
-          });
+          const gachaAtlasEntities: GachaAtlasEntity[] = newWEngines.map(
+            item => {
+              const rankType = parseZenlessZoneZeroRankType(item.ext, 45);
+              const specialty = parseZenlessZoneZeroWEngineSpecialty(item.ext);
+              this.queueLogger.info(
+                '[SyncGachaAtlasProcessor] Creating new zenless zone zero w-engine: %s, rank_type: %s, specialty: %s',
+                item.title,
+                rankType,
+                this.getEnZhText(
+                  specialty,
+                  ZENLESS_ZONE_ZERO_SPECIALTY_I18N_KEY_MAP
+                )
+              );
+              const gachaAtlasEntity = new GachaAtlasEntity();
+              Object.assign(gachaAtlasEntity, {
+                game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
+                content_id: item.content_id,
+                item_id: '',
+                item_name: item.title,
+                item_type: GachaItemTypeEnum.WEAPON,
+                rank_type: rankType,
+                specialty: specialty,
+                icon_url: item.icon,
+                created_at: currentTime,
+                updated_at: currentTime,
+              });
+              return gachaAtlasEntity;
+            }
+          );
 
-          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
-          newWEngineCount = gachaMapEntities.length;
+          await this.gachaAtlasService.batchCreateGachaAtlas(
+            gachaAtlasEntities
+          );
+          newWEngineCount = gachaAtlasEntities.length;
         }
 
         if (wEnginesToUpdate.length > 0) {
@@ -994,7 +1027,7 @@ export class SyncGachaMapProcessor implements IProcessor {
             },
           }));
 
-          await this.gachaMapService.batchUpdateByContentIds(
+          await this.gachaAtlasService.batchUpdateByContentIds(
             GameTypeEnum.ZENLESS_ZONE_ZERO,
             updates
           );
@@ -1003,7 +1036,7 @@ export class SyncGachaMapProcessor implements IProcessor {
       }
 
       this.queueLogger.info(
-        '[SyncGachaMapProcessor] Zenless zone zero gacha map sync completed: %d new agents, %d updated agents, %d new banboos, %d updated banboos, %d new w-engines, %d updated w-engines',
+        '[SyncGachaAtlasProcessor] Zenless zone zero gacha atlas sync completed: %d new agents, %d updated agents, %d new banboos, %d updated banboos, %d new w-engines, %d updated w-engines',
         newAgentCount,
         updatedAgentCount,
         newBanbooCount,
@@ -1013,7 +1046,7 @@ export class SyncGachaMapProcessor implements IProcessor {
       );
     } catch (error) {
       this.queueLogger.error(
-        '[SyncGachaMapProcessor] Error syncing zenless zone zero gacha map',
+        '[SyncGachaAtlasProcessor] Error syncing zenless zone zero gacha atlas',
         error
       );
     }

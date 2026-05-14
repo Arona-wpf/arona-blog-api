@@ -49,7 +49,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
         },
         // 米游社API
         miyoushe: {
-          baseURL: BasicConfig.sync_gacha_map.api_domain,
+          baseURL: BasicConfig.sync_gacha_atlas.api_domain,
         },
       },
     },
@@ -224,19 +224,19 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
     },
 
     // 米游社API
-    syncGachaMap: {
-      api_domain: BasicConfig.sync_gacha_map.api_domain,
+    syncGachaAtlas: {
+      api_domain: BasicConfig.sync_gacha_atlas.api_domain,
       api_path: {
         genshin_impact: {
           character:
-            BasicConfig.sync_gacha_map.api_path.genshin_impact.character,
-          weapon: BasicConfig.sync_gacha_map.api_path.genshin_impact.weapon,
+            BasicConfig.sync_gacha_atlas.api_path.genshin_impact.character,
+          weapon: BasicConfig.sync_gacha_atlas.api_path.genshin_impact.weapon,
         },
         honkai_star_rail: {
-          all: BasicConfig.sync_gacha_map.api_path.honkai_star_rail.all,
+          all: BasicConfig.sync_gacha_atlas.api_path.honkai_star_rail.all,
         },
         zenless_zone_zero: {
-          all: BasicConfig.sync_gacha_map.api_path.zenless_zone_zero.all,
+          all: BasicConfig.sync_gacha_atlas.api_path.zenless_zone_zero.all,
         },
       },
     },

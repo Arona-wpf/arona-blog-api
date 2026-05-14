@@ -15,10 +15,10 @@ import { randomId } from '@/utils/common';
 @index({ game_type: 1, content_id: 1 }, { background: true, unique: true })
 @index({ game_type: 1, item_name: 1 }, { background: true })
 @modelOptions({
-  schemaOptions: { collection: 'gacha_map' },
+  schemaOptions: { collection: 'gacha_atlas' },
 })
-// 祈愿物品映射表
-export class GachaMapEntity {
+// 祈愿物品图鉴表
+export class GachaAtlasEntity {
   @prop({ type: String, default: randomId })
   _id?: string;
 

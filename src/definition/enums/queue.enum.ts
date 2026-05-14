@@ -1,3 +1,3 @@
 export enum QueueNameEnum {
-  SYNC_GACHA_MAP = 'sync_gacha_map',
+  SYNC_GACHA_ATLAS = 'sync_gacha_atlas',
 }

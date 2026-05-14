@@ -142,7 +142,7 @@ export interface IMihoyoGachaConfig {
  * @param api_domain API域名
  * @param api_path API路径
  */
-export interface ISyncGachaMapConfig {
+export interface ISyncGachaAtlasConfig {
   api_domain: string;
   api_path: {
     genshin_impact: {
