@@ -1,0 +1,10 @@
+{
+  "log.type.list.success": "Log type list retrieved successfully",
+  "log.file.list.success": "Log file list retrieved successfully",
+  "log.current.success": "Current log file retrieved successfully",
+  "log.content.success": "Log content retrieved successfully",
+  "log.type": "Log type",
+  "log.filename": "Log filename",
+  "log.startLine": "Start line",
+  "log.limit": "Line limit"
+}

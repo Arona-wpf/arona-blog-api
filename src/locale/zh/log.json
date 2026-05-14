@@ -1,0 +1,10 @@
+{
+  "log.type.list.success": "获取日志类型列表成功",
+  "log.file.list.success": "获取日志文件列表成功",
+  "log.current.success": "获取当前日志文件成功",
+  "log.content.success": "获取日志内容成功",
+  "log.type": "日志类型",
+  "log.filename": "日志文件名",
+  "log.startLine": "起始行号",
+  "log.limit": "行数限制"
+}

@@ -11,6 +11,7 @@ export enum PermissionGroupEnum {
   USER = 'user',
   ROLE = 'role',
   PERMISSION = 'permission',
+  LOG = 'log', // 日志管理权限组
 }
 
 // 权限类型枚举
