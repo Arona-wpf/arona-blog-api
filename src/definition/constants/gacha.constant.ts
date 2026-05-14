@@ -126,6 +126,26 @@ export const HONKAI_STAR_RAIL_PATH_TYPE_MAP: Record<string, string> = {
   神秘: 'Enigmata',
 };
 
+// 崩坏：星穹铁道 命途类型 i18n key 映射（英文到 i18n key）
+export const HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP: Record<string, string> = {
+  Destruction: 'gacha.path.honkai_star_rail.destruction',
+  TheHunt: 'gacha.path.honkai_star_rail.the_hunt',
+  Erudition: 'gacha.path.honkai_star_rail.erudition',
+  Harmony: 'gacha.path.honkai_star_rail.harmony',
+  Nihility: 'gacha.path.honkai_star_rail.nihility',
+  Preservation: 'gacha.path.honkai_star_rail.preservation',
+  Abundance: 'gacha.path.honkai_star_rail.abundance',
+  Remembrance: 'gacha.path.honkai_star_rail.remembrance',
+  Elation: 'gacha.path.honkai_star_rail.elation',
+  Propagation: 'gacha.path.honkai_star_rail.propagation',
+  Voracity: 'gacha.path.honkai_star_rail.voracity',
+  Order: 'gacha.path.honkai_star_rail.order',
+  Trailblaze: 'gacha.path.honkai_star_rail.trailblaze',
+  Equilibrium: 'gacha.path.honkai_star_rail.equilibrium',
+  Finality: 'gacha.path.honkai_star_rail.finality',
+  Enigmata: 'gacha.path.honkai_star_rail.enigmata',
+};
+
 // 崩坏：星穹铁道 属性类型映射
 export const HONKAI_STAR_RAIL_COMBAT_TYPE_MAP: Record<string, string> = {
   物理: 'Physical',
@@ -136,6 +156,18 @@ export const HONKAI_STAR_RAIL_COMBAT_TYPE_MAP: Record<string, string> = {
   量子: 'Quantum',
   虚数: 'Imaginary',
 };
+
+// 崩坏：星穹铁道 属性类型 i18n key 映射（英文到 i18n key）
+export const HONKAI_STAR_RAIL_COMBAT_TYPE_I18N_KEY_MAP: Record<string, string> =
+  {
+    Physical: 'gacha.combat.honkai_star_rail.physical',
+    Fire: 'gacha.combat.honkai_star_rail.fire',
+    Ice: 'gacha.combat.honkai_star_rail.ice',
+    Lightning: 'gacha.combat.honkai_star_rail.lightning',
+    Wind: 'gacha.combat.honkai_star_rail.wind',
+    Quantum: 'gacha.combat.honkai_star_rail.quantum',
+    Imaginary: 'gacha.combat.honkai_star_rail.imaginary',
+  };
 
 // 绝区零 稀有度类型映射
 export const ZENLESS_ZONE_ZERO_RANK_TYPE_MAP: Record<string, string> = {
@@ -153,6 +185,16 @@ export const ZENLESS_ZONE_ZERO_ATTRIBUTE_MAP: Record<string, string> = {
   以太: 'Ether',
 };
 
+// 绝区零 属性类型 i18n key 映射（英文到 i18n key）
+export const ZENLESS_ZONE_ZERO_ATTRIBUTE_I18N_KEY_MAP: Record<string, string> =
+  {
+    Physical: 'gacha.attribute.zenless_zone_zero.physical',
+    Fire: 'gacha.attribute.zenless_zone_zero.fire',
+    Ice: 'gacha.attribute.zenless_zone_zero.ice',
+    Electric: 'gacha.attribute.zenless_zone_zero.electric',
+    Ether: 'gacha.attribute.zenless_zone_zero.ether',
+  };
+
 // 绝区零 特性类型映射
 export const ZENLESS_ZONE_ZERO_SPECIALTY_MAP: Record<string, string> = {
   强攻: 'Attack',
@@ -162,6 +204,17 @@ export const ZENLESS_ZONE_ZERO_SPECIALTY_MAP: Record<string, string> = {
   防护: 'Defense',
   命破: 'Rupture',
 };
+
+// 绝区零 特性类型 i18n key 映射（英文到 i18n key）
+export const ZENLESS_ZONE_ZERO_SPECIALTY_I18N_KEY_MAP: Record<string, string> =
+  {
+    Attack: 'gacha.specialty.zenless_zone_zero.attack',
+    Stun: 'gacha.specialty.zenless_zone_zero.stun',
+    Anomaly: 'gacha.specialty.zenless_zone_zero.anomaly',
+    Support: 'gacha.specialty.zenless_zone_zero.support',
+    Defense: 'gacha.specialty.zenless_zone_zero.defense',
+    Rupture: 'gacha.specialty.zenless_zone_zero.rupture',
+  };
 
 /**
  * 从 ext 字段中解析 rank_type
@@ -346,6 +399,182 @@ export function parseZenlessZoneZeroRankType(
 
     const rankName = rankItem.replace('稀有度/', '');
     return ZENLESS_ZONE_ZERO_RANK_TYPE_MAP[rankName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析崩坏：星穹铁道角色的命途类型
+ * @param ext ext JSON字符串
+ * @returns 命途类型（英文），解析失败返回空字符串
+ */
+export function parseHonkaiStarRailCharacterPath(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_18?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const pathItem = filterArray.find((item: string) => item.includes('命途/'));
+
+    if (!pathItem) {
+      return '';
+    }
+
+    const pathName = pathItem.replace('命途/', '');
+    return HONKAI_STAR_RAIL_PATH_TYPE_MAP[pathName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析崩坏：星穹铁道角色的属性类型
+ * @param ext ext JSON字符串
+ * @returns 属性类型（英文），解析失败返回空字符串
+ */
+export function parseHonkaiStarRailCharacterCombatType(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_18?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const combatItem = filterArray.find((item: string) =>
+      item.includes('属性/')
+    );
+
+    if (!combatItem) {
+      return '';
+    }
+
+    const combatName = combatItem.replace('属性/', '');
+    return HONKAI_STAR_RAIL_COMBAT_TYPE_MAP[combatName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析崩坏：星穹铁道光锥的命途类型
+ * @param ext ext JSON字符串
+ * @returns 命途类型（英文），解析失败返回空字符串
+ */
+export function parseHonkaiStarRailLightConePath(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_19?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const pathItem = filterArray.find((item: string) => item.includes('命途/'));
+
+    if (!pathItem) {
+      return '';
+    }
+
+    const pathName = pathItem.replace('命途/', '');
+    return HONKAI_STAR_RAIL_PATH_TYPE_MAP[pathName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析绝区零代理人的属性类型
+ * @param ext ext JSON字符串
+ * @returns 属性类型（英文），解析失败返回空字符串
+ */
+export function parseZenlessZoneZeroAgentAttribute(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_43?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const attributeItem = filterArray.find((item: string) =>
+      item.includes('属性/')
+    );
+
+    if (!attributeItem) {
+      return '';
+    }
+
+    const attributeName = attributeItem.replace('属性/', '');
+    return ZENLESS_ZONE_ZERO_ATTRIBUTE_MAP[attributeName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析绝区零代理人的特性类型
+ * @param ext ext JSON字符串
+ * @returns 特性类型（英文），解析失败返回空字符串
+ */
+export function parseZenlessZoneZeroAgentSpecialty(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_43?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const specialtyItem = filterArray.find((item: string) =>
+      item.includes('特性/')
+    );
+
+    if (!specialtyItem) {
+      return '';
+    }
+
+    const specialtyName = specialtyItem.replace('特性/', '');
+    return ZENLESS_ZONE_ZERO_SPECIALTY_MAP[specialtyName] || '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 从 ext 字段中解析绝区零音擎的特性类型
+ * @param ext ext JSON字符串
+ * @returns 特性类型（英文），解析失败返回空字符串
+ */
+export function parseZenlessZoneZeroWEngineSpecialty(ext: string): string {
+  try {
+    const extData = JSON.parse(ext);
+    const filterText = extData?.c_45?.filter?.text;
+
+    if (!filterText) {
+      return '';
+    }
+
+    const filterArray = JSON.parse(filterText);
+    const specialtyItem = filterArray.find((item: string) =>
+      item.includes('特性/')
+    );
+
+    if (!specialtyItem) {
+      return '';
+    }
+
+    const specialtyName = specialtyItem.replace('特性/', '');
+    return ZENLESS_ZONE_ZERO_SPECIALTY_MAP[specialtyName] || '';
   } catch {
     return '';
   }

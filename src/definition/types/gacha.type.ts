@@ -107,3 +107,34 @@ export interface IMiyousheGenshinImpactWikiItem {
   icon: string;
   summary: string;
 }
+
+/**
+ * 米游社百科分类（带children）
+ */
+export interface IMiyousheWikiCategoryWithChildren {
+  id: number;
+  name: string;
+  children: IMiyousheWikiCategoryWithChildren[];
+  list?: IMiyousheWikiItem[];
+}
+
+/**
+ * 米游社百科物品条目（通用）
+ */
+export interface IMiyousheWikiItem {
+  content_id: number;
+  title: string;
+  ext: string;
+  icon: string;
+}
+
+/**
+ * 米游社百科响应（通用）
+ */
+export interface IMiyousheWikiResponse {
+  retcode: number;
+  message: string;
+  data: {
+    list: IMiyousheWikiCategoryWithChildren[];
+  };
+}

@@ -7,15 +7,29 @@ import { AxiosInstance } from 'axios';
 import {
   GENSHIN_IMPACT_ELEMENT_TYPE_I18N_KEY_MAP,
   GENSHIN_IMPACT_WEAPON_TYPE_I18N_KEY_MAP,
+  HONKAI_STAR_RAIL_COMBAT_TYPE_I18N_KEY_MAP,
+  HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP,
   parseGenshinAndStarRailRankType,
   parseGenshinImpactCharacterElement,
   parseGenshinImpactCharacterWeaponType,
   parseGenshinImpactWeaponRankType,
   parseGenshinImpactWeaponType,
+  parseHonkaiStarRailCharacterCombatType,
+  parseHonkaiStarRailCharacterPath,
+  parseHonkaiStarRailLightConePath,
+  parseZenlessZoneZeroAgentAttribute,
+  parseZenlessZoneZeroAgentSpecialty,
+  parseZenlessZoneZeroRankType,
+  parseZenlessZoneZeroWEngineSpecialty,
+  ZENLESS_ZONE_ZERO_ATTRIBUTE_I18N_KEY_MAP,
+  ZENLESS_ZONE_ZERO_SPECIALTY_I18N_KEY_MAP,
 } from '@/definition/constants/gacha.constant';
 import { GachaItemTypeEnum, GameTypeEnum } from '@/definition/enums/gacha.enum';
 import { QueueNameEnum } from '@/definition/enums/queue.enum';
-import { IMiyousheGenshinImpactWikiResponse } from '@/definition/types/gacha.type';
+import {
+  IMiyousheGenshinImpactWikiResponse,
+  IMiyousheWikiResponse,
+} from '@/definition/types/gacha.type';
 import { GachaMapEntity } from '@/entity/gacha-map.entity';
 import { AxiosHelper } from '@/helper/axios.helper';
 import { ISyncGachaMapConfig } from '@/interface';
@@ -23,7 +37,7 @@ import { GachaMapService } from '@/service/gacha-map.service';
 
 @Processor(QueueNameEnum.SYNC_GACHA_MAP, {
   repeat: {
-    // immediately: true,
+    immediately: true,
     pattern: FORMAT.CRONTAB.EVERY_HOUR,
   },
 })
@@ -163,7 +177,11 @@ export class SyncGachaMapProcessor implements IProcessor {
 
         // 过滤掉预告和奇偶
         const validCharacters = characterCategory.list.filter(
-          item => !item.title.includes('预告') && !item.title.includes('奇偶')
+          item =>
+            !item.title.includes('奇偶') &&
+            !item.title.includes('预告') &&
+            !item.title.includes('前瞻') &&
+            !item.title.includes('卫星')
         );
 
         // 获取现有数据库中的角色数据
@@ -402,7 +420,257 @@ export class SyncGachaMapProcessor implements IProcessor {
     this.queueLogger.info(
       '[SyncGachaMapProcessor] Syncing honkai star rail gacha map'
     );
-    // TODO: 待实现
+
+    const allPath = this.syncGachaMapConfig.api_path.honkai_star_rail.all;
+
+    if (!allPath) {
+      this.queueLogger.warn(
+        '[SyncGachaMapProcessor] Honkai star rail path is not set, skipping sync'
+      );
+      return;
+    }
+
+    const currentTime = Date.now().valueOf();
+
+    try {
+      const response = await axiosInstance.get<IMiyousheWikiResponse>(allPath);
+
+      if (response.data.retcode !== 0) {
+        this.queueLogger.error(
+          '[SyncGachaMapProcessor] Honkai star rail API returned error: retcode=%d, message=%s',
+          response.data.retcode,
+          response.data.message
+        );
+        return;
+      }
+
+      // 找到游戏图鉴分类(id=17)
+      const gameWikiCategory = response.data.data.list.find(
+        item => item.id === 17
+      );
+
+      if (!gameWikiCategory || !gameWikiCategory.children) {
+        this.queueLogger.error(
+          '[SyncGachaMapProcessor] Game wiki category not found in response'
+        );
+        return;
+      }
+
+      // 同步角色(id=18)
+      const characterCategory = gameWikiCategory.children.find(
+        item => item.id === 18
+      );
+      let newCharacterCount = 0;
+      let updatedCharacterCount = 0;
+
+      if (characterCategory && characterCategory.list) {
+        const validCharacters = characterCategory.list.filter(
+          item =>
+            !item.title.includes('预告') &&
+            !item.title.includes('卫星') &&
+            !item.title.includes('前瞻')
+        );
+
+        const existingCharacters = await this.gachaMapService.findByContentIds(
+          GameTypeEnum.HONKAI_STAR_RAIL,
+          validCharacters.map(item => item.content_id)
+        );
+
+        const existingMap = new Map(
+          existingCharacters.map(item => [item.content_id, item])
+        );
+
+        const newCharacters = validCharacters.filter(item => {
+          if (existingMap.has(item.content_id)) return false;
+          const rankType = parseGenshinAndStarRailRankType(item.ext, 18);
+          if (!rankType) {
+            this.queueLogger.warn(
+              '[SyncGachaMapProcessor] Skipping honkai star rail character %s: rank_type not found (may be preview/satellite)',
+              item.title
+            );
+            return false;
+          }
+          return true;
+        });
+
+        const charactersToUpdate = validCharacters.filter(item => {
+          const existing = existingMap.get(item.content_id);
+          if (!existing) return false;
+          const newRankType = parseGenshinAndStarRailRankType(item.ext, 18);
+          if (!newRankType) return false;
+          const newPath = parseHonkaiStarRailCharacterPath(item.ext);
+          const newCombatType = parseHonkaiStarRailCharacterCombatType(
+            item.ext
+          );
+          return (
+            existing.icon_url !== item.icon ||
+            existing.rank_type !== newRankType ||
+            existing.path !== newPath ||
+            existing.combat_type !== newCombatType
+          );
+        });
+
+        if (newCharacters.length > 0) {
+          const gachaMapEntities: GachaMapEntity[] = newCharacters.map(item => {
+            const rankType = parseGenshinAndStarRailRankType(item.ext, 18);
+            const path = parseHonkaiStarRailCharacterPath(item.ext);
+            const combatType = parseHonkaiStarRailCharacterCombatType(item.ext);
+            this.queueLogger.info(
+              '[SyncGachaMapProcessor] Creating new honkai star rail character: %s, rank_type: %s, path: %s, combat_type: %s',
+              item.title,
+              rankType,
+              this.getEnZhText(path, HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP),
+              this.getEnZhText(
+                combatType,
+                HONKAI_STAR_RAIL_COMBAT_TYPE_I18N_KEY_MAP
+              )
+            );
+            const gachaMapEntity = new GachaMapEntity();
+            Object.assign(gachaMapEntity, {
+              game_type: GameTypeEnum.HONKAI_STAR_RAIL,
+              content_id: item.content_id,
+              item_id: '',
+              item_name: item.title,
+              item_type: GachaItemTypeEnum.CHARACTER,
+              rank_type: rankType,
+              path: path,
+              combat_type: combatType,
+              icon_url: item.icon,
+              created_at: currentTime,
+              updated_at: currentTime,
+            });
+            return gachaMapEntity;
+          });
+
+          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
+          newCharacterCount = gachaMapEntities.length;
+        }
+
+        if (charactersToUpdate.length > 0) {
+          const updates = charactersToUpdate.map(item => ({
+            content_id: item.content_id,
+            updateData: {
+              icon_url: item.icon,
+              rank_type: parseGenshinAndStarRailRankType(item.ext, 18),
+              path: parseHonkaiStarRailCharacterPath(item.ext),
+              combat_type: parseHonkaiStarRailCharacterCombatType(item.ext),
+              updated_at: currentTime,
+            },
+          }));
+
+          await this.gachaMapService.batchUpdateByContentIds(
+            GameTypeEnum.HONKAI_STAR_RAIL,
+            updates
+          );
+          updatedCharacterCount = charactersToUpdate.length;
+        }
+      }
+
+      // 同步光锥(id=19)
+      const lightConeCategory = gameWikiCategory.children.find(
+        item => item.id === 19
+      );
+      let newLightConeCount = 0;
+      let updatedLightConeCount = 0;
+
+      if (lightConeCategory && lightConeCategory.list) {
+        const existingLightCones = await this.gachaMapService.findByContentIds(
+          GameTypeEnum.HONKAI_STAR_RAIL,
+          lightConeCategory.list.map(item => item.content_id)
+        );
+
+        const existingMap = new Map(
+          existingLightCones.map(item => [item.content_id, item])
+        );
+
+        const newLightCones = lightConeCategory.list.filter(item => {
+          if (existingMap.has(item.content_id)) return false;
+          const rankType = parseGenshinAndStarRailRankType(item.ext, 19);
+          if (!rankType) {
+            this.queueLogger.warn(
+              '[SyncGachaMapProcessor] Skipping honkai star rail light cone %s: rank_type not found (may be preview/satellite)',
+              item.title
+            );
+            return false;
+          }
+          return true;
+        });
+
+        const lightConesToUpdate = lightConeCategory.list.filter(item => {
+          const existing = existingMap.get(item.content_id);
+          if (!existing) return false;
+          const newRankType = parseGenshinAndStarRailRankType(item.ext, 19);
+          if (!newRankType) return false;
+          const newPath = parseHonkaiStarRailLightConePath(item.ext);
+          return (
+            existing.icon_url !== item.icon ||
+            existing.rank_type !== newRankType ||
+            existing.path !== newPath
+          );
+        });
+
+        if (newLightCones.length > 0) {
+          const gachaMapEntities: GachaMapEntity[] = newLightCones.map(item => {
+            const rankType = parseGenshinAndStarRailRankType(item.ext, 19);
+            const path = parseHonkaiStarRailLightConePath(item.ext);
+            this.queueLogger.info(
+              '[SyncGachaMapProcessor] Creating new honkai star rail light cone: %s, rank_type: %s, path: %s',
+              item.title,
+              rankType,
+              this.getEnZhText(path, HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP)
+            );
+            const gachaMapEntity = new GachaMapEntity();
+            Object.assign(gachaMapEntity, {
+              game_type: GameTypeEnum.HONKAI_STAR_RAIL,
+              content_id: item.content_id,
+              item_id: '',
+              item_name: item.title,
+              item_type: GachaItemTypeEnum.WEAPON,
+              rank_type: rankType,
+              path: path,
+              icon_url: item.icon,
+              created_at: currentTime,
+              updated_at: currentTime,
+            });
+            return gachaMapEntity;
+          });
+
+          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
+          newLightConeCount = gachaMapEntities.length;
+        }
+
+        if (lightConesToUpdate.length > 0) {
+          const updates = lightConesToUpdate.map(item => ({
+            content_id: item.content_id,
+            updateData: {
+              icon_url: item.icon,
+              rank_type: parseGenshinAndStarRailRankType(item.ext, 19),
+              path: parseHonkaiStarRailLightConePath(item.ext),
+              updated_at: currentTime,
+            },
+          }));
+
+          await this.gachaMapService.batchUpdateByContentIds(
+            GameTypeEnum.HONKAI_STAR_RAIL,
+            updates
+          );
+          updatedLightConeCount = lightConesToUpdate.length;
+        }
+      }
+
+      this.queueLogger.info(
+        '[SyncGachaMapProcessor] Honkai star rail gacha map sync completed: %d new characters, %d updated characters, %d new light cones, %d updated light cones',
+        newCharacterCount,
+        updatedCharacterCount,
+        newLightConeCount,
+        updatedLightConeCount
+      );
+    } catch (error) {
+      this.queueLogger.error(
+        '[SyncGachaMapProcessor] Error syncing honkai star rail gacha map',
+        error
+      );
+    }
   }
 
   /**
@@ -413,6 +681,341 @@ export class SyncGachaMapProcessor implements IProcessor {
     this.queueLogger.info(
       '[SyncGachaMapProcessor] Syncing zenless zone zero gacha map'
     );
-    // TODO: 待实现
+
+    const allPath = this.syncGachaMapConfig.api_path.zenless_zone_zero.all;
+
+    if (!allPath) {
+      this.queueLogger.warn(
+        '[SyncGachaMapProcessor] Zenless zone zero path is not set, skipping sync'
+      );
+      return;
+    }
+
+    const currentTime = Date.now().valueOf();
+
+    try {
+      const response = await axiosInstance.get<IMiyousheWikiResponse>(allPath);
+
+      if (response.data.retcode !== 0) {
+        this.queueLogger.error(
+          '[SyncGachaMapProcessor] Zenless zone zero API returned error: retcode=%d, message=%s',
+          response.data.retcode,
+          response.data.message
+        );
+        return;
+      }
+
+      // 找到游戏图鉴分类(id=2)
+      const gameWikiCategory = response.data.data.list.find(
+        item => item.id === 2
+      );
+
+      if (!gameWikiCategory || !gameWikiCategory.children) {
+        this.queueLogger.error(
+          '[SyncGachaMapProcessor] Game wiki category not found in response'
+        );
+        return;
+      }
+
+      // 同步代理人(id=43)
+      const agentCategory = gameWikiCategory.children.find(
+        item => item.id === 43
+      );
+      let newAgentCount = 0;
+      let updatedAgentCount = 0;
+
+      if (agentCategory && agentCategory.list) {
+        const existingAgents = await this.gachaMapService.findByContentIds(
+          GameTypeEnum.ZENLESS_ZONE_ZERO,
+          agentCategory.list.map(item => item.content_id)
+        );
+
+        const existingMap = new Map(
+          existingAgents.map(item => [item.content_id, item])
+        );
+
+        const newAgents = agentCategory.list.filter(item => {
+          if (existingMap.has(item.content_id)) return false;
+          const rankType = parseZenlessZoneZeroRankType(item.ext, 43);
+          if (!rankType) {
+            this.queueLogger.warn(
+              '[SyncGachaMapProcessor] Skipping zenless zone zero agent %s: rank_type not found (may be preview/satellite)',
+              item.title
+            );
+            return false;
+          }
+          return true;
+        });
+
+        const agentsToUpdate = agentCategory.list.filter(item => {
+          const existing = existingMap.get(item.content_id);
+          if (!existing) return false;
+          const newRankType = parseZenlessZoneZeroRankType(item.ext, 43);
+          if (!newRankType) return false;
+          const newAttribute = parseZenlessZoneZeroAgentAttribute(item.ext);
+          const newSpecialty = parseZenlessZoneZeroAgentSpecialty(item.ext);
+          return (
+            existing.icon_url !== item.icon ||
+            existing.rank_type !== newRankType ||
+            existing.attribute !== newAttribute ||
+            existing.specialty !== newSpecialty
+          );
+        });
+
+        if (newAgents.length > 0) {
+          const gachaMapEntities: GachaMapEntity[] = newAgents.map(item => {
+            const rankType = parseZenlessZoneZeroRankType(item.ext, 43);
+            const attribute = parseZenlessZoneZeroAgentAttribute(item.ext);
+            const specialty = parseZenlessZoneZeroAgentSpecialty(item.ext);
+            this.queueLogger.info(
+              '[SyncGachaMapProcessor] Creating new zenless zone zero agent: %s, rank_type: %s, attribute: %s, specialty: %s',
+              item.title,
+              rankType,
+              this.getEnZhText(
+                attribute,
+                ZENLESS_ZONE_ZERO_ATTRIBUTE_I18N_KEY_MAP
+              ),
+              this.getEnZhText(
+                specialty,
+                ZENLESS_ZONE_ZERO_SPECIALTY_I18N_KEY_MAP
+              )
+            );
+            const gachaMapEntity = new GachaMapEntity();
+            Object.assign(gachaMapEntity, {
+              game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
+              content_id: item.content_id,
+              item_id: '',
+              item_name: item.title,
+              item_type: GachaItemTypeEnum.CHARACTER,
+              rank_type: rankType,
+              attribute: attribute,
+              specialty: specialty,
+              icon_url: item.icon,
+              created_at: currentTime,
+              updated_at: currentTime,
+            });
+            return gachaMapEntity;
+          });
+
+          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
+          newAgentCount = gachaMapEntities.length;
+        }
+
+        if (agentsToUpdate.length > 0) {
+          const updates = agentsToUpdate.map(item => ({
+            content_id: item.content_id,
+            updateData: {
+              icon_url: item.icon,
+              rank_type: parseZenlessZoneZeroRankType(item.ext, 43),
+              attribute: parseZenlessZoneZeroAgentAttribute(item.ext),
+              specialty: parseZenlessZoneZeroAgentSpecialty(item.ext),
+              updated_at: currentTime,
+            },
+          }));
+
+          await this.gachaMapService.batchUpdateByContentIds(
+            GameTypeEnum.ZENLESS_ZONE_ZERO,
+            updates
+          );
+          updatedAgentCount = agentsToUpdate.length;
+        }
+      }
+
+      // 同步邦布(id=44)
+      const banbooCategory = gameWikiCategory.children.find(
+        item => item.id === 44
+      );
+      let newBanbooCount = 0;
+      let updatedBanbooCount = 0;
+
+      if (banbooCategory && banbooCategory.list) {
+        const existingBanboos = await this.gachaMapService.findByContentIds(
+          GameTypeEnum.ZENLESS_ZONE_ZERO,
+          banbooCategory.list.map(item => item.content_id)
+        );
+
+        const existingMap = new Map(
+          existingBanboos.map(item => [item.content_id, item])
+        );
+
+        const newBanboos = banbooCategory.list.filter(item => {
+          if (existingMap.has(item.content_id)) return false;
+          const rankType = parseZenlessZoneZeroRankType(item.ext, 44);
+          if (!rankType) {
+            this.queueLogger.warn(
+              '[SyncGachaMapProcessor] Skipping zenless zone zero banboo %s: rank_type not found (may be preview/satellite)',
+              item.title
+            );
+            return false;
+          }
+          return true;
+        });
+
+        const banboosToUpdate = banbooCategory.list.filter(item => {
+          const existing = existingMap.get(item.content_id);
+          if (!existing) return false;
+          const newRankType = parseZenlessZoneZeroRankType(item.ext, 44);
+          if (!newRankType) return false;
+          return (
+            existing.icon_url !== item.icon ||
+            existing.rank_type !== newRankType
+          );
+        });
+
+        if (newBanboos.length > 0) {
+          const gachaMapEntities: GachaMapEntity[] = newBanboos.map(item => {
+            const rankType = parseZenlessZoneZeroRankType(item.ext, 44);
+            this.queueLogger.info(
+              '[SyncGachaMapProcessor] Creating new zenless zone zero banboo: %s, rank_type: %s',
+              item.title,
+              rankType
+            );
+            const gachaMapEntity = new GachaMapEntity();
+            Object.assign(gachaMapEntity, {
+              game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
+              content_id: item.content_id,
+              item_id: '',
+              item_name: item.title,
+              item_type: GachaItemTypeEnum.BANBOO,
+              rank_type: rankType,
+              icon_url: item.icon,
+              created_at: currentTime,
+              updated_at: currentTime,
+            });
+            return gachaMapEntity;
+          });
+
+          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
+          newBanbooCount = gachaMapEntities.length;
+        }
+
+        if (banboosToUpdate.length > 0) {
+          const updates = banboosToUpdate.map(item => ({
+            content_id: item.content_id,
+            updateData: {
+              icon_url: item.icon,
+              rank_type: parseZenlessZoneZeroRankType(item.ext, 44),
+              updated_at: currentTime,
+            },
+          }));
+
+          await this.gachaMapService.batchUpdateByContentIds(
+            GameTypeEnum.ZENLESS_ZONE_ZERO,
+            updates
+          );
+          updatedBanbooCount = banboosToUpdate.length;
+        }
+      }
+
+      // 同步音擎(id=45)
+      const wEngineCategory = gameWikiCategory.children.find(
+        item => item.id === 45
+      );
+      let newWEngineCount = 0;
+      let updatedWEngineCount = 0;
+
+      if (wEngineCategory && wEngineCategory.list) {
+        const existingWEngines = await this.gachaMapService.findByContentIds(
+          GameTypeEnum.ZENLESS_ZONE_ZERO,
+          wEngineCategory.list.map(item => item.content_id)
+        );
+
+        const existingMap = new Map(
+          existingWEngines.map(item => [item.content_id, item])
+        );
+
+        const newWEngines = wEngineCategory.list.filter(item => {
+          if (existingMap.has(item.content_id)) return false;
+          const rankType = parseZenlessZoneZeroRankType(item.ext, 45);
+          if (!rankType) {
+            this.queueLogger.warn(
+              '[SyncGachaMapProcessor] Skipping zenless zone zero w-engine %s: rank_type not found (may be preview/satellite)',
+              item.title
+            );
+            return false;
+          }
+          return true;
+        });
+
+        const wEnginesToUpdate = wEngineCategory.list.filter(item => {
+          const existing = existingMap.get(item.content_id);
+          if (!existing) return false;
+          const newRankType = parseZenlessZoneZeroRankType(item.ext, 45);
+          if (!newRankType) return false;
+          const newSpecialty = parseZenlessZoneZeroWEngineSpecialty(item.ext);
+          return (
+            existing.icon_url !== item.icon ||
+            existing.rank_type !== newRankType ||
+            existing.specialty !== newSpecialty
+          );
+        });
+
+        if (newWEngines.length > 0) {
+          const gachaMapEntities: GachaMapEntity[] = newWEngines.map(item => {
+            const rankType = parseZenlessZoneZeroRankType(item.ext, 45);
+            const specialty = parseZenlessZoneZeroWEngineSpecialty(item.ext);
+            this.queueLogger.info(
+              '[SyncGachaMapProcessor] Creating new zenless zone zero w-engine: %s, rank_type: %s, specialty: %s',
+              item.title,
+              rankType,
+              this.getEnZhText(
+                specialty,
+                ZENLESS_ZONE_ZERO_SPECIALTY_I18N_KEY_MAP
+              )
+            );
+            const gachaMapEntity = new GachaMapEntity();
+            Object.assign(gachaMapEntity, {
+              game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
+              content_id: item.content_id,
+              item_id: '',
+              item_name: item.title,
+              item_type: GachaItemTypeEnum.WEAPON,
+              rank_type: rankType,
+              specialty: specialty,
+              icon_url: item.icon,
+              created_at: currentTime,
+              updated_at: currentTime,
+            });
+            return gachaMapEntity;
+          });
+
+          await this.gachaMapService.batchCreateGachaMap(gachaMapEntities);
+          newWEngineCount = gachaMapEntities.length;
+        }
+
+        if (wEnginesToUpdate.length > 0) {
+          const updates = wEnginesToUpdate.map(item => ({
+            content_id: item.content_id,
+            updateData: {
+              icon_url: item.icon,
+              rank_type: parseZenlessZoneZeroRankType(item.ext, 45),
+              specialty: parseZenlessZoneZeroWEngineSpecialty(item.ext),
+              updated_at: currentTime,
+            },
+          }));
+
+          await this.gachaMapService.batchUpdateByContentIds(
+            GameTypeEnum.ZENLESS_ZONE_ZERO,
+            updates
+          );
+          updatedWEngineCount = wEnginesToUpdate.length;
+        }
+      }
+
+      this.queueLogger.info(
+        '[SyncGachaMapProcessor] Zenless zone zero gacha map sync completed: %d new agents, %d updated agents, %d new banboos, %d updated banboos, %d new w-engines, %d updated w-engines',
+        newAgentCount,
+        updatedAgentCount,
+        newBanbooCount,
+        updatedBanbooCount,
+        newWEngineCount,
+        updatedWEngineCount
+      );
+    } catch (error) {
+      this.queueLogger.error(
+        '[SyncGachaMapProcessor] Error syncing zenless zone zero gacha map',
+        error
+      );
+    }
   }
 }
