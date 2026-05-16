@@ -1,24 +1,17 @@
-import { App, Inject, Logger, Provide, Scope, ScopeEnum } from '@midwayjs/core';
+import { App, Init, Inject, Logger, Provide } from '@midwayjs/core';
+import { IMidwayApplication } from '@midwayjs/core';
 import { ILogger } from '@midwayjs/logger';
+import * as chokidar from 'chokidar';
 import * as fs from 'fs';
 import * as path from 'path';
 
 import { LogTypeEnum } from '@/definition/enums/log.enum';
+import { LogFileInfo } from '@/definition/types/log.type';
 import { SubscribeLogDto } from '@/dto/log.dto';
 import { WsConnectionManager } from '@/manage/ws-connection.manage';
 
 /**
- * 日志文件信息
- */
-export interface LogFileInfo {
-  filename: string; // 文件名
-  size: number; // 文件大小（字节）
-  modifiedTime: string; // 最后修改时间
-  isHistory: boolean; // 是否是历史日志（带日期后缀）
-}
-
-/**
- * 日志订阅者信息
+ * 日志订阅者信息（内部使用）
  */
 interface LogSubscriber {
   account: string; // 用户账号
@@ -32,10 +25,9 @@ interface LogSubscriber {
  * 提供日志文件读取、监听和推送功能
  */
 @Provide()
-@Scope(ScopeEnum.Singleton)
 export class LogService {
   @App()
-  app;
+  app: IMidwayApplication;
 
   @Inject()
   wsConnectionManager: WsConnectionManager;
@@ -53,12 +45,13 @@ export class LogService {
   private subscribers: Map<string, LogSubscriber> = new Map();
 
   // 文件监听器
-  private fileWatchers: Map<string, fs.FSWatcher> = new Map();
+  private fileWatchers: Map<string, chokidar.FSWatcher> = new Map();
 
   /**
    * 初始化服务
    */
-  async init() {
+  @Init()
+  async initLogDir() {
     // 获取日志目录路径：baseDir/logs
     this.logDir = path.join(this.app.getBaseDir(), 'logs');
     this.logger.info(`[LogService] Log directory: ${this.logDir}`);
@@ -112,30 +105,44 @@ export class LogService {
       // 读取目录内容
       const filenames = fs.readdirSync(this.logDir);
 
+      // 日志文件名正则：匹配 prefix.log 或 prefix.log.YYYY-MM-DD
+      const logFileRegex = new RegExp(
+        `^${prefix}\\.log(?:\\.\\d{4}-\\d{2}-\\d{2})?$`
+      );
+
       for (const filename of filenames) {
         // 过滤匹配的日志文件
-        if (filename.startsWith(prefix) && filename.endsWith('.log')) {
+        if (logFileRegex.test(filename)) {
           const filePath = path.join(this.logDir, filename);
           const stats = fs.statSync(filePath);
 
-          // 判断是否是历史日志（带日期后缀）
-          const isHistory = filename.match(/\.\d{4}-\d{2}-\d{2}$/) !== null;
+          // 判断是否是历史日志（带日期后缀且日期在今天之前）
+          const dateMatch = filename.match(/\.log\.(\d{4}-\d{2}-\d{2})$/);
+          const fileDate = dateMatch ? dateMatch[1] : null;
+
+          // 比较日期：只有日期在今天之前的才算历史日志
+          const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+          const isHistory = fileDate !== null && fileDate < today;
 
           files.push({
             filename,
             size: stats.size,
             modifiedTime: stats.mtime.toISOString(),
             isHistory,
+            date: fileDate,
           });
         }
       }
 
-      // 按修改时间倒序排序（最新的排在前面）
+      // 按日期倒序排序（最新的排在前面）
       files.sort((a, b) => {
         // 当前日志（无日期后缀）排在最前面
         if (!a.isHistory && b.isHistory) return -1;
         if (a.isHistory && !b.isHistory) return 1;
-        // 历史日志按日期倒序（文件名中包含日期）
+        // 历史日志按日期倒序
+        if (a.date && b.date) {
+          return b.date.localeCompare(a.date);
+        }
         return b.filename.localeCompare(a.filename);
       });
     } catch (error) {
@@ -269,9 +276,9 @@ export class LogService {
    * 订阅日志实时推送
    * @param account 用户账号
    * @param dto订阅参数
-   * @returns 是否订阅成功
+   * @returns 实际订阅的文件名，失败返回 null
    */
-  subscribe(account: string, dto: SubscribeLogDto): boolean {
+  subscribe(account: string, dto: SubscribeLogDto): string | null {
     const subscriberKey = `${account}:${dto.type}`;
 
     // 如果已经订阅了同类型的日志，先取消之前的订阅
@@ -279,25 +286,35 @@ export class LogService {
       this.unsubscribe(account, dto.type);
     }
 
-    // 获取当前文件大小作为起始位置
-    const position = this.getFileSize(dto.filename);
+    // 判断是否是历史日志（带日期后缀且日期在今天之前）
+    const dateMatch = dto.filename.match(/\.log\.(\d{4}-\d{2}-\d{2})$/);
+    const today = new Date().toISOString().slice(0, 10);
+    const isHistory = dateMatch !== null && dateMatch[1] < today;
 
-    // 创建订阅者
+    // 当天日志监听 .log 文件（实时写入），历史日志监听实际文件（静态）
+    const actualFilename = isHistory
+      ? dto.filename
+      : this.getCurrentLogFile(dto.type);
+
+    // 获取当前文件大小作为起始位置
+    const position = this.getFileSize(actualFilename);
+
+    // 创建订阅者（记录实际监听的文件名）
     this.subscribers.set(subscriberKey, {
       account,
       type: dto.type,
-      filename: dto.filename,
+      filename: actualFilename,
       lastPosition: position,
     });
 
     // 启动文件监听
-    this.startFileWatcher(dto.type, dto.filename);
+    this.startFileWatcher(dto.type, actualFilename);
 
     this.logger.info(
-      `[LogService] User ${account} subscribed to log type ${dto.type}, file ${dto.filename}`
+      `[LogService] User ${account} subscribed to log type ${dto.type}, file ${actualFilename}`
     );
 
-    return true;
+    return actualFilename;
   }
 
   /**
@@ -328,26 +345,35 @@ export class LogService {
   /**
    * 启动文件监听器
    * @param type 日志类型
-   * @param filename 文件名
+   * @param filename 要监听的文件名（已经处理过，当天日志为 .log 文件）
    */
   private startFileWatcher(type: LogTypeEnum, filename: string): void {
     const watcherKey = type.toString();
-    const filePath = path.join(this.logDir, filename);
 
     // 如果已经有监听器，不重复创建
     if (this.fileWatchers.has(watcherKey)) {
       return;
     }
 
+    const filePath = path.join(this.logDir, filename);
+
+    this.logger.info(`[LogService] Watching file path: ${filePath}`);
+
     try {
-      // 使用 fs.watch 监听文件变化
-      const watcher = fs.watch(filePath, eventType => {
-        if (eventType === 'change') {
-          this.onFileChange(type);
-        }
+      // 使用 chokidar 监听文件变化
+      const watcher = chokidar.watch(filePath, {
+        ignoreInitial: true, // 忽略初始扫描
+        awaitWriteFinish: {
+          stabilityThreshold: 100, // 文件稳定100ms后才触发
+          pollInterval: 50,
+        },
       });
 
-      // 处理监听器错误
+      watcher.on('change', () => {
+        this.logger.info(`[LogService] File changed: ${filename}`);
+        this.onFileChange(type);
+      });
+
       watcher.on('error', error => {
         this.logger.error(
           `[LogService] File watcher error for ${filename}: ${error}`
@@ -382,9 +408,15 @@ export class LogService {
    * @param type 日志类型
    */
   private onFileChange(type: LogTypeEnum): void {
+    this.logger.info(`[LogService] File change detected for type: ${type}`);
+
     // 找出所有订阅该类型日志的用户
     const subscribers = Array.from(this.subscribers.values()).filter(
       sub => sub.type === type
+    );
+
+    this.logger.info(
+      `[LogService] Found ${subscribers.length} subscribers for type ${type}`
     );
 
     for (const subscriber of subscribers) {
@@ -392,6 +424,10 @@ export class LogService {
       const result = this.readNewContent(
         subscriber.filename,
         subscriber.lastPosition
+      );
+
+      this.logger.info(
+        `[LogService] Read ${result.lines.length} new lines for ${subscriber.account}, position: ${subscriber.lastPosition} -> ${result.newPosition}`
       );
 
       // 更新订阅者的读取位置
@@ -415,18 +451,16 @@ export class LogService {
     type: LogTypeEnum,
     lines: string[]
   ): void {
-    const message = {
-      event: 'log:update',
-      data: {
-        type,
-        lines,
-      },
-    };
-
-    this.wsConnectionManager.sendToUser(account, 'log:update', message.data);
-    this.logger.debug(
-      `[LogService] Pushed ${lines.length} lines to user ${account} for log type ${type}`
+    this.logger.info(
+      `[LogService] Pushing ${lines.length} lines to user ${account} for type ${type}`
     );
+
+    this.wsConnectionManager.sendToUser(account, 'log:update', {
+      type,
+      lines,
+    });
+
+    this.logger.info(`[LogService] Push completed for user ${account}`);
   }
 
   /**

@@ -1,6 +1,6 @@
 import '@midwayjs/koa';
 import '@midwayjs/ws';
-import { IUserSession } from '@/interface';
+import { WsUserInfo } from '@/definition/types/log.type';
 
 declare module '@midwayjs/koa' {
   interface State {
@@ -11,6 +11,6 @@ declare module '@midwayjs/koa' {
 
 declare module '@midwayjs/ws' {
   interface Context {
-    user?: IUserSession['user'];
+    user?: WsUserInfo;
   }
 }

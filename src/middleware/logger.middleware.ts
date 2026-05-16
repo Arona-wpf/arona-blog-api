@@ -32,7 +32,9 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
         const responseTime: number = new Date().valueOf() - start;
 
         const realIp = (ctx.request.header['EO-Client-IP'] as string) || ctx.ip;
-        let realIpCountry = '';
+        let realIpCountry: string;
+        let isp = '';
+
         if (
           realIp.startsWith('127.') ||
           realIp.startsWith('172.') ||
@@ -40,14 +42,25 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
           realIp.startsWith('10.')
         ) {
           realIpCountry = 'Reserved Address';
-        }
+        } else {
+          const countryName = ctx.request.header[
+            'x-geo-country-name'
+          ] as string;
+          const regionName = ctx.request.header['x-geo-region'] as string;
+          const cityName = ctx.request.header['x-geo-city'] as string;
+          isp = ctx.request.header['x-geo-isp'] as string;
 
-        if (ctx.request.header['EO-Client-IPCountry']) {
-          realIpCountry = ctx.request.header['EO-Client-IPCountry'] as string;
+          const locationParts = [countryName, regionName, cityName].filter(
+            Boolean
+          );
+          realIpCountry =
+            locationParts.join(' ') ||
+            (ctx.request.header['EO-Client-IPCountry'] as string) ||
+            '';
         }
 
         this.logger.info(
-          `[${ctx.path}] ${ctx.method} ${realIp} ${realIpCountry} ${responseTime}ms`
+          `[${ctx.path}] ${ctx.method} ${realIp} ${realIpCountry}${isp ? ` [${isp}]` : ''} ${responseTime}ms`
         );
       }
     };

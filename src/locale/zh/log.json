@@ -6,5 +6,15 @@
   "log.type": "日志类型",
   "log.filename": "日志文件名",
   "log.startLine": "起始行号",
-  "log.limit": "行数限制"
+  "log.limit": "行数限制",
+  "log.ws.subscribe.success": "订阅日志成功",
+  "log.ws.unsubscribe.success": "取消订阅成功",
+  "log.ws.file.notfound": "日志文件不存在",
+  "log.ws.subscribe.failed": "订阅日志失败",
+  "log.ws.unauthorized": "未授权访问",
+  "log.ws.locale.updated": "语言设置已更新",
+  "log.ws.invalid.event": "无效的事件格式",
+  "log.ws.unknown.module": "未知的模块",
+  "log.ws.unknown.action": "未知的操作",
+  "log.ws.invalid.message": "无效的消息格式"
 }

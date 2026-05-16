@@ -19,6 +19,7 @@ export class PriV1LogController {
 
     return {
       data: types,
+      group: 'log',
       msg: 'log.type.list.success',
     };
   }
@@ -33,6 +34,7 @@ export class PriV1LogController {
 
     return {
       data: files,
+      group: 'log',
       msg: 'log.file.list.success',
     };
   }
@@ -51,6 +53,7 @@ export class PriV1LogController {
         filename,
         size: fileSize,
       },
+      group: 'log',
       msg: 'log.current.success',
     };
   }
@@ -79,6 +82,7 @@ export class PriV1LogController {
         startLine,
         limit,
       },
+      group: 'log',
       msg: 'log.content.success',
     };
   }

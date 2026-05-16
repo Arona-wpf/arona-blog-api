@@ -37,7 +37,6 @@ import { GachaAtlasService } from '@/service/gacha-atlas.service';
 
 @Processor(QueueNameEnum.SYNC_GACHA_ATLAS, {
   repeat: {
-    immediately: true,
     pattern: FORMAT.CRONTAB.EVERY_HOUR,
   },
 })

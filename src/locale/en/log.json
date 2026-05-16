@@ -6,5 +6,15 @@
   "log.type": "Log type",
   "log.filename": "Log filename",
   "log.startLine": "Start line",
-  "log.limit": "Line limit"
+  "log.limit": "Line limit",
+  "log.ws.subscribe.success": "Successfully subscribed to log",
+  "log.ws.unsubscribe.success": "Successfully unsubscribed from log",
+  "log.ws.file.notfound": "Log file not found",
+  "log.ws.subscribe.failed": "Failed to subscribe to log",
+  "log.ws.unauthorized": "Unauthorized access",
+  "log.ws.locale.updated": "Locale updated successfully",
+  "log.ws.invalid.event": "Invalid event format",
+  "log.ws.unknown.module": "Unknown module",
+  "log.ws.unknown.action": "Unknown action",
+  "log.ws.invalid.message": "Invalid message format"
 }

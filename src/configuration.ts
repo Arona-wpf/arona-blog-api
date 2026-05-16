@@ -145,6 +145,7 @@ export class MainConfiguration {
         // 解析 cookie
         const cookies = parseCookie(cookieHeader);
         const sessionId = cookies['arona-blog-api.sid'];
+        const localeCookie = cookies['locale'];
 
         if (!sessionId) {
           this.wsLogger.warn(
@@ -183,11 +184,14 @@ export class MainConfiguration {
           return false;
         }
 
-        // 将用户信息附加到 request 对象上，供后续 WsGateway 使用
-        request['wsUser'] = session.user;
+        // 将用户信息和 locale 附加到 request 对象上
+        request['wsUser'] = {
+          ...session.user,
+          locale: localeCookie || session.locale || 'zh-cn',
+        };
 
         this.wsLogger.info(
-          `[WS Upgrade] Authentication succeeded: user ${session.user.account}`
+          `[WS Upgrade] Authentication succeeded: user ${session.user.account}, locale ${request['wsUser'].locale}`
         );
         return true;
       } catch (error) {

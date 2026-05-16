@@ -1,6 +1,6 @@
 {
   "name": "arona-blog-api",
-  "version": "26.5.14",
+  "version": "26.5.16",
   "author": "Arona-wpf",
   "description": "Aronaの小屋——后端api服务",
   "license": "MIT",
@@ -27,6 +27,7 @@
     "@midwayjs/ws": "^3.20.24",
     "@typegoose/typegoose": "^11.8.1",
     "archiver": "^7.0.1",
+    "chokidar": "^5.0.0",
     "cos-nodejs-sdk-v5": "^2.15.4",
     "dayjs": "^1.11.20",
     "koa-redis": "^4.0.1",
