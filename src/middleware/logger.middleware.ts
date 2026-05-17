@@ -14,6 +14,15 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
     return 'logger';
   }
 
+  /**
+   * HTTP 头部使用 Latin-1 编码传输
+   * 当 nginx 设置 UTF-8 编码的中文时，需要重新解码
+   */
+  private decodeHeader(value: string | undefined): string {
+    if (!value) return '';
+    return Buffer.from(value, 'latin1').toString('utf8');
+  }
+
   resolve() {
     return async (ctx: Context, next: NextFunction) => {
       const start: number = new Date().valueOf();
@@ -43,12 +52,16 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
         ) {
           realIpCountry = 'Reserved Address';
         } else {
-          const countryName = ctx.request.header[
-            'x-geo-country-name'
-          ] as string;
-          const regionName = ctx.request.header['x-geo-region'] as string;
-          const cityName = ctx.request.header['x-geo-city'] as string;
-          isp = ctx.request.header['x-geo-isp'] as string;
+          const countryName = this.decodeHeader(
+            ctx.request.header['x-geo-country-name'] as string
+          );
+          const regionName = this.decodeHeader(
+            ctx.request.header['x-geo-region'] as string
+          );
+          const cityName = this.decodeHeader(
+            ctx.request.header['x-geo-city'] as string
+          );
+          isp = this.decodeHeader(ctx.request.header['x-geo-isp'] as string);
 
           const locationParts = [countryName, regionName, cityName].filter(
             Boolean

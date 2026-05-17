@@ -6,19 +6,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { LogTypeEnum } from '@/definition/enums/log.enum';
-import { LogFileInfo } from '@/definition/types/log.type';
+import { LogFileInfo, LogSubscriber } from '@/definition/types/log.type';
 import { SubscribeLogDto } from '@/dto/log.dto';
 import { WsConnectionManager } from '@/manage/ws-connection.manage';
-
-/**
- * 日志订阅者信息（内部使用）
- */
-interface LogSubscriber {
-  account: string; // 用户账号
-  type: LogTypeEnum; // 日志类型
-  filename: string; // 当前监听的文件名
-  lastPosition: number; // 最后读取位置（字节）
-}
 
 /**
  * 日志服务
@@ -66,8 +56,9 @@ export class LogService {
 
   /**
    * 根据日志类型获取对应的文件名前缀
+   * 错误日志类型返回 null，需要单独处理
    */
-  private getLogFilePrefix(type: LogTypeEnum): string {
+  private getLogFilePrefix(type: LogTypeEnum): string | null {
     switch (type) {
       case LogTypeEnum.APP:
         return `${this.logFilePrefix}-app`;
@@ -78,7 +69,7 @@ export class LogService {
       case LogTypeEnum.WS:
         return `${this.logFilePrefix}-ws`;
       case LogTypeEnum.ERROR:
-        return `${this.logFilePrefix}-error`;
+        return null;
       default:
         return `${this.logFilePrefix}-app`;
     }
@@ -105,10 +96,17 @@ export class LogService {
       // 读取目录内容
       const filenames = fs.readdirSync(this.logDir);
 
-      // 日志文件名正则：匹配 prefix.log 或 prefix.log.YYYY-MM-DD
-      const logFileRegex = new RegExp(
-        `^${prefix}\\.log(?:\\.\\d{4}-\\d{2}-\\d{2})?$`
-      );
+      // 根据类型构建不同的正则
+      let logFileRegex: RegExp;
+      if (type === LogTypeEnum.ERROR) {
+        // 错误日志匹配后缀: -error.log 或 -error.log.YYYY-MM-DD
+        logFileRegex = new RegExp('-error\\.log(?:\\.\\d{4}-\\d{2}-\\d{2})?$');
+      } else {
+        // 其他日志匹配前缀: prefix.log 或 prefix.log.YYYY-MM-DD
+        logFileRegex = new RegExp(
+          `^${prefix}\\.log(?:\\.\\d{4}-\\d{2}-\\d{2})?$`
+        );
+      }
 
       for (const filename of filenames) {
         // 过滤匹配的日志文件
@@ -248,10 +246,21 @@ export class LogService {
   /**
    * 获取当前监听的日志文件名（不带日期后缀的主日志文件）
    * @param type 日志类型
+   * @param filename 用户选择的文件名（错误日志需要使用）
    * @returns 当前日志文件名
    */
-  getCurrentLogFile(type: LogTypeEnum): string {
+  getCurrentLogFile(type: LogTypeEnum, filename?: string): string {
     const prefix = this.getLogFilePrefix(type);
+    if (prefix === null) {
+      // 错误日志没有固定前缀，返回用户选择的文件名（去掉日期后缀）
+      if (filename) {
+        const dateMatch = filename.match(/\.log\.\d{4}-\d{2}-\d{2}$/);
+        return dateMatch
+          ? filename.slice(0, dateMatch.index) + '.log'
+          : filename;
+      }
+      return null;
+    }
     return `${prefix}.log`;
   }
 
@@ -294,7 +303,15 @@ export class LogService {
     // 当天日志监听 .log 文件（实时写入），历史日志监听实际文件（静态）
     const actualFilename = isHistory
       ? dto.filename
-      : this.getCurrentLogFile(dto.type);
+      : this.getCurrentLogFile(dto.type, dto.filename);
+
+    // 如果无法确定监听文件，返回 null
+    if (!actualFilename) {
+      this.logger.warn(
+        `[LogService] Cannot determine log file for type ${dto.type}`
+      );
+      return null;
+    }
 
     // 获取当前文件大小作为起始位置
     const position = this.getFileSize(actualFilename);
@@ -370,7 +387,7 @@ export class LogService {
       });
 
       watcher.on('change', () => {
-        this.logger.info(`[LogService] File changed: ${filename}`);
+        // this.logger.info(`[LogService] File changed: ${filename}`);
         this.onFileChange(type);
       });
 
@@ -408,16 +425,16 @@ export class LogService {
    * @param type 日志类型
    */
   private onFileChange(type: LogTypeEnum): void {
-    this.logger.info(`[LogService] File change detected for type: ${type}`);
+    // this.logger.info(`[LogService] File change detected for type: ${type}`);
 
     // 找出所有订阅该类型日志的用户
     const subscribers = Array.from(this.subscribers.values()).filter(
       sub => sub.type === type
     );
 
-    this.logger.info(
-      `[LogService] Found ${subscribers.length} subscribers for type ${type}`
-    );
+    // this.logger.info(
+    //   `[LogService] Found ${subscribers.length} subscribers for type ${type}`
+    // );
 
     for (const subscriber of subscribers) {
       // 读取新增内容
@@ -426,9 +443,9 @@ export class LogService {
         subscriber.lastPosition
       );
 
-      this.logger.info(
-        `[LogService] Read ${result.lines.length} new lines for ${subscriber.account}, position: ${subscriber.lastPosition} -> ${result.newPosition}`
-      );
+      // this.logger.info(
+      //   `[LogService] Read ${result.lines.length} new lines for ${subscriber.account}, position: ${subscriber.lastPosition} -> ${result.newPosition}`
+      // );
 
       // 更新订阅者的读取位置
       subscriber.lastPosition = result.newPosition;
@@ -451,16 +468,16 @@ export class LogService {
     type: LogTypeEnum,
     lines: string[]
   ): void {
-    this.logger.info(
-      `[LogService] Pushing ${lines.length} lines to user ${account} for type ${type}`
-    );
+    // this.logger.info(
+    //   `[LogService] Pushing ${lines.length} lines to user ${account} for type ${type}`
+    // );
 
     this.wsConnectionManager.sendToUser(account, 'log:update', {
       type,
       lines,
     });
 
-    this.logger.info(`[LogService] Push completed for user ${account}`);
+    // this.logger.info(`[LogService] Push completed for user ${account}`);
   }
 
   /**
