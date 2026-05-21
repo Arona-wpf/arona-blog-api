@@ -6,16 +6,16 @@ Backend API service for Arona's personal blog. Features are still being develope
 
 ## Project Architecture
 
-| Component | Version |
-|-----------|---------|
-| Framework | Midway.js 3 |
-| Language | TypeScript 5.9.3 |
-| Server | Koa 2 |
-| Protocol | HTTP / WebSocket |
-| Cache | Redis (koa-redis) |
-| Database | MongoDB 8 (mongoose) |
-| File Storage | Minio / Tencent COS |
-| Build Tool | Gulp |
+| Component    | Version              |
+| ------------ | -------------------- |
+| Framework    | Midway.js 3          |
+| Language     | TypeScript 5.9.3     |
+| Server       | Koa 2                |
+| Protocol     | HTTP / WebSocket     |
+| Cache        | Redis (koa-redis)    |
+| Database     | MongoDB 8 (mongoose) |
+| File Storage | Minio / Tencent COS  |
+| Build Tool   | Gulp                 |
 
 ## Development Commands
 
@@ -57,7 +57,8 @@ filter/                   — Exception capture and unified error response
 decorator/                — Custom decorators (e.g., @Permission)
 helper/                   — Framework-context utilities (i18n, route metadata, Redis, Result response)
 utils/                    — Pure function utilities (crypto, email, common methods)
-websocket/                — WebSocket controllers for real-time communication
+socket/                   — WebSocket controllers for real-time communication
+queue/                    — BullMQ job queues for background task processing
 definition/               — Constants, enums, type definitions
   constants/              — Runtime constants (business error constants)
   enums/                  — Enum definitions

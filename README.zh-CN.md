@@ -6,16 +6,16 @@ Aronaの小屋 网站的后端 API 服务。功能还在逐步开发中……
 
 ## 项目架构
 
-| 组成 | 版本 |
-|------|------|
-| 框架 | Midway.js 3 |
-| 语言 | TypeScript 5.9.3 |
-| 服务器 | Koa 2 |
-| 通信协议 | HTTP / WebSocket |
-| 缓存 | Redis (koa-redis) |
-| 数据库 | MongoDB 8 (mongoose) |
-| 文件存储 | Minio / 腾讯云 COS |
-| 打包工具 | Gulp |
+| 组成     | 版本                 |
+| -------- | -------------------- |
+| 框架     | Midway.js 3          |
+| 语言     | TypeScript 5.9.3     |
+| 服务器   | Koa 2                |
+| 通信协议 | HTTP / WebSocket     |
+| 缓存     | Redis (koa-redis)    |
+| 数据库   | MongoDB 8 (mongoose) |
+| 文件存储 | Minio / 腾讯云 COS   |
+| 打包工具 | Gulp                 |
 
 ## 开发命令
 
@@ -57,7 +57,8 @@ filter/                   — 异常捕获与统一错误响应
 decorator/                — 自定义装饰器（如 @Permission）
 helper/                   — 带框架上下文的工具（i18n 翻译、路由元数据、Redis 获取、Result 响应）
 utils/                    — 纯函数工具（加密、邮件、通用方法）
-websocket/                — WebSocket 控制器，用于实时通信
+socket/                   — WebSocket 控制器，用于实时通信
+queue/                    — BullMQ 任务队列，用于后台任务处理
 definition/               — 常量、枚举、类型定义
   constants/              — 运行时常量（业务错误常量）
   enums/                  — 枚举定义

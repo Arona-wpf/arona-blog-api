@@ -27,6 +27,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
+        proxy: false,
       },
       clients: {
         [GameTypeEnum.GENSHIN_IMPACT]: {
