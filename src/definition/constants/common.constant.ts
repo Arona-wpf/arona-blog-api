@@ -176,4 +176,13 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿任务不存在
   GACHA_TASK_NOT_FOUND: (args?: Record<string, string>) =>
     new BusinessError(1000904, 'error.gacha.task.not.found', args),
+  // 祈愿配置不存在
+  GACHA_CONFIG_NOT_FOUND: (args?: Record<string, string>) =>
+    new BusinessError(1000905, 'error.gacha.config.not.found', args),
+  // 祈愿配置账号不匹配
+  GACHA_CONFIG_ACCOUNT_MISMATCH: (args?: Record<string, string>) =>
+    new BusinessError(1000906, 'error.gacha.config.account.mismatch', args),
+  // 祈愿配置数量超过限制
+  GACHA_CONFIG_LIMIT_EXCEEDED: (args?: Record<string, string>) =>
+    new BusinessError(1000907, 'error.gacha.config.limit.exceeded', args),
 };

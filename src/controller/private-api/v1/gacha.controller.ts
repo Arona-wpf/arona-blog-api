@@ -1,8 +1,25 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@midwayjs/core';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Query,
+  Session,
+} from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 
 import { GameType } from '@/definition/types/gacha.type';
-import { CreateGachaTaskDTO } from '@/dto/gacha.dto';
+import {
+  CreateGachaConfigDTO,
+  CreateGachaTaskDTO,
+  DeleteGachaConfigDTO,
+  GetGachaConfigListDTO,
+  UpdateGachaConfigDTO,
+} from '@/dto/gacha.dto';
+import { IUserSession } from '@/interface';
+import { GachaConfigService } from '@/service/gacha-config.service';
 import { GachaTaskService } from '@/service/gacha-task.service';
 
 @Controller('/private-api/v1/gacha')
@@ -13,9 +30,11 @@ export class PriV1GachaController {
   @Inject()
   gachaTaskService: GachaTaskService;
 
+  @Inject()
+  gachaConfigService: GachaConfigService;
+
   /**
    * 创建祈愿同步任务
-   * @param body 任务参数
    */
   @Post('/sync')
   async createTask(@Body() body: CreateGachaTaskDTO) {
@@ -37,7 +56,6 @@ export class PriV1GachaController {
 
   /**
    * 查询祈愿任务状态
-   * @param taskId 任务ID
    */
   @Get('/task/:taskId')
   async getTask(@Param('taskId') taskId: string) {
@@ -57,6 +75,117 @@ export class PriV1GachaController {
       },
       group: 'gacha',
       msg: 'gacha.task.get.success',
+    };
+  }
+
+  /**
+   * 创建祈愿配置
+   */
+  @Post('/config/create')
+  async createConfig(
+    @Body() body: CreateGachaConfigDTO,
+    @Session() session: IUserSession
+  ) {
+    const account = session.user.account;
+    const config = await this.gachaConfigService.createGachaConfig(
+      account,
+      body.game_type as GameType,
+      body.region,
+      body.game_uid,
+      body.game_nickname,
+      body.gacha_url
+    );
+
+    return {
+      data: {
+        _id: config._id,
+        game_type: config.game_type,
+        region: config.region,
+        game_uid: config.game_uid,
+        game_nickname: config.game_nickname,
+        created_at: config.created_at,
+      },
+      group: 'gacha',
+      msg: 'gacha.config.create.success',
+    };
+  }
+
+  /**
+   * 获取祈愿配置列表
+   */
+  @Get('/config/list')
+  async getConfigList(
+    @Query() query: GetGachaConfigListDTO,
+    @Session() session: IUserSession
+  ) {
+    const account = session.user.account;
+    let configList;
+    if (query.game_type) {
+      configList = await this.gachaConfigService.getGachaConfigListByGameType(
+        account,
+        query.game_type as GameType
+      );
+    } else {
+      configList = await this.gachaConfigService.getGachaConfigList(account);
+    }
+
+    return {
+      data: configList.map(config => ({
+        _id: config._id,
+        game_type: config.game_type,
+        region: config.region,
+        game_uid: config.game_uid,
+        game_nickname: config.game_nickname,
+        created_at: config.created_at,
+        updated_at: config.updated_at,
+      })),
+      group: 'gacha',
+      msg: 'gacha.config.list.success',
+    };
+  }
+
+  /**
+   * 更新祈愿配置
+   */
+  @Post('/config/update')
+  async updateConfig(
+    @Body() body: UpdateGachaConfigDTO,
+    @Session() session: IUserSession
+  ) {
+    const account = session.user.account;
+    const updateData: Record<string, any> = {};
+    if (body.game_uid) updateData.game_uid = body.game_uid;
+    if (body.game_nickname) updateData.game_nickname = body.game_nickname;
+    if (body.gacha_url) updateData.gacha_url = body.gacha_url;
+
+    await this.gachaConfigService.updateGachaConfig(
+      body._id,
+      account,
+      updateData
+    );
+
+    return {
+      data: null,
+      group: 'gacha',
+      msg: 'gacha.config.update.success',
+    };
+  }
+
+  /**
+   * 删除祈愿配置
+   */
+  @Post('/config/delete')
+  async deleteConfig(
+    @Body() body: DeleteGachaConfigDTO,
+    @Session() session: IUserSession
+  ) {
+    const account = session.user.account;
+    await this.gachaConfigService.deleteGachaConfig(body._id, account);
+
+    return {
+      data: null,
+      group: 'gacha',
+      msg: 'gacha.config.delete.success',
     };
   }
 }

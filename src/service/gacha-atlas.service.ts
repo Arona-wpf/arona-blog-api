@@ -81,10 +81,14 @@ export class GachaAtlasService {
    * @returns 祈愿物品图鉴列表
    */
   async findByContentIds(game_type: GameType, content_ids: number[]) {
-    return this.gachaAtlasDao.findManyByCondition({
-      game_type,
-      content_id: { $in: content_ids },
-    });
+    return this.gachaAtlasDao.findMany(
+      {
+        game_type,
+        content_id: { $in: content_ids },
+      },
+      1,
+      content_ids.length
+    );
   }
 
   /**

@@ -2,21 +2,21 @@ import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typegoose';
 import { ReturnModelType } from '@typegoose/typegoose';
 
-import { GachaAtlasEntity } from '@/entity/gacha-atlas.entity';
+import { GachaConfigEntity } from '@/entity/gacha-config.entity';
 
 import { BaseDao } from './base.dao';
 
 @Provide()
-export class GachaAtlasDao extends BaseDao<GachaAtlasEntity> {
-  @InjectEntityModel(GachaAtlasEntity)
-  gachaAtlasEntity: ReturnModelType<typeof GachaAtlasEntity>;
+export class GachaConfigDao extends BaseDao<GachaConfigEntity> {
+  @InjectEntityModel(GachaConfigEntity)
+  gachaConfigEntity: ReturnModelType<typeof GachaConfigEntity>;
 
-  protected get model(): ReturnModelType<typeof GachaAtlasEntity> {
-    return this.gachaAtlasEntity;
+  protected get model(): ReturnModelType<typeof GachaConfigEntity> {
+    return this.gachaConfigEntity;
   }
 
   constructor() {
-    super('GachaAtlas');
+    super('GachaConfig');
   }
 
   async findOne(
@@ -25,22 +25,22 @@ export class GachaAtlasDao extends BaseDao<GachaAtlasEntity> {
     sort?: Record<string, any>
   ) {
     try {
-      return await this.gachaAtlasEntity
+      return await this.gachaConfigEntity
         .findOne(queryCondition)
         .select(select)
         .sort(sort)
         .lean();
     } catch (error) {
-      this.logger.error('[GachaAtlasDao] findOne error', error);
+      this.logger.error('[GachaConfigDao] findOne error', error);
       throw error;
     }
   }
 
   async findById(id: string, select?: string) {
     try {
-      return await this.gachaAtlasEntity.findById(id).select(select).lean();
+      return await this.gachaConfigEntity.findById(id).select(select).lean();
     } catch (error) {
-      this.logger.error('[GachaAtlasDao] findById error', error);
+      this.logger.error('[GachaConfigDao] findById error', error);
       throw error;
     }
   }
@@ -53,7 +53,7 @@ export class GachaAtlasDao extends BaseDao<GachaAtlasEntity> {
     sort?: Record<string, any>
   ) {
     try {
-      return await this.gachaAtlasEntity
+      return await this.gachaConfigEntity
         .find(queryCondition)
         .skip((currentPage - 1) * pageSize)
         .limit(pageSize)
@@ -61,7 +61,7 @@ export class GachaAtlasDao extends BaseDao<GachaAtlasEntity> {
         .sort(sort)
         .lean();
     } catch (error) {
-      this.logger.error('[GachaAtlasDao] findMany error', error);
+      this.logger.error('[GachaConfigDao] findMany error', error);
       throw error;
     }
   }

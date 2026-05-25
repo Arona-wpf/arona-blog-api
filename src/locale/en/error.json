@@ -52,5 +52,8 @@
   "error.gacha.server.region.not.found": "Gacha server region not found",
   "error.gacha.game.type.not.supported": "Gacha game type not supported",
   "error.gacha.task.not.found": "Gacha task not found",
+  "error.gacha.config.not.found": "Gacha config not found",
+  "error.gacha.config.account.mismatch": "Gacha config account mismatch",
+  "error.gacha.config.limit.exceeded": "Game account limit reached (10 accounts max)",
   "error.ws.unauthorized": "WebSocket connection unauthorized, please login first"
 }
