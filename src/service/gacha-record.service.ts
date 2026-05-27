@@ -4,6 +4,7 @@ import { ILogger } from '@midwayjs/logger';
 import { AxiosInstance, AxiosResponse } from 'axios';
 import { readFile } from 'fs/promises';
 
+import { GachaAtlasDao } from '@/dao/gacha-atlas.dao';
 import { GachaRecordDao } from '@/dao/gacha-record.dao';
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
 import {
@@ -27,6 +28,7 @@ import {
 import { GachaRecordEntity } from '@/entity/gacha-record.entity';
 import { AxiosHelper } from '@/helper/axios.helper';
 import { RedisHelper } from '@/helper/redis.helper';
+import { GachaAtlasService } from '@/service/gacha-atlas.service';
 import { GachaConfigService } from '@/service/gacha-config.service';
 
 const GACHA_LOCK_PREFIX = 'gacha:lock';
@@ -38,7 +40,13 @@ export class GachaRecordService {
   gachaRecordDao: GachaRecordDao;
 
   @Inject()
+  gachaAtlasDao: GachaAtlasDao;
+
+  @Inject()
   gachaConfigService: GachaConfigService;
+
+  @Inject()
+  gachaAtlasService: GachaAtlasService;
 
   @Inject()
   axiosHelper: AxiosHelper;
@@ -535,9 +543,11 @@ export class GachaRecordService {
 
     // 过滤掉已存在的记录，只导入新的
     let totalImported = 0;
+    let dataLang = '';
 
     for (const gameData of gameDataList) {
-      const { uid, timezone, list } = gameData;
+      const { uid, timezone, lang, list } = gameData;
+      dataLang = lang;
       if (!list || !Array.isArray(list)) continue;
 
       if (String(uid) !== String(config.game_uid)) {
@@ -556,7 +566,7 @@ export class GachaRecordService {
           uid: config.game_uid,
           gacha_id: item.id,
           gacha_type: item.gacha_type,
-          gacha_time: new Date(item.time),
+          gacha_time: new Date(item.time).valueOf(),
           item_id: item.item_id,
           item_type: this.resolveItemType(gameType, item.item_id),
           item_name: item.name,
@@ -575,7 +585,51 @@ export class GachaRecordService {
       `[GachaRecordService] Imported ${totalImported} gacha records from JSON file for config ${gachaConfigId}`
     );
 
+    if (dataLang === 'zh-cn') {
+      // 异步更新图鉴中的item_id（不阻塞主流程）
+      this.asyncUpdateAtlasItemId(gameType, gameDataList);
+    }
+
     return { total: allGachaIds.length, imported: totalImported };
+  }
+
+  /**
+   * 异步更新图鉴中的item_id
+   * @param gameType 游戏类型
+   * @param gameDataList 游戏数据列表
+   */
+  private asyncUpdateAtlasItemId(
+    gameType: GameType,
+    gameDataList: Array<{ list?: Array<{ name: string; item_id: string }> }>
+  ) {
+    // 汇总所有item_name和item_id的映射
+    const itemUpdates: Array<{ item_name: string; item_id: string }> = [];
+    const seenNames = new Set<string>();
+
+    for (const gameData of gameDataList) {
+      if (!gameData.list || !Array.isArray(gameData.list)) continue;
+      for (const item of gameData.list) {
+        if (!seenNames.has(item.name) && item.item_id) {
+          seenNames.add(item.name);
+          itemUpdates.push({
+            item_name: item.name,
+            item_id: item.item_id,
+          });
+        }
+      }
+    }
+
+    if (itemUpdates.length === 0) return;
+
+    // 异步执行更新，不阻塞主流程
+    this.gachaAtlasService
+      .batchUpdateItemIdByName(gameType, itemUpdates)
+      .catch(error => {
+        this.logger.error(
+          '[GachaRecordService] asyncUpdateAtlasItemId error',
+          error
+        );
+      });
   }
 
   /**
@@ -614,5 +668,58 @@ export class GachaRecordService {
     }
     const zzzRankMap: Record<string, string> = { '4': 'S', '3': 'A', '2': 'B' };
     return zzzRankMap[rankType] ?? rankType.toString();
+  }
+
+  /**
+   * 根据配置ID获取祈愿记录（按gacha_type分组）
+   * @param gachaConfigId 祈愿配置ID
+   * @returns 分组的祈愿记录（包含icon_url）
+   */
+  async getGachaRecordsByConfigId(
+    gachaConfigId: string
+  ): Promise<Record<string, GachaRecordEntity[]>> {
+    const config =
+      await this.gachaConfigService.getGachaConfigById(gachaConfigId);
+
+    const records = await this.gachaRecordDao.findGroupedByGachaType({
+      game_type: config.game_type,
+      server_region: config.region,
+      uid: config.game_uid,
+    });
+
+    this.logger.info(
+      `[GachaRecordService] Found ${Object.keys(records).length} gacha types for config ${gachaConfigId}`
+    );
+
+    // 收集所有item_id，查询对应的icon_url
+    const allRecords: GachaRecordEntity[] = [];
+    for (const recordList of Object.values(records)) {
+      allRecords.push(...recordList);
+    }
+
+    const uniqueItemIds = [
+      ...new Set(allRecords.map(r => r.item_id).filter(id => id)),
+    ];
+    if (uniqueItemIds.length > 0) {
+      const atlasList = await this.gachaAtlasService.findByItemIds(
+        config.game_type,
+        uniqueItemIds
+      );
+
+      // 构建 item_id -> icon_url 的映射
+      const iconUrlMap = new Map<string, string>();
+      for (const atlas of atlasList) {
+        if (atlas.item_id && atlas.icon_url) {
+          iconUrlMap.set(atlas.item_id, atlas.icon_url);
+        }
+      }
+
+      // 将 icon_url 添加到每条记录
+      for (const record of allRecords) {
+        record.icon_url = iconUrlMap.get(record.item_id) || '';
+      }
+    }
+
+    return records;
   }
 }

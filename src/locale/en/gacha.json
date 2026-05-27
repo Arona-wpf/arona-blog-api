@@ -33,6 +33,7 @@
   "gacha.config.update.success": "Gacha config updated successfully",
   "gacha.config.delete.success": "Gacha config deleted successfully",
   "gacha.import.success": "Gacha records imported successfully",
+  "gacha.record.list.success": "Gacha record list retrieved successfully",
   "error.gacha.import.uid.mismatch": "UID in JSON file does not match the gacha config UID",
   "gacha.element.genshin_impact.anemo": "Anemo",
   "gacha.element.genshin_impact.geo": "Geo",

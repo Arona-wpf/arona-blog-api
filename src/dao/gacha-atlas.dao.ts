@@ -65,4 +65,16 @@ export class GachaAtlasDao extends BaseDao<GachaAtlasEntity> {
       throw error;
     }
   }
+
+  /**
+   * 批量写入操作
+   */
+  async bulkWrite(operations: any[]) {
+    try {
+      return await this.gachaAtlasEntity.bulkWrite(operations);
+    } catch (error) {
+      this.logger.error('[GachaAtlasDao] bulkWrite error', error);
+      throw error;
+    }
+  }
 }

@@ -128,4 +128,55 @@ export class GachaAtlasService {
 
     return this.gachaAtlasDao.bulkWrite(bulkOps);
   }
+
+  /**
+   * 根据物品名称批量更新item_id
+   * @param game_type 游戏类型
+   * @param itemUpdates 物品名称和item_id的映射列表
+   */
+  async batchUpdateItemIdByName(
+    game_type: GameType,
+    itemUpdates: Array<{ item_name: string; item_id: string }>
+  ) {
+    if (itemUpdates.length === 0) return;
+
+    const bulkOps = itemUpdates.map(({ item_name, item_id }) => ({
+      updateOne: {
+        filter: { game_type, item_name },
+        update: { $set: { item_id, updated_at: Date.now() } },
+      },
+    }));
+
+    try {
+      const result = await this.gachaAtlasDao.bulkWrite(bulkOps);
+      this.logger.info(
+        `[GachaAtlasService] Batch updated ${result.modifiedCount || 0} atlas item_ids`
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(
+        '[GachaAtlasService] batchUpdateItemIdByName error',
+        error
+      );
+    }
+  }
+
+  /**
+   * 根据游戏类型和item_id列表批量查找祈愿物品图鉴
+   * @param game_type 游戏类型
+   * @param item_ids item_id列表
+   * @returns 祈愿物品图鉴列表
+   */
+  async findByItemIds(game_type: GameType, item_ids: string[]) {
+    if (item_ids.length === 0) return [];
+    return this.gachaAtlasDao.findMany(
+      {
+        game_type,
+        item_id: { $in: item_ids },
+      },
+      1,
+      item_ids.length,
+      'item_id icon_url item_name'
+    );
+  }
 }

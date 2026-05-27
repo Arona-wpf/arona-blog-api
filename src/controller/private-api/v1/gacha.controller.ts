@@ -20,6 +20,7 @@ import {
   CreateGachaTaskDTO,
   DeleteGachaConfigDTO,
   GetGachaConfigListDTO,
+  GetGachaRecordListDTO,
   ImportGachaDTO,
   UpdateGachaConfigDTO,
 } from '@/dto/gacha.dto';
@@ -210,7 +211,7 @@ export class PriV1GachaController {
       throw BUSINESS_ERROR_CONSTANT.FILE_UPLOAD_NOT_FOUND();
     }
     const result = await this.gachaRecordService.parseAndImportGachaJson(
-      files[0].filename,
+      files[0].data,
       fields.gacha_config_id,
       fields.game_type as GameType
     );
@@ -219,6 +220,38 @@ export class PriV1GachaController {
       data: result,
       group: 'gacha',
       msg: 'gacha.import.success',
+    };
+  }
+
+  /**
+   * 获取祈愿记录列表（按gacha_type分组）
+   */
+  @Get('/record/list')
+  async getRecordList(@Query() query: GetGachaRecordListDTO) {
+    const records = await this.gachaRecordService.getGachaRecordsByConfigId(
+      query.gacha_config_id
+    );
+
+    // 转换记录格式，添加标签信息
+    const groupedRecords: Record<string, any[]> = {};
+    for (const [gachaType, recordList] of Object.entries(records)) {
+      groupedRecords[gachaType] = recordList.map(record => ({
+        _id: record._id,
+        gacha_id: record.gacha_id,
+        gacha_type: record.gacha_type,
+        gacha_time: record.gacha_time,
+        item_id: record.item_id,
+        item_type: record.item_type,
+        item_name: record.item_name,
+        rank_type: record.rank_type,
+        icon_url: record.icon_url,
+      }));
+    }
+
+    return {
+      data: groupedRecords,
+      group: 'gacha',
+      msg: 'gacha.record.list.success',
     };
   }
 }
