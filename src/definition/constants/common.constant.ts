@@ -185,4 +185,7 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿配置数量超过限制
   GACHA_CONFIG_LIMIT_EXCEEDED: (args?: Record<string, string>) =>
     new BusinessError(1000907, 'error.gacha.config.limit.exceeded', args),
+  // 祈愿JSON文件UID与配置UID不一致
+  GACHA_IMPORT_UID_MISMATCH: (args?: Record<string, string>) =>
+    new BusinessError(1000908, 'error.gacha.import.uid.mismatch', args),
 };

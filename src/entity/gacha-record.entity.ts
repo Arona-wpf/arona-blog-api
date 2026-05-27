@@ -26,9 +26,6 @@ export class GachaRecordEntity {
   _id?: string;
 
   @prop({ type: String, required: true })
-  account: string; // 账号
-
-  @prop({ type: String, required: true })
   game_type: GameType; // 游戏类型
 
   @prop({ type: String, required: true })

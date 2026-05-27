@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  Fields,
+  Files,
   Get,
   Inject,
   Param,
@@ -9,17 +11,21 @@ import {
   Session,
 } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
+import { UploadFileInfo } from '@midwayjs/upload';
 
+import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
 import { GameType } from '@/definition/types/gacha.type';
 import {
   CreateGachaConfigDTO,
   CreateGachaTaskDTO,
   DeleteGachaConfigDTO,
   GetGachaConfigListDTO,
+  ImportGachaDTO,
   UpdateGachaConfigDTO,
 } from '@/dto/gacha.dto';
 import { IUserSession } from '@/interface';
 import { GachaConfigService } from '@/service/gacha-config.service';
+import { GachaRecordService } from '@/service/gacha-record.service';
 import { GachaTaskService } from '@/service/gacha-task.service';
 
 @Controller('/private-api/v1/gacha')
@@ -32,6 +38,9 @@ export class PriV1GachaController {
 
   @Inject()
   gachaConfigService: GachaConfigService;
+
+  @Inject()
+  gachaRecordService: GachaRecordService;
 
   /**
    * 创建祈愿同步任务
@@ -186,6 +195,30 @@ export class PriV1GachaController {
       data: null,
       group: 'gacha',
       msg: 'gacha.config.delete.success',
+    };
+  }
+
+  /**
+   * 导入祈愿记录（JSON文件）
+   */
+  @Post('/import')
+  async importGacha(
+    @Files('file') files: Array<UploadFileInfo<string>>,
+    @Fields() fields: ImportGachaDTO
+  ) {
+    if (!files?.length) {
+      throw BUSINESS_ERROR_CONSTANT.FILE_UPLOAD_NOT_FOUND();
+    }
+    const result = await this.gachaRecordService.parseAndImportGachaJson(
+      files[0].filename,
+      fields.gacha_config_id,
+      fields.game_type as GameType
+    );
+
+    return {
+      data: result,
+      group: 'gacha',
+      msg: 'gacha.import.success',
     };
   }
 }

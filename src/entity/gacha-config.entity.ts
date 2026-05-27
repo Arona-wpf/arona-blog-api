@@ -3,7 +3,7 @@ import { index, modelOptions, prop } from '@typegoose/typegoose';
 import { GameType } from '@/definition/types/gacha.type';
 import { randomId } from '@/utils/common';
 
-@index({ account: 1, game_type: 1, game_uid: 1 }, { background: true })
+@index({ account: 1, game_type: 1, region: 1, game_uid: 1 }, { unique: true, background: true })
 @modelOptions({
   schemaOptions: { collection: 'gacha_config' },
 })

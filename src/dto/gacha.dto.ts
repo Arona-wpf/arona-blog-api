@@ -99,3 +99,15 @@ export class GetGachaConfigListDTO {
   )
   game_type?: string;
 }
+
+export class ImportGachaDTO {
+  @Rule(
+    createStringRuleType('gacha.dto.game_type', true, 'gacha', {
+      enum: Object.values(GameTypeEnum),
+    })
+  )
+  game_type: string;
+
+  @Rule(createStringRuleType('gacha.dto.gacha_config_id', true, 'gacha'))
+  gacha_config_id: string;
+}

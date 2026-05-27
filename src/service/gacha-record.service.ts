@@ -2,6 +2,7 @@ import { Inject, Logger, Provide } from '@midwayjs/core';
 import { MidwayI18nService } from '@midwayjs/i18n';
 import { ILogger } from '@midwayjs/logger';
 import { AxiosInstance, AxiosResponse } from 'axios';
+import { readFile } from 'fs/promises';
 
 import { GachaRecordDao } from '@/dao/gacha-record.dao';
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
@@ -13,6 +14,7 @@ import {
 } from '@/definition/constants/gacha.constant';
 import { RedisStorageEnum } from '@/definition/enums/common.enum';
 import {
+  GachaItemTypeEnum,
   GameTypeEnum,
   GenshinImpactGachaTypeEnum,
   HonkaiStarRailGachaTypeEnum,
@@ -25,6 +27,7 @@ import {
 import { GachaRecordEntity } from '@/entity/gacha-record.entity';
 import { AxiosHelper } from '@/helper/axios.helper';
 import { RedisHelper } from '@/helper/redis.helper';
+import { GachaConfigService } from '@/service/gacha-config.service';
 
 const GACHA_LOCK_PREFIX = 'gacha:lock';
 const GACHA_LOCK_TTL = 300; // 5 minutes
@@ -33,6 +36,9 @@ const GACHA_LOCK_TTL = 300; // 5 minutes
 export class GachaRecordService {
   @Inject()
   gachaRecordDao: GachaRecordDao;
+
+  @Inject()
+  gachaConfigService: GachaConfigService;
 
   @Inject()
   axiosHelper: AxiosHelper;
@@ -455,5 +461,158 @@ export class GachaRecordService {
     return await this.axiosHelper.getAxiosInstance(
       gameType + (isGlobalServer ? '_global' : '')
     );
+  }
+
+  /**
+   * 解析并导入JSON祈愿记录文件
+   * @param filePath JSON文件路径
+   * @param gachaConfigId 祈愿配置ID
+   * @param gameType 游戏类型
+   * @param account 用户账号
+   * @returns 导入结果
+   */
+  async parseAndImportGachaJson(
+    filePath: string,
+    gachaConfigId: string,
+    gameType: GameType
+  ): Promise<{ total: number; imported: number }> {
+    const config =
+      await this.gachaConfigService.getGachaConfigById(gachaConfigId);
+
+    const fileContent = await readFile(filePath, 'utf-8');
+    const jsonData: Record<string, any> = JSON.parse(fileContent);
+
+    const gameKeyMap: Record<GameType, string> = {
+      [GameTypeEnum.GENSHIN_IMPACT]: 'hk4e',
+      [GameTypeEnum.HONKAI_STAR_RAIL]: 'hkrpg',
+      [GameTypeEnum.ZENLESS_ZONE_ZERO]: 'nap',
+    };
+
+    const gameKey = gameKeyMap[gameType];
+    const gameDataList = jsonData[gameKey];
+    if (!gameDataList || !Array.isArray(gameDataList)) {
+      this.logger.warn(
+        `[GachaRecordService] No data found for game key: ${gameKey}`
+      );
+      return { total: 0, imported: 0 };
+    }
+
+    // 收集 JSON 中所有的 gacha_id（对应 item.id 字段）
+    const allGachaIds: string[] = [];
+    for (const gameData of gameDataList) {
+      if (!gameData.list || !Array.isArray(gameData.list)) continue;
+      for (const item of gameData.list) {
+        allGachaIds.push(item.id);
+      }
+    }
+
+    if (allGachaIds.length === 0) {
+      return { total: 0, imported: 0 };
+    }
+
+    // 查询数据库中已存在的 gacha_id
+    const existingIds = new Set<string>();
+    const batchSize = 1000;
+    const totalItems = allGachaIds.length;
+
+    for (let offset = 0; offset < totalItems; offset += batchSize) {
+      const batchIds = allGachaIds.slice(offset, offset + batchSize);
+      const existingRecords = await this.gachaRecordDao.findMany(
+        {
+          game_type: gameType,
+          server_region: config.region,
+          uid: config.game_uid,
+          gacha_id: { $in: batchIds },
+        },
+        1,
+        batchIds.length,
+        'gacha_id'
+      );
+      for (const record of existingRecords) {
+        existingIds.add(record.gacha_id);
+      }
+    }
+
+    // 过滤掉已存在的记录，只导入新的
+    let totalImported = 0;
+
+    for (const gameData of gameDataList) {
+      const { uid, timezone, list } = gameData;
+      if (!list || !Array.isArray(list)) continue;
+
+      if (String(uid) !== String(config.game_uid)) {
+        throw BUSINESS_ERROR_CONSTANT.GACHA_IMPORT_UID_MISMATCH();
+      }
+
+      const newItems = list.filter(item => !existingIds.has(item.id));
+      if (newItems.length === 0) continue;
+
+      const entities = newItems.map(item => {
+        const entity = new GachaRecordEntity();
+        Object.assign(entity, {
+          game_type: gameType,
+          server_region: config.region,
+          region_time_zone: timezone,
+          uid: config.game_uid,
+          gacha_id: item.id,
+          gacha_type: item.gacha_type,
+          gacha_time: new Date(item.time),
+          item_id: item.item_id,
+          item_type: this.resolveItemType(gameType, item.item_id),
+          item_name: item.name,
+          rank_type: this.resolveRankType(gameType, item.rank_type),
+        });
+        return entity;
+      });
+
+      if (entities.length > 0) {
+        await this.gachaRecordDao.createMany(entities);
+        totalImported += entities.length;
+      }
+    }
+
+    this.logger.info(
+      `[GachaRecordService] Imported ${totalImported} gacha records from JSON file for config ${gachaConfigId}`
+    );
+
+    return { total: allGachaIds.length, imported: totalImported };
+  }
+
+  /**
+   * 根据 item_id 长度和前缀判断物品类型
+   */
+  private resolveItemType(gameType: GameType, itemId: string): string {
+    const len = itemId.length;
+    switch (gameType) {
+      case GameTypeEnum.GENSHIN_IMPACT:
+        return len === 5
+          ? GachaItemTypeEnum.WEAPON
+          : GachaItemTypeEnum.CHARACTER;
+      case GameTypeEnum.HONKAI_STAR_RAIL:
+        return len === 4
+          ? GachaItemTypeEnum.CHARACTER
+          : GachaItemTypeEnum.WEAPON;
+      case GameTypeEnum.ZENLESS_ZONE_ZERO:
+        if (len === 4) return GachaItemTypeEnum.CHARACTER;
+        if (len === 5) {
+          return itemId.startsWith('5')
+            ? GachaItemTypeEnum.BANBOO
+            : GachaItemTypeEnum.WEAPON;
+        }
+        return '';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * 绝区零将 rank_type 数字映射为 S/A/B，原神和星铁保持原值
+   */
+  private resolveRankType(gameType: GameType, rankType: string): string {
+    if (gameType !== GameTypeEnum.ZENLESS_ZONE_ZERO) {
+      return rankType.toString();
+    }
+    const zzzRankMap: Record<string, string> = { '4': 'S', '3': 'A', '2': 'B' };
+    return zzzRankMap[rankType] ?? rankType.toString();
   }
 }
