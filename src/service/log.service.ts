@@ -3,12 +3,15 @@ import { IMidwayApplication } from '@midwayjs/core';
 import { ILogger } from '@midwayjs/logger';
 import * as chokidar from 'chokidar';
 import * as fs from 'fs';
+import { tmpdir } from 'os';
 import * as path from 'path';
 
 import { LogTypeEnum } from '@/definition/enums/log.enum';
 import { LogFileInfo, LogSubscriber } from '@/definition/types/log.type';
 import { SubscribeLogDto } from '@/dto/log.dto';
 import { WsConnectionManager } from '@/manage/ws-connection.manage';
+
+import packageJson from '../../package.json';
 
 /**
  * 日志服务
@@ -43,7 +46,7 @@ export class LogService {
   @Init()
   async initLogDir() {
     // 获取日志目录路径：baseDir/logs
-    this.logDir = path.join(this.app.getBaseDir(), 'logs');
+    this.logDir = path.join(tmpdir(), 'arona-blog', packageJson.name, 'logs');
     this.logger.info(`[LogService] Log directory: ${this.logDir}`);
   }
 

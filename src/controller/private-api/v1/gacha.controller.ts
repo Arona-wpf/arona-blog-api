@@ -49,9 +49,7 @@ export class PriV1GachaController {
   @Post('/sync')
   async createTask(@Body() body: CreateGachaTaskDTO) {
     const task = await this.gachaTaskService.createGachaTask(
-      body.uid,
-      body.game_type as GameType,
-      body.gacha_url
+      body.gacha_config_id
     );
 
     return {

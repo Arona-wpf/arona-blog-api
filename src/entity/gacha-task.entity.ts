@@ -24,6 +24,9 @@ export class GachaTaskEntity {
   @prop({ type: String, required: true })
   gacha_url: string; // 祈愿URL（用于后台执行）
 
+  @prop({ type: String })
+  gacha_config_id?: string; // 祈愿配置ID（用于关联配置及异步更新图鉴）
+
   @prop({
     type: String,
     required: true,

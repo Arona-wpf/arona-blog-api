@@ -294,6 +294,83 @@ export class GachaRecordService {
   }
 
   /**
+   * 同步祈愿数据并收集item数据（用于任务执行后异步更新图鉴）
+   * @param uid 游戏uid
+   * @param gameType 游戏类型
+   * @param axiosInstance 请求实例
+   * @param searchParams 查询参数
+   * @param serverRegion 服务器区域
+   */
+  async syncGachaDataWithItems(
+    uid: string,
+    gameType: GameType,
+    axiosInstance: AxiosInstance,
+    searchParams: URLSearchParams,
+    serverRegion: string
+  ): Promise<{
+    totalRecords: number;
+    syncedItems: Array<{ name: string; item_id: string }>;
+  }> {
+    const gameTypeLabel = this.getGameTypeLabel(gameType);
+    const gachaTypeList = this.getGachaTypeList(gameType);
+    const apiPath = this.getGachaApiPath(gameType);
+
+    this.logger.info(
+      `[GachaRecordService] Starting gacha sync with items for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, serverRegion: ${serverRegion}`
+    );
+
+    let totalNewRecords = 0;
+    const syncedItems: Array<{ name: string; item_id: string }> = [];
+
+    for (const gachaType of gachaTypeList) {
+      const gachaTypeLabel = this.getGachaTypeLabel(gachaType, gameType);
+      const lockKey = this.generateLockKey(
+        gameType,
+        serverRegion,
+        uid,
+        gachaType
+      );
+
+      const lockAcquired = await this.acquireLock(lockKey);
+      if (!lockAcquired) {
+        this.logger.warn(
+          `[GachaRecordService] Lock acquisition failed for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, skipping (may be in progress)`
+        );
+        continue;
+      }
+
+      this.logger.info(
+        `[GachaRecordService] Acquired lock for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
+      );
+
+      try {
+        const result = await this.syncGachaDataByTypeWithItems(
+          uid,
+          gameType,
+          axiosInstance,
+          searchParams,
+          serverRegion,
+          gachaType,
+          apiPath
+        );
+        totalNewRecords += result.totalNewRecords;
+        syncedItems.push(...result.syncedItems);
+      } finally {
+        await this.releaseLock(lockKey);
+        this.logger.info(
+          `[GachaRecordService] Released lock for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
+        );
+      }
+    }
+
+    this.logger.info(
+      `[GachaRecordService] Completed gacha sync with items for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, total new records: ${totalNewRecords}, synced items: ${syncedItems.length}`
+    );
+
+    return { totalRecords: totalNewRecords, syncedItems };
+  }
+
+  /**
    * 同步单个祈愿类型的数据
    * @param uid 游戏uid
    * @param gameType 游戏类型
@@ -445,6 +522,153 @@ export class GachaRecordService {
     );
 
     return totalNewRecords;
+  }
+
+  /**
+   * 同步单个祈愿类型的数据并收集item信息
+   * @param uid 游戏uid
+   * @param gameType 游戏类型
+   * @param axiosInstance 请求实例
+   * @param searchParams 查询参数
+   * @param serverRegion 服务器区域
+   * @param gachaType 祈愿类型
+   * @param apiPath API路径
+   */
+  private async syncGachaDataByTypeWithItems(
+    uid: string,
+    gameType: GameType,
+    axiosInstance: AxiosInstance,
+    searchParams: URLSearchParams,
+    serverRegion: string,
+    gachaType: string,
+    apiPath: string
+  ): Promise<{
+    totalNewRecords: number;
+    syncedItems: Array<{ name: string; item_id: string }>;
+  }> {
+    const gachaTypeLabel = this.getGachaTypeLabel(gachaType, gameType);
+
+    this.logger.info(
+      `[GachaRecordService] Fetching recent gacha records for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
+    );
+    const recentGachaRecords = await this.gachaRecordDao.findMany(
+      {
+        game_type: gameType,
+        server_region: serverRegion,
+        uid,
+        gacha_type: gachaType,
+      },
+      1,
+      100,
+      'gacha_id',
+      { gacha_time: -1 }
+    );
+    const recentGachaIds = recentGachaRecords.map(record => record.gacha_id);
+    this.logger.info(
+      `[GachaRecordService] Found ${recentGachaRecords.length} recent records for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
+    );
+
+    let page = 1;
+    const size = 50;
+    let fetchMore = true;
+    let retryCount = 0;
+    let totalNewRecords = 0;
+    const syncedItems: Array<{ name: string; item_id: string }> = [];
+
+    const currentSearchParams = new URLSearchParams(searchParams);
+    currentSearchParams.set('gacha_type', gachaType);
+    currentSearchParams.set('size', size.toString());
+
+    while (fetchMore) {
+      if (retryCount) {
+        if (retryCount >= 3) {
+          this.logger.error(
+            `[GachaRecordService] Max retries reached for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, aborting`
+          );
+          break;
+        }
+        this.logger.warn(
+          `[GachaRecordService] Retrying fetch for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, attempt ${retryCount}`
+        );
+      }
+
+      let response: AxiosResponse<IMihoyoGachaLogFetchData>;
+      try {
+        response = await axiosInstance.get(
+          `${apiPath}?${currentSearchParams.toString()}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `[GachaRecordService] Request failed for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, page: ${page}, error: ${error.message}`
+        );
+        retryCount++;
+        continue;
+      }
+
+      const { retcode, message, data } = response.data;
+      if (retcode === 0 && message === 'OK' && data.list.length > 0) {
+        const uniqueGachaList = data.list.filter(
+          item => !recentGachaIds.includes(item.gacha_id)
+        );
+
+        if (uniqueGachaList.length > 0) {
+          this.logger.info(
+            `[GachaRecordService] Found ${uniqueGachaList.length} new records for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, page: ${page}`
+          );
+
+          const newGachaList: GachaRecordEntity[] = [];
+          uniqueGachaList.forEach(r => {
+            const newGachaRecordEntity = new GachaRecordEntity();
+            Object.assign(newGachaRecordEntity, {
+              game_type: gameType,
+              server_region: serverRegion,
+              region_time_zone: data.region_time_zone,
+              uid,
+              gacha_id: r.id,
+              gacha_type: gachaType,
+              gacha_time: new Date(r.time),
+              item_id: r.item_id,
+              item_type: r.item_type,
+              item_name: r.name,
+              rank_type: r.rank_type,
+            });
+            newGachaList.push(newGachaRecordEntity);
+
+            syncedItems.push({ name: r.name, item_id: r.item_id });
+          });
+
+          this.logger.info(
+            `[GachaRecordService] Writing ${newGachaList.length} records to database for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
+          );
+          await this.gachaRecordDao.createMany(newGachaList);
+          totalNewRecords += newGachaList.length;
+
+          if (newGachaList.length === size) {
+            page++;
+            currentSearchParams.set('page', page.toString());
+            currentSearchParams.set(
+              'end_id',
+              uniqueGachaList[uniqueGachaList.length - 1].id
+            );
+          }
+        }
+
+        if (uniqueGachaList.length < size) {
+          fetchMore = false;
+        }
+      } else {
+        this.logger.error(
+          `[GachaRecordService] API returned error for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, retcode: ${retcode}, message: ${message}`
+        );
+        fetchMore = false;
+      }
+    }
+
+    this.logger.info(
+      `[GachaRecordService] Completed gacha sync with items for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, new records: ${totalNewRecords}, items: ${syncedItems.length}`
+    );
+
+    return { totalNewRecords, syncedItems };
   }
 
   /**
@@ -627,6 +851,37 @@ export class GachaRecordService {
       .catch(error => {
         this.logger.error(
           '[GachaRecordService] asyncUpdateAtlasItemId error',
+          error
+        );
+      });
+  }
+
+  /**
+   * 从同步任务收集的item数据异步更新图鉴中的item_id
+   * @param gameType 游戏类型
+   * @param syncedItems 同步收集的item数据
+   */
+  asyncUpdateAtlasItemIdFromSync(
+    gameType: GameType,
+    syncedItems: Array<{ name: string; item_id: string }>
+  ) {
+    if (syncedItems.length === 0) return;
+
+    const itemUpdates: Array<{ item_name: string; item_id: string }> =
+      Array.from(
+        new Map(
+          syncedItems.map(item => [
+            item.name,
+            { item_name: item.name, item_id: item.item_id },
+          ])
+        ).values()
+      );
+
+    this.gachaAtlasService
+      .batchUpdateItemIdByName(gameType, itemUpdates)
+      .catch(error => {
+        this.logger.error(
+          '[GachaRecordService] asyncUpdateAtlasItemIdFromSync error',
           error
         );
       });

@@ -14,9 +14,8 @@ import { zh_CN } from '@/locale/zh';
 const config = (appInfo: MidwayAppInfo): MidwayConfig => {
   const pkg = appInfo.pkg;
 
-  const baseDir = appInfo.baseDir;
-  const logDir = join(baseDir, 'logs');
-  const tmpDir = join(tmpdir(), 'arona-blog');
+  const logDir = join(tmpdir(), 'arona-blog', pkg.name, 'logs');
+  const tmpDir = join(tmpdir(), 'arona-blog', pkg.name, 'tmp');
 
   return {
     // axios

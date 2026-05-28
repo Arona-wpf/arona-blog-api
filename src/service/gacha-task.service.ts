@@ -8,6 +8,7 @@ import {
   GameTypeEnum,
 } from '@/definition/enums/gacha.enum';
 import { GameType } from '@/definition/types/gacha.type';
+import { GachaConfigService } from '@/service/gacha-config.service';
 import { GachaRecordService } from '@/service/gacha-record.service';
 
 @Provide()
@@ -18,26 +19,30 @@ export class GachaTaskService {
   @Inject()
   gachaRecordService: GachaRecordService;
 
+  @Inject()
+  gachaConfigService: GachaConfigService;
+
   @Logger()
   logger: ILogger;
 
   /**
    * 创建祈愿分析任务
-   * @param uid 游戏uid
-   * @param gameType 游戏类型
-   * @param gachaUrl 祈愿URL
+   * @param gachaConfigId 祈愿配置ID
    * @returns 任务实体
    */
-  async createGachaTask(uid: string, gameType: GameType, gachaUrl: string) {
-    const gameTypeLabel = this.gachaRecordService.getGameTypeLabel(gameType);
+  async createGachaTask(gachaConfigId: string) {
+    const config =
+      await this.gachaConfigService.getGachaConfigById(gachaConfigId);
+
     this.logger.info(
-      `[GachaTaskService] Creating gacha task for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}`
+      `[GachaTaskService] Creating gacha task for config: ${gachaConfigId}, uid: ${config.game_uid}, gameType: ${config.game_type}`
     );
 
     const task = await this.gachaTaskDao.createOne({
-      game_type: gameType,
-      uid,
-      gacha_url: gachaUrl,
+      game_type: config.game_type,
+      uid: config.game_uid,
+      gacha_url: config.gacha_url,
+      gacha_config_id: gachaConfigId,
       status: GachaTaskStatusEnum.PENDING,
     });
 
@@ -129,19 +134,21 @@ export class GachaTaskService {
         host
       );
 
-      // 根据游戏类型执行同步
+      // 根据游戏类型执行同步（收集item数据用于图鉴更新）
       let totalRecords = 0;
+      let syncedItems: Array<{ name: string; item_id: string }> = [];
       switch (gameType) {
         case GameTypeEnum.GENSHIN_IMPACT:
         case GameTypeEnum.HONKAI_STAR_RAIL:
         case GameTypeEnum.ZENLESS_ZONE_ZERO:
-          totalRecords = await this.gachaRecordService.syncGachaData(
-            task.uid,
-            gameType,
-            axiosInstance,
-            searchParams,
-            serverRegion
-          );
+          ({ totalRecords, syncedItems } =
+            await this.gachaRecordService.syncGachaDataWithItems(
+              task.uid,
+              gameType,
+              axiosInstance,
+              searchParams,
+              serverRegion
+            ));
           break;
         default:
           this.logger.error(
@@ -160,6 +167,17 @@ export class GachaTaskService {
           },
         }
       );
+
+      // 如果配置为国服，异步更新图鉴中的item_id
+      if (task.gacha_config_id && this.isCnServer(serverRegion)) {
+        this.logger.info(
+          `[GachaTaskService] CN server detected, triggering asyncUpdateAtlasItemId for task ${taskId}`
+        );
+        this.gachaRecordService.asyncUpdateAtlasItemIdFromSync(
+          gameType,
+          syncedItems
+        );
+      }
 
       this.logger.info(
         `[GachaTaskService] Task ${taskId} completed successfully, total records: ${totalRecords}`
@@ -183,6 +201,13 @@ export class GachaTaskService {
         `[GachaTaskService] Task ${taskId} failed with error: ${errorMessage}`
       );
     }
+  }
+
+  /**
+   * 判断是否为国服
+   */
+  private isCnServer(region: string): boolean {
+    return region.includes('cn');
   }
 
   /**
