@@ -31,7 +31,7 @@ export class CreateGachaConfigDTO {
 
   @Rule(
     createStringRuleType('gacha.dto.game_uid', true, 'gacha', {
-      min: 9,
+      min: 8,
       max: 10,
     })
   )
