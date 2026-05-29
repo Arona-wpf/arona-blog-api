@@ -13,7 +13,7 @@ Backend API service for Arona's personal blog. Features are still being develope
 | Server       | Koa 2                |
 | Protocol     | HTTP / WebSocket     |
 | Cache        | Redis (koa-redis)    |
-| Database     | MongoDB 8 (mongoose) |
+| Database     | MongoDB 7 (mongoose) |
 | File Storage | Minio / Tencent COS  |
 | Build Tool   | Gulp                 |
 
