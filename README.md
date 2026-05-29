@@ -8,11 +8,11 @@ Backend API service for Arona's personal blog. Features are still being develope
 
 | Component    | Version              |
 | ------------ | -------------------- |
-| Framework    | Midway.js 3          |
+| Framework    | Midway.js 3.20.24    |
 | Language     | TypeScript 5.9.3     |
 | Server       | Koa 2                |
 | Protocol     | HTTP / WebSocket     |
-| Cache        | Redis (koa-redis)    |
+| Cache        | Redis 8              |
 | Database     | MongoDB 7 (mongoose) |
 | File Storage | Minio / Tencent COS  |
 | Build Tool   | Gulp                 |

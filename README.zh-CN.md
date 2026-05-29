@@ -6,16 +6,16 @@ Aronaの小屋 网站的后端 API 服务。功能还在逐步开发中……
 
 ## 项目架构
 
-| 组成     | 版本                   |
-| -------- | ---------------------- |
-| 框架     | Midway.js 3.20.22      |
-| 语言     | TypeScript 5.9.3       |
-| 服务器   | Koa 2                  |
-| 通信协议 | HTTP / WebSocket       |
-| 缓存     | Redis 8                |
-| 数据库   | MongoDB 7 (mongoose)   |
-| 文件存储 | Minio / 腾讯云 COS     |
-| 打包工具 | Gulp                   |
+| 组成     | 版本                 |
+| -------- | -------------------- |
+| 框架     | Midway.js 3.20.24    |
+| 语言     | TypeScript 5.9.3     |
+| 服务器   | Koa 2                |
+| 通信协议 | HTTP / WebSocket     |
+| 缓存     | Redis 8              |
+| 数据库   | MongoDB 7 (mongoose) |
+| 文件存储 | Minio / 腾讯云 COS   |
+| 打包工具 | Gulp                 |
 
 ## 开发命令
 
