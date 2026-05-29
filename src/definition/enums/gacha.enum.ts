@@ -1,15 +1,24 @@
+/**
+ * 游戏类型枚举。
+ */
 export enum GameTypeEnum {
   GENSHIN_IMPACT = 'genshin_impact',
   HONKAI_STAR_RAIL = 'honkai_star_rail',
   ZENLESS_ZONE_ZERO = 'zenless_zone_zero',
 }
 
+/**
+ * 祈愿记录中的物品类型枚举。
+ */
 export enum GachaItemTypeEnum {
   CHARACTER = 'character',
   WEAPON = 'weapon',
   BANBOO = 'banboo',
 }
 
+/**
+ * 原神服务器区域枚举。
+ */
 export enum GenshinImpactServerRegionEnum {
   CN_GF01 = 'cn_gf01', // 国服
   CN_QD01 = 'cn_qd01', // 渠道服
@@ -19,6 +28,9 @@ export enum GenshinImpactServerRegionEnum {
   OS_CHT = 'os_cht', // 港澳台服
 }
 
+/**
+ * 崩坏：星穹铁道服务器区域枚举。
+ */
 export enum HonkaiStarRailServerRegionEnum {
   PROD_GF_CN = 'prod_gf_cn', // 国服
   PROD_QD_CN = 'prod_qd_cn', // 渠道服
@@ -28,6 +40,9 @@ export enum HonkaiStarRailServerRegionEnum {
   PROD_OFFICIAL_CHT = 'prod_official_cht', // 港澳台服
 }
 
+/**
+ * 绝区零服务器区域枚举。
+ */
 export enum ZenlessZoneZeroServerRegionEnum {
   PROD_GF_CN = 'prod_gf_cn', // 国服
   PROD_QD_CN = 'prod_qd_cn', // 渠道服
@@ -37,6 +52,9 @@ export enum ZenlessZoneZeroServerRegionEnum {
   PROD_OFFICIAL_CHT = 'prod_official_cht', // 港澳台服
 }
 
+/**
+ * 原神祈愿卡池类型枚举。
+ */
 export enum GenshinImpactGachaTypeEnum {
   NOVICE_WISH = '100', // 新手祈愿
   PERMANENT_WISH = '200', // 常驻祈愿
@@ -46,6 +64,9 @@ export enum GenshinImpactGachaTypeEnum {
   CHRONICLED_WISH = '401', // 集录祈愿
 }
 
+/**
+ * 崩坏：星穹铁道跃迁类型枚举。
+ */
 export enum HonkaiStarRailGachaTypeEnum {
   REGULAR_WARP = '1', // 常驻跃迁
   STARTER_WARP = '2', // 新手跃迁
@@ -55,6 +76,9 @@ export enum HonkaiStarRailGachaTypeEnum {
   LIGHT_CONE_COLLABORATION_WARP = '22', // 光锥联动跃迁
 }
 
+/**
+ * 绝区零频段类型枚举。
+ */
 export enum ZenlessZoneZeroGachaTypeEnum {
   STABLE_CHANNEL = '1', // 常驻频段
   EXCLUSIVE_CHANNEL = '2', // 独家频段
@@ -62,6 +86,9 @@ export enum ZenlessZoneZeroGachaTypeEnum {
   BANBOO_CHANNEL = '5', // 邦布频段
 }
 
+/**
+ * 祈愿同步任务状态枚举。
+ */
 export enum GachaTaskStatusEnum {
   PENDING = 'pending', // 待处理
   PROCESSING = 'processing', // 处理中
@@ -69,6 +96,9 @@ export enum GachaTaskStatusEnum {
   FAILED = 'failed', // 失败
 }
 
+/**
+ * 原神祈愿角色元素类型枚举。
+ */
 export enum GenshinImpactGachaItemElementEnum {
   ANEMO = 'Anemo',
   GEO = 'Geo',
@@ -79,6 +109,9 @@ export enum GenshinImpactGachaItemElementEnum {
   CRYO = 'Cryo',
 }
 
+/**
+ * 原神祈愿武器类型枚举。
+ */
 export enum GenshinImpactGachaItemWeaponTypeEnum {
   SWORD = 'Sword',
   CLAYMORE = 'Claymore',
@@ -87,6 +120,9 @@ export enum GenshinImpactGachaItemWeaponTypeEnum {
   BOW = 'Bow',
 }
 
+/**
+ * 崩坏：星穹铁道祈愿命途枚举。
+ */
 export enum HonkaiStarRailGachaItemPathEnum {
   DESTRUCTION = 'Destruction',
   THE_HUNT = 'The Hunt',
@@ -106,6 +142,9 @@ export enum HonkaiStarRailGachaItemPathEnum {
   ENIGMATA = 'Enigmata',
 }
 
+/**
+ * 崩坏：星穹铁道祈愿属性枚举。
+ */
 export enum HonkaiStarRailGachaItemCombatTypeEnum {
   PHYSICAL = 'Physical',
   FIRE = 'Fire',
@@ -116,6 +155,9 @@ export enum HonkaiStarRailGachaItemCombatTypeEnum {
   IMAGINARY = 'Imaginary',
 }
 
+/**
+ * 绝区零祈愿属性枚举。
+ */
 export enum ZenlessZoneZeroGachaItemAttributeEnum {
   PHYSICAL = 'Physical',
   FIRE = 'Fire',
@@ -124,6 +166,9 @@ export enum ZenlessZoneZeroGachaItemAttributeEnum {
   ETHER = 'Ether',
 }
 
+/**
+ * 绝区零祈愿特性枚举。
+ */
 export enum ZenlessZoneZeroGachaItemSpecialtyEnum {
   ATTACK = 'Attack',
   STUN = 'Stun',

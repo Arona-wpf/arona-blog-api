@@ -101,3 +101,18 @@ export class GetGachaRecordListDTO {
   @Rule(createStringRuleType('gacha.dto.gacha_config_id', true, 'gacha'))
   gacha_config_id: string;
 }
+
+export class ExportGachaDTO {
+  @Rule(createStringRuleType('gacha.dto.gacha_config_id', true, 'gacha'))
+  gacha_config_id: string;
+
+  @Rule(createStringRuleType('gacha.dto.file_name', true, 'gacha'))
+  file_name: string;
+
+  @Rule(
+    createStringRuleType('gacha.dto.file_type', true, 'gacha', {
+      enum: ['json', 'excel'],
+    })
+  )
+  file_type: string;
+}

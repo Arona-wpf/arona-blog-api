@@ -2,9 +2,10 @@ import { Inject, Logger, Provide } from '@midwayjs/core';
 import { MidwayI18nService } from '@midwayjs/i18n';
 import { ILogger } from '@midwayjs/logger';
 import { AxiosInstance, AxiosResponse } from 'axios';
+import dayjs from 'dayjs';
+import ExcelJS from 'exceljs';
 import { readFile } from 'fs/promises';
 
-import { GachaAtlasDao } from '@/dao/gacha-atlas.dao';
 import { GachaRecordDao } from '@/dao/gacha-record.dao';
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
 import {
@@ -13,7 +14,7 @@ import {
   HonkaiStarRailGachaTypeI18nKeyMap,
   ZenlessZoneZeroGachaTypeI18nKeyMap,
 } from '@/definition/constants/gacha.constant';
-import { RedisStorageEnum } from '@/definition/enums/common.enum';
+import { LocaleEnum, RedisStorageEnum } from '@/definition/enums/common.enum';
 import {
   GachaItemTypeEnum,
   GameTypeEnum,
@@ -30,6 +31,7 @@ import { AxiosHelper } from '@/helper/axios.helper';
 import { RedisHelper } from '@/helper/redis.helper';
 import { GachaAtlasService } from '@/service/gacha-atlas.service';
 import { GachaConfigService } from '@/service/gacha-config.service';
+import { MinioService } from '@/service/minio.service';
 
 const GACHA_LOCK_PREFIX = 'gacha:lock';
 const GACHA_LOCK_TTL = 300; // 5 minutes
@@ -38,9 +40,6 @@ const GACHA_LOCK_TTL = 300; // 5 minutes
 export class GachaRecordService {
   @Inject()
   gachaRecordDao: GachaRecordDao;
-
-  @Inject()
-  gachaAtlasDao: GachaAtlasDao;
 
   @Inject()
   gachaConfigService: GachaConfigService;
@@ -56,6 +55,9 @@ export class GachaRecordService {
 
   @Inject()
   i18nService: MidwayI18nService;
+
+  @Inject()
+  minioService: MinioService;
 
   @Logger()
   logger: ILogger;
@@ -976,5 +978,208 @@ export class GachaRecordService {
     }
 
     return records;
+  }
+
+  /**
+   * 导出祈愿记录，上传到 MinIO 并返回下载链接
+   * @param gachaConfigId 祈愿配置ID
+   * @param fileName 文件名
+   * @param fileType 文件类型（json/excel）
+   * @param locale 当前语言
+   * @returns MinIO 下载链接
+   */
+  async exportGachaRecords(
+    gachaConfigId: string,
+    fileName: string,
+    fileType: 'json' | 'excel',
+    locale: string
+  ): Promise<string> {
+    const config =
+      await this.gachaConfigService.getGachaConfigById(gachaConfigId);
+
+    const records = await this.gachaRecordDao.findGroupedByGachaType({
+      game_type: config.game_type,
+      server_region: config.region,
+      uid: config.game_uid,
+    });
+
+    // 收集所有记录
+    const allRecords: GachaRecordEntity[] = [];
+    for (const recordList of Object.values(records)) {
+      allRecords.push(...recordList);
+    }
+
+    if (allRecords.length === 0) {
+      throw BUSINESS_ERROR_CONSTANT.GACHA_EXPORT_EMPTY();
+    }
+
+    const isZh = locale === LocaleEnum.ZH_CN;
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9一-龥_-]/g, '');
+    const timestamp = dayjs().format('YYYYMMDD_HHmmss');
+
+    if (fileType === 'json') {
+      const ext = 'json';
+      const objectKey = `gacha/export/${dayjs().format('YYYY-MM')}/${safeFileName}_${timestamp}.${ext}`;
+
+      const gameKeyMap: Record<string, string> = {
+        [GameTypeEnum.GENSHIN_IMPACT]: 'hk4e',
+        [GameTypeEnum.HONKAI_STAR_RAIL]: 'hkrpg',
+        [GameTypeEnum.ZENLESS_ZONE_ZERO]: 'nap',
+      };
+      const gameKey = gameKeyMap[config.game_type];
+
+      const groupedData: Record<string, any[]> = {};
+      for (const record of allRecords) {
+        if (!groupedData[record.gacha_type]) {
+          groupedData[record.gacha_type] = [];
+        }
+        groupedData[record.gacha_type].push({
+          id: record.gacha_id,
+          gacha_type: record.gacha_type,
+          item_id: record.item_id,
+          name: record.item_name,
+          item_type: record.item_type,
+          rank_type: record.rank_type,
+          time: dayjs(record.gacha_time).format('YYYY-MM-DD HH:mm:ss'),
+          lang: isZh ? 'zh-cn' : 'en-us',
+        });
+      }
+
+      const exportData = {
+        [gameKey]: Object.entries(groupedData).map(([gachaType, list]) => ({
+          gacha_type: gachaType,
+          uid: config.game_uid,
+          timezone: allRecords[0]?.region_time_zone ?? 8,
+          lang: isZh ? 'zh-cn' : 'en-us',
+          list,
+        })),
+      };
+
+      const buffer = Buffer.from(JSON.stringify(exportData, null, 2));
+      return this.minioService.uploadBuffer(
+        buffer,
+        objectKey,
+        'application/json'
+      );
+    }
+
+    if (fileType === 'excel') {
+      const ext = 'xlsx';
+      const objectKey = `gacha/export/${dayjs().format('YYYY-MM')}/${safeFileName}_${timestamp}.${ext}`;
+
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'Arona Blog';
+      workbook.created = new Date();
+
+      // 列名国际化
+      const columnHeaders = isZh
+        ? {
+            id: 'ID',
+            time: '时间',
+            type: '类型',
+            name: '名称',
+            category: '类别',
+            rank: '星级',
+            uid: 'UID',
+          }
+        : {
+            id: 'ID',
+            time: 'Time',
+            type: 'Type',
+            name: 'Name',
+            category: 'Category',
+            rank: 'Rank',
+            uid: 'UID',
+          };
+
+      const gachaTypeLabelMap: Record<string, { zh: string; en: string }> = {};
+      for (const gachaType of Object.keys(records)) {
+        gachaTypeLabelMap[gachaType] = this.getGachaTypeLabel(
+          gachaType,
+          config.game_type
+        );
+      }
+
+      for (const [gachaType, recordList] of Object.entries(records)) {
+        const label = isZh
+          ? gachaTypeLabelMap[gachaType]?.zh || gachaType
+          : gachaTypeLabelMap[gachaType]?.en || gachaType;
+        const worksheet = workbook.addWorksheet(label.slice(0, 31));
+
+        worksheet.columns = [
+          { header: columnHeaders.id, key: 'gacha_id', width: 20 },
+          { header: columnHeaders.time, key: 'gacha_time', width: 22 },
+          { header: columnHeaders.type, key: 'gacha_type_label', width: 16 },
+          { header: columnHeaders.name, key: 'item_name', width: 20 },
+          { header: columnHeaders.category, key: 'item_type', width: 12 },
+          { header: columnHeaders.rank, key: 'rank_type', width: 8 },
+          { header: columnHeaders.uid, key: 'uid', width: 12 },
+        ];
+
+        worksheet.getRow(1).font = { bold: true };
+        worksheet.getRow(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE0E0E0' },
+        };
+
+        for (const record of recordList) {
+          worksheet.addRow({
+            gacha_id: record.gacha_id,
+            gacha_time: isZh
+              ? dayjs(record.gacha_time).format('YYYY-MM-DD HH:mm:ss')
+              : new Date(record.gacha_time).toLocaleString('en-US'),
+            gacha_type_label: isZh
+              ? gachaTypeLabelMap[gachaType]?.zh || gachaType
+              : gachaTypeLabelMap[gachaType]?.en || gachaType,
+            item_name: record.item_name,
+            item_type: record.item_type,
+            rank_type: record.rank_type,
+            uid: config.game_uid,
+          });
+        }
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      return this.minioService.uploadBuffer(
+        Buffer.from(buffer),
+        objectKey,
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+    }
+
+    throw BUSINESS_ERROR_CONSTANT.GACHA_EXPORT_FILE_TYPE_INVALID();
+  }
+
+  /**
+   * 异步清理不再有任何配置关联的祈愿记录
+   * @param gameType 游戏类型
+   * @param region 服务器区域
+   * @param uid 游戏UID
+   */
+  asyncCleanupOrphanRecords(gameType: string, region: string, uid: string) {
+    this.gachaConfigService
+      .countConfigsByQuery({ game_type: gameType, region, game_uid: uid })
+      .then(count => {
+        if (count === 0) {
+          this.logger.info(
+            `[GachaRecordService] No configs found for gameType=${gameType}, region=${region}, uid=${uid}, cleaning up orphan gacha records`
+          );
+          return this.gachaRecordDao.deleteMany({
+            game_type: gameType,
+            server_region: region,
+            uid,
+          });
+        }
+        this.logger.info(
+          `[GachaRecordService] Found ${count} config(s) for gameType=${gameType}, region=${region}, uid=${uid}, skipping orphan cleanup`
+        );
+      })
+      .catch(err => {
+        this.logger.error(
+          '[GachaRecordService] asyncCleanupOrphanRecords error',
+          err
+        );
+      });
   }
 }

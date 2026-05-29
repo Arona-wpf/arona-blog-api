@@ -1,4 +1,6 @@
-// 日志类型枚举
+/**
+ * 日志文件类别枚举。
+ */
 export enum LogTypeEnum {
   APP = 'app', // 应用日志
   CORE = 'core', // 核心日志

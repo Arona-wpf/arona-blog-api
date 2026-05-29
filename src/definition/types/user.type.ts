@@ -1,6 +1,8 @@
 import { PermissionEntity } from '@/entity/permission.entity';
 
-// 用户角色项
+/**
+ * 用户角色信息。
+ */
 export interface IUserRoleItem {
   _id: string;
   name: string;
@@ -9,7 +11,9 @@ export interface IUserRoleItem {
   menu_permissions: PermissionEntity[];
 }
 
-// 用户角色和权限
+/**
+ * 用户及其角色权限聚合信息。
+ */
 export interface IUserWithRolesAndPermissions {
   _id: string;
   account: string;

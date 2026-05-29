@@ -113,24 +113,48 @@ export class MinioService {
    * @returns 包含桶名、对象名和下载地址
    */
   async uploadFile(file: UploadFileInfo<string>, type: FileType) {
-    const key = `${type}/${dayjs().format('YYYY-MM')}/${nanoid(16)}${extname(
+    const objectKey = `${type}/${dayjs().format('YYYY-MM')}/${nanoid(16)}${extname(
       file.filename
     )}`;
 
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
-        Key: key,
+        Key: objectKey,
         Body: createReadStream(file.data),
         ContentType: file.mimeType,
       })
     );
 
-    const url = await this.getDownloadUrl('127.0.0.1', key);
-    return {
-      object_name: key,
-      url,
-    };
+    return this.getAttachmentDownloadUrl(
+      objectKey,
+      10 * 60,
+      objectKey.split('/').pop()
+    );
+  }
+
+  /**
+   * 上传 buffer 到对象存储
+   * @param buffer 文件内容
+   * @param objectKey 对象路径（如 temp/gacha/xxx.json）
+   * @param contentType MIME 类型
+   * @returns 预签名下载链接
+   */
+  async uploadBuffer(buffer: Buffer, objectKey: string, contentType: string) {
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: objectKey,
+        Body: buffer,
+        ContentType: contentType,
+      })
+    );
+
+    return this.getAttachmentDownloadUrl(
+      objectKey,
+      10 * 60,
+      objectKey.split('/').pop()
+    );
   }
 
   /**

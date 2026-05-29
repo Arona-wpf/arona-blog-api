@@ -19,6 +19,7 @@ import {
   CreateGachaConfigDTO,
   CreateGachaTaskDTO,
   DeleteGachaConfigDTO,
+  ExportGachaDTO,
   GetGachaConfigListDTO,
   GetGachaRecordListDTO,
   ImportGachaDTO,
@@ -218,6 +219,26 @@ export class PriV1GachaController {
       data: result,
       group: 'gacha',
       msg: 'gacha.import.success',
+    };
+  }
+
+  /**
+   * 导出祈愿记录（JSON/Excel），上传到 MinIO 返回下载链接
+   */
+  @Post('/export')
+  async exportGacha(@Body() body: ExportGachaDTO) {
+    const locale = (this.ctx as any).locale || 'zh-cn';
+    const downloadUrl = await this.gachaRecordService.exportGachaRecords(
+      body.gacha_config_id,
+      body.file_name,
+      body.file_type as 'json' | 'excel',
+      locale
+    );
+
+    return {
+      data: { url: downloadUrl },
+      group: 'gacha',
+      msg: 'gacha.export.success',
     };
   }
 

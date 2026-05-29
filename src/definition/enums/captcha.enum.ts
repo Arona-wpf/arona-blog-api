@@ -1,4 +1,6 @@
-// 验证码类型枚举
+/**
+ * 验证码业务场景枚举。
+ */
 export enum CaptchaTypeEnum {
   LOGIN = 'login',
   REGISTER = 'register',

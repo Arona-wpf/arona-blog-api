@@ -5,7 +5,9 @@ import {
   ZenlessZoneZeroGachaTypeEnum,
 } from '../enums/gacha.enum';
 
-// 原神祈愿类型国际化 key 映射
+/**
+ * 原神祈愿类型到 i18n key 的映射。
+ */
 export const GenshinImpactGachaTypeI18nKeyMap: Record<string, string> = {
   [GenshinImpactGachaTypeEnum.NOVICE_WISH]:
     'gacha.type.genshin_impact.novice_wish',
@@ -21,7 +23,9 @@ export const GenshinImpactGachaTypeI18nKeyMap: Record<string, string> = {
     'gacha.type.genshin_impact.chronicled_wish',
 };
 
-// 崩坏：星穹铁道跃迁类型国际化 key 映射
+/**
+ * 崩坏：星穹铁道跃迁类型到 i18n key 的映射。
+ */
 export const HonkaiStarRailGachaTypeI18nKeyMap: Record<string, string> = {
   [HonkaiStarRailGachaTypeEnum.REGULAR_WARP]:
     'gacha.type.honkai_star_rail.regular_warp',
@@ -37,7 +41,9 @@ export const HonkaiStarRailGachaTypeI18nKeyMap: Record<string, string> = {
     'gacha.type.honkai_star_rail.light_cone_collaboration_warp',
 };
 
-// 绝区零频段类型国际化 key 映射
+/**
+ * 绝区零频段类型到 i18n key 的映射。
+ */
 export const ZenlessZoneZeroGachaTypeI18nKeyMap: Record<string, string> = {
   [ZenlessZoneZeroGachaTypeEnum.STABLE_CHANNEL]:
     'gacha.type.zenless_zone_zero.stable_channel',
@@ -49,14 +55,18 @@ export const ZenlessZoneZeroGachaTypeI18nKeyMap: Record<string, string> = {
     'gacha.type.zenless_zone_zero.banboo_channel',
 };
 
-// 游戏类型国际化 key 映射
+/**
+ * 游戏类型到 i18n key 的映射。
+ */
 export const GameTypeI18nKeyMap: Record<string, string> = {
   [GameTypeEnum.GENSHIN_IMPACT]: 'gacha.game_type.genshin_impact',
   [GameTypeEnum.HONKAI_STAR_RAIL]: 'gacha.game_type.honkai_star_rail',
   [GameTypeEnum.ZENLESS_ZONE_ZERO]: 'gacha.game_type.zenless_zone_zero',
 };
 
-// 星级名称到数字的映射
+/**
+ * 星级中文文本到数字字符串的映射（原神/星铁通用）。
+ */
 const GENSIN_AND_STAR_RAIL_RANK_TYPE_MAP: Record<string, string> = {
   五星: '5',
   四星: '4',
@@ -65,7 +75,9 @@ const GENSIN_AND_STAR_RAIL_RANK_TYPE_MAP: Record<string, string> = {
   一星: '1',
 };
 
-// 原神 元素类型映射
+/**
+ * 原神元素中文到英文枚举值映射。
+ */
 export const GENSHIN_IMPACT_ELEMENT_TYPE_MAP: Record<string, string> = {
   风: 'Anemo',
   岩: 'Geo',
@@ -76,7 +88,9 @@ export const GENSHIN_IMPACT_ELEMENT_TYPE_MAP: Record<string, string> = {
   冰: 'Cryo',
 };
 
-// 原神 元素类型 i18n key 映射（英文到 i18n key）
+/**
+ * 原神元素英文枚举值到 i18n key 的映射。
+ */
 export const GENSHIN_IMPACT_ELEMENT_TYPE_I18N_KEY_MAP: Record<string, string> =
   {
     Anemo: 'gacha.element.genshin_impact.anemo',
@@ -88,7 +102,9 @@ export const GENSHIN_IMPACT_ELEMENT_TYPE_I18N_KEY_MAP: Record<string, string> =
     Cryo: 'gacha.element.genshin_impact.cryo',
   };
 
-// 原神 武器类型映射
+/**
+ * 原神武器中文到英文枚举值映射。
+ */
 export const GENSHIN_IMPACT_WEAPON_TYPE_MAP: Record<string, string> = {
   单手剑: 'Sword',
   双手剑: 'Claymore',
@@ -97,7 +113,9 @@ export const GENSHIN_IMPACT_WEAPON_TYPE_MAP: Record<string, string> = {
   弓: 'Bow',
 };
 
-// 原神 武器类型 i18n key 映射（英文到 i18n key）
+/**
+ * 原神武器英文枚举值到 i18n key 的映射。
+ */
 export const GENSHIN_IMPACT_WEAPON_TYPE_I18N_KEY_MAP: Record<string, string> = {
   Sword: 'gacha.weapon.genshin_impact.sword',
   Claymore: 'gacha.weapon.genshin_impact.claymore',
@@ -106,7 +124,9 @@ export const GENSHIN_IMPACT_WEAPON_TYPE_I18N_KEY_MAP: Record<string, string> = {
   Bow: 'gacha.weapon.genshin_impact.bow',
 };
 
-// 崩坏：星穹铁道 命途类型映射
+/**
+ * 崩坏：星穹铁道命途中文到英文枚举值映射。
+ */
 export const HONKAI_STAR_RAIL_PATH_TYPE_MAP: Record<string, string> = {
   毁灭: 'Destruction',
   巡猎: 'The Hunt',
@@ -126,7 +146,9 @@ export const HONKAI_STAR_RAIL_PATH_TYPE_MAP: Record<string, string> = {
   神秘: 'Enigmata',
 };
 
-// 崩坏：星穹铁道 命途类型 i18n key 映射（英文到 i18n key）
+/**
+ * 崩坏：星穹铁道命途英文枚举值到 i18n key 的映射。
+ */
 export const HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP: Record<string, string> = {
   Destruction: 'gacha.path.honkai_star_rail.destruction',
   TheHunt: 'gacha.path.honkai_star_rail.the_hunt',
@@ -146,7 +168,9 @@ export const HONKAI_STAR_RAIL_PATH_TYPE_I18N_KEY_MAP: Record<string, string> = {
   Enigmata: 'gacha.path.honkai_star_rail.enigmata',
 };
 
-// 崩坏：星穹铁道 属性类型映射
+/**
+ * 崩坏：星穹铁道属性中文到英文枚举值映射。
+ */
 export const HONKAI_STAR_RAIL_COMBAT_TYPE_MAP: Record<string, string> = {
   物理: 'Physical',
   火: 'Fire',
@@ -157,7 +181,9 @@ export const HONKAI_STAR_RAIL_COMBAT_TYPE_MAP: Record<string, string> = {
   虚数: 'Imaginary',
 };
 
-// 崩坏：星穹铁道 属性类型 i18n key 映射（英文到 i18n key）
+/**
+ * 崩坏：星穹铁道属性英文枚举值到 i18n key 的映射。
+ */
 export const HONKAI_STAR_RAIL_COMBAT_TYPE_I18N_KEY_MAP: Record<string, string> =
   {
     Physical: 'gacha.combat.honkai_star_rail.physical',
@@ -169,14 +195,18 @@ export const HONKAI_STAR_RAIL_COMBAT_TYPE_I18N_KEY_MAP: Record<string, string> =
     Imaginary: 'gacha.combat.honkai_star_rail.imaginary',
   };
 
-// 绝区零 稀有度类型映射
+/**
+ * 绝区零稀有度文本到标准值映射。
+ */
 export const ZENLESS_ZONE_ZERO_RANK_TYPE_MAP: Record<string, string> = {
   S: 'S',
   A: 'A',
   B: 'B',
 };
 
-// 绝区零 属性类型映射
+/**
+ * 绝区零属性中文到英文枚举值映射。
+ */
 export const ZENLESS_ZONE_ZERO_ATTRIBUTE_MAP: Record<string, string> = {
   物理: 'Physical',
   火: 'Fire',
@@ -185,7 +215,9 @@ export const ZENLESS_ZONE_ZERO_ATTRIBUTE_MAP: Record<string, string> = {
   以太: 'Ether',
 };
 
-// 绝区零 属性类型 i18n key 映射（英文到 i18n key）
+/**
+ * 绝区零属性英文枚举值到 i18n key 的映射。
+ */
 export const ZENLESS_ZONE_ZERO_ATTRIBUTE_I18N_KEY_MAP: Record<string, string> =
   {
     Physical: 'gacha.attribute.zenless_zone_zero.physical',
@@ -195,7 +227,9 @@ export const ZENLESS_ZONE_ZERO_ATTRIBUTE_I18N_KEY_MAP: Record<string, string> =
     Ether: 'gacha.attribute.zenless_zone_zero.ether',
   };
 
-// 绝区零 特性类型映射
+/**
+ * 绝区零特性中文到英文枚举值映射。
+ */
 export const ZENLESS_ZONE_ZERO_SPECIALTY_MAP: Record<string, string> = {
   强攻: 'Attack',
   击破: 'Stun',
@@ -205,7 +239,9 @@ export const ZENLESS_ZONE_ZERO_SPECIALTY_MAP: Record<string, string> = {
   命破: 'Rupture',
 };
 
-// 绝区零 特性类型 i18n key 映射（英文到 i18n key）
+/**
+ * 绝区零特性英文枚举值到 i18n key 的映射。
+ */
 export const ZENLESS_ZONE_ZERO_SPECIALTY_I18N_KEY_MAP: Record<string, string> =
   {
     Attack: 'gacha.specialty.zenless_zone_zero.attack',

@@ -1,6 +1,8 @@
 import { BusinessError } from '@/class/error/business.error';
 
-// 业务错误常量
+/**
+ * 业务错误工厂常量集合。
+ */
 export const BUSINESS_ERROR_CONSTANT = {
   // URL替换失败
   URL_REPLACE_FAILED: (args?: Record<string, string>) =>
@@ -188,4 +190,10 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿JSON文件UID与配置UID不一致
   GACHA_IMPORT_UID_MISMATCH: (args?: Record<string, string>) =>
     new BusinessError(1000908, 'error.gacha.import.uid.mismatch', args),
+  // 祈愿记录为空，无数据可导出
+  GACHA_EXPORT_EMPTY: (args?: Record<string, string>) =>
+    new BusinessError(1000909, 'error.gacha.export.empty', args),
+  // 祈愿导出文件类型不支持
+  GACHA_EXPORT_FILE_TYPE_INVALID: (args?: Record<string, string>) =>
+    new BusinessError(1000910, 'error.gacha.export.file.type.invalid', args),
 };

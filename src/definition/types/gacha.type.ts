@@ -10,38 +10,56 @@ import {
   ZenlessZoneZeroGachaItemSpecialtyEnum,
 } from '../enums/gacha.enum';
 
-// 抽卡类型
+/**
+ * 游戏类型。
+ */
 export type GameType = (typeof GameTypeEnum)[keyof typeof GameTypeEnum];
 
-// 抽卡物品类型
+/**
+ * 祈愿物品类型。
+ */
 export type GachaItemType =
   (typeof GachaItemTypeEnum)[keyof typeof GachaItemTypeEnum];
 
-// 祈愿任务状态
+/**
+ * 祈愿同步任务状态类型。
+ */
 export type GachaTaskStatusType =
   (typeof GachaTaskStatusEnum)[keyof typeof GachaTaskStatusEnum];
 
-// 原神 元素类型
+/**
+ * 原神祈愿元素类型。
+ */
 export type GenshinImpactGachaItemElementType =
   (typeof GenshinImpactGachaItemElementEnum)[keyof typeof GenshinImpactGachaItemElementEnum];
 
-// 原神 武器类型
+/**
+ * 原神祈愿武器类型。
+ */
 export type GenshinImpactGachaItemWeaponType =
   (typeof GenshinImpactGachaItemWeaponTypeEnum)[keyof typeof GenshinImpactGachaItemWeaponTypeEnum];
 
-// 崩坏：星穹铁道 属性类型
+/**
+ * 崩坏：星穹铁道祈愿属性类型。
+ */
 export type HonkaiStarRailGachaItemCombatType =
   (typeof HonkaiStarRailGachaItemCombatTypeEnum)[keyof typeof HonkaiStarRailGachaItemCombatTypeEnum];
 
-// 崩坏：星穹铁道 命途类型
+/**
+ * 崩坏：星穹铁道祈愿命途类型。
+ */
 export type HonkaiStarRailGachaItemPathType =
   (typeof HonkaiStarRailGachaItemPathEnum)[keyof typeof HonkaiStarRailGachaItemPathEnum];
 
-// 绝区零 属性类型
+/**
+ * 绝区零祈愿属性类型。
+ */
 export type ZenlessZoneZeroGachaItemAttributeType =
   (typeof ZenlessZoneZeroGachaItemAttributeEnum)[keyof typeof ZenlessZoneZeroGachaItemAttributeEnum];
 
-// 绝区零 特性类型
+/**
+ * 绝区零祈愿特性类型。
+ */
 export type ZenlessZoneZeroGachaItemSpecialtyType =
   (typeof ZenlessZoneZeroGachaItemSpecialtyEnum)[keyof typeof ZenlessZoneZeroGachaItemSpecialtyEnum];
 

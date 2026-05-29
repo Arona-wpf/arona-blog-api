@@ -11,6 +11,7 @@ import {
 import { GameTypeEnum } from '@/definition/enums/gacha.enum';
 import { GameType } from '@/definition/types/gacha.type';
 import { GachaConfigEntity } from '@/entity/gacha-config.entity';
+import { GachaRecordService } from '@/service/gacha-record.service';
 
 const GAME_REGION_ENUM_MAP: Record<string, string[]> = {
   [GameTypeEnum.GENSHIN_IMPACT]: Object.values(GenshinImpactServerRegionEnum),
@@ -26,6 +27,9 @@ const GAME_REGION_ENUM_MAP: Record<string, string[]> = {
 export class GachaConfigService {
   @Inject()
   gachaConfigDao: GachaConfigDao;
+
+  @Inject()
+  gachaRecordService: GachaRecordService;
 
   @Logger()
   logger: ILogger;
@@ -143,6 +147,20 @@ export class GachaConfigService {
       throw BUSINESS_ERROR_CONSTANT.GACHA_CONFIG_ACCOUNT_MISMATCH();
     }
 
-    return await this.gachaConfigDao.findByIdAndDelete(id);
+    await this.gachaConfigDao.findByIdAndDelete(id);
+
+    // 异步检查并清理孤立的 gacha_records
+    this.gachaRecordService.asyncCleanupOrphanRecords(
+      config.game_type,
+      config.region,
+      config.game_uid
+    );
+  }
+
+  /**
+   * 根据查询条件统计配置数量
+   */
+  async countConfigsByQuery(query: Record<string, any>): Promise<number> {
+    return await this.gachaConfigDao.count(query);
   }
 }
