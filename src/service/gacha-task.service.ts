@@ -1,15 +1,21 @@
 import { Inject, Logger, Provide } from '@midwayjs/core';
+import { MidwayI18nService } from '@midwayjs/i18n';
 import { ILogger } from '@midwayjs/logger';
 
 import { GachaTaskDao } from '@/dao/gacha-task.dao';
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
+import { LocaleEnum } from '@/definition/enums/common.enum';
 import {
   GachaTaskStatusEnum,
   GameTypeEnum,
 } from '@/definition/enums/gacha.enum';
 import { GameType } from '@/definition/types/gacha.type';
+import { WsConnectionManager } from '@/manage/ws-connection.manage';
 import { GachaConfigService } from '@/service/gacha-config.service';
-import { GachaRecordService } from '@/service/gacha-record.service';
+import {
+  GachaRecordService,
+  GachaSyncProgressPayload,
+} from '@/service/gacha-record.service';
 
 @Provide()
 export class GachaTaskService {
@@ -22,17 +28,29 @@ export class GachaTaskService {
   @Inject()
   gachaConfigService: GachaConfigService;
 
+  @Inject()
+  wsConnectionManager: WsConnectionManager;
+
+  @Inject()
+  i18nService: MidwayI18nService;
+
   @Logger()
   logger: ILogger;
 
   /**
    * 创建祈愿分析任务
    * @param gachaConfigId 祈愿配置ID
+   * @param account 当前会话账号
    * @returns 任务实体
    */
-  async createGachaTask(gachaConfigId: string) {
+  async createGachaTask(gachaConfigId: string, account: string) {
     const config =
       await this.gachaConfigService.getGachaConfigById(gachaConfigId);
+
+    // 必须使用当前会话账号，防止越权同步其他账号配置
+    if (config.account !== account) {
+      throw BUSINESS_ERROR_CONSTANT.GACHA_CONFIG_ACCOUNT_MISMATCH();
+    }
 
     this.logger.info(
       `[GachaTaskService] Creating gacha task for config: ${gachaConfigId}, uid: ${config.game_uid}, gameType: ${config.game_type}`
@@ -51,7 +69,7 @@ export class GachaTaskService {
     );
 
     // (异步)执行祈愿分析任务
-    this.executeGachaTask(task._id);
+    this.executeGachaTask(task._id, account);
 
     return task;
   }
@@ -74,7 +92,7 @@ export class GachaTaskService {
    * 执行祈愿分析任务（供定时任务或其他服务调用）
    * @param taskId 任务ID
    */
-  async executeGachaTask(taskId: string): Promise<void> {
+  async executeGachaTask(taskId: string, account?: string): Promise<void> {
     const task = await this.getGachaTask(taskId);
 
     // 检查任务状态
@@ -88,6 +106,13 @@ export class GachaTaskService {
       return;
     }
 
+    this.pushSyncLog(account, locale =>
+      this.i18nService.translate('gacha.sync.progress.task.start', {
+        group: 'gacha',
+        locale,
+      })
+    );
+
     // 更新状态为处理中
     await this.gachaTaskDao.findOneAndUpdate(
       { _id: taskId },
@@ -99,6 +124,17 @@ export class GachaTaskService {
       const gameTypeLabel = this.gachaRecordService.getGameTypeLabel(gameType);
       this.logger.info(
         `[GachaTaskService] Executing task ${taskId}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}`
+      );
+
+      this.pushSyncLog(account, locale =>
+        this.i18nService.translate('gacha.sync.progress.task.game', {
+          group: 'gacha',
+          locale,
+          args: {
+            game:
+              locale === LocaleEnum.EN_US ? gameTypeLabel.en : gameTypeLabel.zh,
+          },
+        })
       );
 
       // 解析URL
@@ -147,7 +183,8 @@ export class GachaTaskService {
               gameType,
               axiosInstance,
               searchParams,
-              serverRegion
+              serverRegion,
+              payload => this.handleSyncProgress(account, payload)
             ));
           break;
         default:
@@ -182,6 +219,16 @@ export class GachaTaskService {
       this.logger.info(
         `[GachaTaskService] Task ${taskId} completed successfully, total records: ${totalRecords}`
       );
+      this.pushSyncLog(
+        account,
+        locale =>
+          this.i18nService.translate('gacha.sync.progress.task.completed', {
+            group: 'gacha',
+            locale,
+            args: { count: String(totalRecords) },
+          }),
+        'completed'
+      );
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -200,6 +247,16 @@ export class GachaTaskService {
       this.logger.error(
         `[GachaTaskService] Task ${taskId} failed with error: ${errorMessage}`
       );
+      this.pushSyncLog(
+        account,
+        locale =>
+          this.i18nService.translate('gacha.sync.progress.task.failed', {
+            group: 'gacha',
+            locale,
+            args: { error: errorMessage },
+          }),
+        'failed'
+      );
     }
   }
 
@@ -208,6 +265,75 @@ export class GachaTaskService {
    */
   private isCnServer(region: string): boolean {
     return region.includes('cn');
+  }
+
+  /**
+   * 处理祈愿同步分页进度
+   */
+  private handleSyncProgress(
+    account: string | undefined,
+    payload: GachaSyncProgressPayload
+  ) {
+    if (payload.type === 'fetch_page') {
+      this.pushSyncLog(account, locale =>
+        this.i18nService.translate('gacha.sync.progress.fetch.page', {
+          group: 'gacha',
+          locale,
+          args: {
+            pool:
+              locale === LocaleEnum.EN_US
+                ? payload.gachaTypeLabel.en
+                : payload.gachaTypeLabel.zh,
+            page: String(payload.page || 1),
+          },
+        })
+      );
+      return;
+    }
+
+    if (payload.type === 'pool_completed') {
+      this.pushSyncLog(account, locale =>
+        this.i18nService.translate('gacha.sync.progress.pool.completed', {
+          group: 'gacha',
+          locale,
+          args: {
+            pool:
+              locale === LocaleEnum.EN_US
+                ? payload.gachaTypeLabel.en
+                : payload.gachaTypeLabel.zh,
+            count: String(payload.totalNewRecords || 0),
+          },
+        })
+      );
+    }
+  }
+
+  /**
+   * 向账号在线连接推送祈愿同步日志
+   */
+  private pushSyncLog(
+    account: string | undefined,
+    messageBuilder: (locale: string) => string,
+    status: 'processing' | 'completed' | 'failed' = 'processing'
+  ) {
+    if (!account) return;
+
+    const connections = this.wsConnectionManager.getConnections(account);
+    if (!connections || connections.size === 0) return;
+
+    for (const ctx of connections) {
+      if (ctx.readyState !== 1) continue;
+
+      const locale =
+        this.wsConnectionManager.getUser(ctx)?.locale || LocaleEnum.ZH_CN;
+      const message = messageBuilder(locale);
+      ctx.send(
+        JSON.stringify({
+          event: 'gacha:sync-log',
+          data: { message, status },
+        })
+      );
+    }
   }
 
   /**

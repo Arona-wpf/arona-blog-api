@@ -48,15 +48,19 @@ export class PriV1GachaController {
    * 创建祈愿同步任务
    */
   @Post('/sync')
-  async createTask(@Body() body: CreateGachaTaskDTO) {
+  async createTask(
+    @Body() body: CreateGachaTaskDTO,
+    @Session() session: IUserSession
+  ) {
+    const account = session.user.account;
     const task = await this.gachaTaskService.createGachaTask(
-      body.gacha_config_id
+      body.gacha_config_id,
+      account
     );
 
     return {
       data: {
         task_id: task._id,
-        status: 'created',
       },
       group: 'gacha',
       msg: 'gacha.task.create.success',

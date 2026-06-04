@@ -36,6 +36,13 @@ import { MinioService } from '@/service/minio.service';
 const GACHA_LOCK_PREFIX = 'gacha:lock';
 const GACHA_LOCK_TTL = 300; // 5 minutes
 
+export interface GachaSyncProgressPayload {
+  type: 'fetch_page' | 'pool_completed';
+  gachaTypeLabel: { zh: string; en: string };
+  page?: number;
+  totalNewRecords?: number;
+}
+
 @Provide()
 export class GachaRecordService {
   @Inject()
@@ -308,7 +315,8 @@ export class GachaRecordService {
     gameType: GameType,
     axiosInstance: AxiosInstance,
     searchParams: URLSearchParams,
-    serverRegion: string
+    serverRegion: string,
+    onProgress?: (payload: GachaSyncProgressPayload) => void
   ): Promise<{
     totalRecords: number;
     syncedItems: Array<{ name: string; item_id: string }>;
@@ -353,7 +361,8 @@ export class GachaRecordService {
           searchParams,
           serverRegion,
           gachaType,
-          apiPath
+          apiPath,
+          onProgress
         );
         totalNewRecords += result.totalNewRecords;
         syncedItems.push(...result.syncedItems);
@@ -543,7 +552,8 @@ export class GachaRecordService {
     searchParams: URLSearchParams,
     serverRegion: string,
     gachaType: string,
-    apiPath: string
+    apiPath: string,
+    onProgress?: (payload: GachaSyncProgressPayload) => void
   ): Promise<{
     totalNewRecords: number;
     syncedItems: Array<{ name: string; item_id: string }>;
@@ -582,6 +592,12 @@ export class GachaRecordService {
     currentSearchParams.set('size', size.toString());
 
     while (fetchMore) {
+      onProgress?.({
+        type: 'fetch_page',
+        gachaTypeLabel,
+        page,
+      });
+
       if (retryCount) {
         if (retryCount >= 3) {
           this.logger.error(
@@ -669,6 +685,12 @@ export class GachaRecordService {
     this.logger.info(
       `[GachaRecordService] Completed gacha sync with items for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, new records: ${totalNewRecords}, items: ${syncedItems.length}`
     );
+
+    onProgress?.({
+      type: 'pool_completed',
+      gachaTypeLabel,
+      totalNewRecords,
+    });
 
     return { totalNewRecords, syncedItems };
   }

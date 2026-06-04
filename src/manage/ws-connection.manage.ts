@@ -1,7 +1,7 @@
 import { Provide, Singleton } from '@midwayjs/core';
 import { Context } from '@midwayjs/ws';
 
-import { IUserSession } from '@/interface';
+import { WsUserInfo } from '@/definition/types/websocket.type';
 
 /**
  * WebSocket 连接管理器
@@ -19,14 +19,14 @@ export class WsConnectionManager {
   /**
    * WebSocket Context -> 用户信息的反向映射
    */
-  private connectionUser: Map<Context, IUserSession['user']> = new Map();
+  private connectionUser: Map<Context, WsUserInfo> = new Map();
 
   /**
    * 注册连接
    * @param ctx WebSocket Context
    * @param user 用户信息
    */
-  register(ctx: Context, user: IUserSession['user']): void {
+  register(ctx: Context, user: WsUserInfo): void {
     const account = user.account;
 
     // 建立正向映射
@@ -75,7 +75,7 @@ export class WsConnectionManager {
    * 获取连接对应的用户信息
    * @param ctx WebSocket Context
    */
-  getUser(ctx: Context): IUserSession['user'] | undefined {
+  getUser(ctx: Context): WsUserInfo | undefined {
     return this.connectionUser.get(ctx);
   }
 
@@ -94,6 +94,30 @@ export class WsConnectionManager {
       // 检查连接是否仍然活跃
       if (ctx.readyState === 1) {
         ctx.send(message);
+      }
+    }
+  }
+
+  /**
+   * 强制断开指定用户的所有连接
+   * @param account 用户账号
+   * @param code WebSocket 关闭码
+   * @param reason 关闭原因
+   */
+  disconnectUserConnections(
+    account: string,
+    code = 4001,
+    reason = 'Session expired'
+  ) {
+    const connections = this.userConnections.get(account);
+    if (!connections || connections.size === 0) return;
+
+    // 拷贝后再遍历，避免遍历中修改集合
+    const targets = Array.from(connections);
+    for (const ctx of targets) {
+      this.unregister(ctx);
+      if (ctx.readyState === 1) {
+        ctx.close(code, reason);
       }
     }
   }
