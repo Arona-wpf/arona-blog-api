@@ -55,6 +55,7 @@ export class PriV1GachaController {
     const account = session.user.account;
     const task = await this.gachaTaskService.createGachaTask(
       body.gacha_config_id,
+      body.gacha_url,
       account
     );
 

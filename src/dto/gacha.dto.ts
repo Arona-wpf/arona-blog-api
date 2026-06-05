@@ -7,6 +7,9 @@ import { PageDto } from './page.dto';
 export class CreateGachaTaskDTO {
   @Rule(createStringRuleType('gacha.dto.gacha_config_id', true, 'gacha'))
   gacha_config_id: string;
+
+  @Rule(createStringRuleType('gacha.dto.gacha_url', true, 'gacha'))
+  gacha_url: string;
 }
 
 export class GetGachaAtlasDTO extends PageDto {

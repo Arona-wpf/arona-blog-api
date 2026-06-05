@@ -40,10 +40,15 @@ export class GachaTaskService {
   /**
    * 创建祈愿分析任务
    * @param gachaConfigId 祈愿配置ID
+   * @param gachaUrl 祈愿URL
    * @param account 当前会话账号
    * @returns 任务实体
    */
-  async createGachaTask(gachaConfigId: string, account: string) {
+  async createGachaTask(
+    gachaConfigId: string,
+    gachaUrl: string,
+    account: string
+  ) {
     const config =
       await this.gachaConfigService.getGachaConfigById(gachaConfigId);
 
@@ -59,7 +64,7 @@ export class GachaTaskService {
     const task = await this.gachaTaskDao.createOne({
       game_type: config.game_type,
       uid: config.game_uid,
-      gacha_url: config.gacha_url,
+      gacha_url: gachaUrl,
       gacha_config_id: gachaConfigId,
       status: GachaTaskStatusEnum.PENDING,
     });
@@ -227,7 +232,8 @@ export class GachaTaskService {
             locale,
             args: { count: String(totalRecords) },
           }),
-        'completed'
+        'completed',
+        { totalRecords }
       );
     } catch (error) {
       const errorMessage =
@@ -314,7 +320,8 @@ export class GachaTaskService {
   private pushSyncLog(
     account: string | undefined,
     messageBuilder: (locale: string) => string,
-    status: 'processing' | 'completed' | 'failed' = 'processing'
+    status: 'processing' | 'completed' | 'failed' = 'processing',
+    extraData?: Record<string, any>
   ) {
     if (!account) return;
 
@@ -330,7 +337,7 @@ export class GachaTaskService {
       ctx.send(
         JSON.stringify({
           event: 'gacha:sync-log',
-          data: { message, status },
+          data: { message, status, ...extraData },
         })
       );
     }

@@ -32,6 +32,7 @@ import { RedisHelper } from '@/helper/redis.helper';
 import { GachaAtlasService } from '@/service/gacha-atlas.service';
 import { GachaConfigService } from '@/service/gacha-config.service';
 import { MinioService } from '@/service/minio.service';
+import { delay } from '@/utils/common';
 
 const GACHA_LOCK_PREFIX = 'gacha:lock';
 const GACHA_LOCK_TTL = 300; // 5 minutes
@@ -470,7 +471,7 @@ export class GachaRecordService {
       const { retcode, message, data } = response.data;
       if (retcode === 0 && message === 'OK' && data.list.length > 0) {
         const uniqueGachaList = data.list.filter(
-          item => !recentGachaIds.includes(item.gacha_id)
+          item => !recentGachaIds.includes(item.id)
         );
 
         // 处理新的祈愿记录
@@ -498,12 +499,24 @@ export class GachaRecordService {
             newGachaList.push(newGachaRecordEntity);
           });
 
-          // 写入数据库
+          // 使用 bulkWrite + upsert 实现增量更新（存在则忽略，不存在则插入）
           this.logger.info(
             `[GachaRecordService] Writing ${newGachaList.length} records to database for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
           );
-          await this.gachaRecordDao.createMany(newGachaList);
-          totalNewRecords += newGachaList.length;
+          const bulkOps = newGachaList.map(record => ({
+            updateOne: {
+              filter: {
+                game_type: record.game_type,
+                server_region: record.server_region,
+                uid: record.uid,
+                gacha_id: record.gacha_id,
+              },
+              update: { $setOnInsert: record },
+              upsert: true,
+            },
+          }));
+          const bulkResult = await this.gachaRecordDao.bulkWrite(bulkOps);
+          totalNewRecords += bulkResult.upsertedCount;
 
           // 检查是否还有更多数据
           if (newGachaList.length === size) {
@@ -626,7 +639,7 @@ export class GachaRecordService {
       const { retcode, message, data } = response.data;
       if (retcode === 0 && message === 'OK' && data.list.length > 0) {
         const uniqueGachaList = data.list.filter(
-          item => !recentGachaIds.includes(item.gacha_id)
+          item => !recentGachaIds.includes(item.id)
         );
 
         if (uniqueGachaList.length > 0) {
@@ -655,11 +668,24 @@ export class GachaRecordService {
             syncedItems.push({ name: r.name, item_id: r.item_id });
           });
 
+          // 使用 bulkWrite + upsert 实现增量更新（存在则忽略，不存在则插入）
           this.logger.info(
             `[GachaRecordService] Writing ${newGachaList.length} records to database for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
           );
-          await this.gachaRecordDao.createMany(newGachaList);
-          totalNewRecords += newGachaList.length;
+          const bulkOps = newGachaList.map(record => ({
+            updateOne: {
+              filter: {
+                game_type: record.game_type,
+                server_region: record.server_region,
+                uid: record.uid,
+                gacha_id: record.gacha_id,
+              },
+              update: { $setOnInsert: record },
+              upsert: true,
+            },
+          }));
+          const bulkResult = await this.gachaRecordDao.bulkWrite(bulkOps);
+          totalNewRecords += bulkResult.upsertedCount;
 
           if (newGachaList.length === size) {
             page++;
@@ -680,6 +706,9 @@ export class GachaRecordService {
         );
         fetchMore = false;
       }
+
+      // 等待1秒后继续获取下一页数据，防止请求过于频繁被封禁
+      await delay(1000);
     }
 
     this.logger.info(
