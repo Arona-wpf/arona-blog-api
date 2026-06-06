@@ -349,21 +349,27 @@ export class GachaRecordService {
       'gacha_id',
       { gacha_time: -1 }
     );
-    let recentGachaIds = recentGachaRecords.map(record => record.gacha_id);
+    const recentGachaIds = recentGachaRecords.map(record => record.gacha_id);
     this.logger.info(
       `[GachaRecordService] Found ${recentGachaRecords.length} recent records for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
     );
 
     let page = 1;
-    const size = 50;
+    const size = 20;
     let fetchMore = true;
     let retryCount = 0;
     let totalNewRecords = 0;
     const syncedItems: Array<{ name: string; item_id: string }> = [];
 
     const currentSearchParams = new URLSearchParams(searchParams);
-    currentSearchParams.set('gacha_type', gachaType);
+    if (gameType === GameTypeEnum.ZENLESS_ZONE_ZERO) {
+      currentSearchParams.set('real_gacha_type', gachaType);
+    } else {
+      currentSearchParams.set('gacha_type', gachaType);
+    }
+
     currentSearchParams.set('end_id', '0');
+    currentSearchParams.set('page', page.toString());
     currentSearchParams.set('size', size.toString());
 
     while (fetchMore) {
@@ -387,6 +393,7 @@ export class GachaRecordService {
 
       let response: AxiosResponse<IMihoyoGachaLogFetchData>;
       try {
+        // console.log(`${apiPath}?${currentSearchParams.toString()}`);
         response = await axiosInstance.get(
           `${apiPath}?${currentSearchParams.toString()}`
         );
@@ -404,6 +411,8 @@ export class GachaRecordService {
           fetchMore = false;
           continue;
         }
+
+        currentSearchParams.set('end_id', data.list[data.list.length - 1].id);
 
         const uniqueGachaList = data.list.filter(
           item => !recentGachaIds.includes(item.id)
@@ -426,9 +435,9 @@ export class GachaRecordService {
               gacha_type: gachaType,
               gacha_time: new Date(r.time),
               item_id: r.item_id,
-              item_type: r.item_type,
+              item_type: this.resolveItemType(gameType, r.item_id),
               item_name: r.name,
-              rank_type: r.rank_type,
+              rank_type: this.resolveRankType(gameType, r.rank_type),
             });
             newGachaList.push(newGachaRecordEntity);
 
@@ -440,14 +449,10 @@ export class GachaRecordService {
           );
           await this.gachaRecordDao.createMany(newGachaList);
           totalNewRecords += newGachaList.length;
-          recentGachaIds = [
-            ...new Set([...recentGachaIds, ...uniqueGachaList.map(r => r.id)]),
-          ];
 
           // 更新分页参数
           page++;
           currentSearchParams.set('page', page.toString());
-          currentSearchParams.set('end_id', data.list[data.list.length - 1].id);
         } else {
           this.logger.info(
             `[GachaRecordService] No new records found for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, page: ${page}`

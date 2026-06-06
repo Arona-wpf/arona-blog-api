@@ -73,6 +73,11 @@ export class GachaTaskService {
       `[GachaTaskService] Gacha task created with id: ${task._id}`
     );
 
+    // 更新祈愿配置URL
+    this.gachaConfigService.updateGachaConfig(gachaConfigId, account, {
+      gacha_url: gachaUrl,
+    });
+
     // (异步)执行祈愿分析任务
     this.executeGachaTask(task._id, account);
 

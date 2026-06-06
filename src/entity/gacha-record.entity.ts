@@ -4,7 +4,13 @@ import { randomId } from '@/utils/common';
 import { GameType } from '@/definition/types/gacha.type';
 
 @index(
-  { game_type: 1, server_region: 1, uid: 1, gacha_id: 1 },
+  {
+    game_type: 1,
+    server_region: 1,
+    uid: 1,
+    gacha_id: 1,
+    gacha_type: 1,
+  },
   { unique: true, background: true }
 )
 @index(
