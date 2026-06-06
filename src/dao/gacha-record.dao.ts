@@ -85,32 +85,4 @@ export class GachaRecordDao extends BaseDao<GachaRecordEntity> {
       throw error;
     }
   }
-
-  /**
-   * 按gacha_type分组查询记录
-   */
-  async findGroupedByGachaType(
-    queryCondition: Record<string, any>
-  ): Promise<Record<string, GachaRecordEntity[]>> {
-    try {
-      const records = await this.gachaRecordEntity
-        .find(queryCondition)
-        .sort({ gacha_time: -1 })
-        .lean();
-
-      const grouped: Record<string, GachaRecordEntity[]> = {};
-      for (const record of records) {
-        const gachaType = record.gacha_type;
-        if (!grouped[gachaType]) {
-          grouped[gachaType] = [];
-        }
-        grouped[gachaType].push(record);
-      }
-
-      return grouped;
-    } catch (error) {
-      this.logger.error('[GachaRecordDao] findGroupedByGachaType error', error);
-      throw error;
-    }
-  }
 }
