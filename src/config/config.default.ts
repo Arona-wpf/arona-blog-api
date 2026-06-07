@@ -51,6 +51,10 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
         miyoushe: {
           baseURL: BasicConfig.sync_gacha_atlas.api_domain,
         },
+        // 原神祈愿物品图鉴API
+        genshin_impact_atlas: {
+          baseURL: BasicConfig.sync_genshin_impact_atlas.api_domain,
+        },
       },
     },
 
@@ -250,6 +254,15 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
         zenless_zone_zero: {
           all: BasicConfig.sync_gacha_atlas.api_path.zenless_zone_zero.all,
         },
+      },
+    },
+
+    // 原神祈愿物品图鉴
+    syncGenshinImpactAtlas: {
+      api_domain: BasicConfig.sync_genshin_impact_atlas.api_domain,
+      api_path: {
+        character: BasicConfig.sync_genshin_impact_atlas.api_path.character,
+        weapon: BasicConfig.sync_genshin_impact_atlas.api_path.weapon,
       },
     },
 

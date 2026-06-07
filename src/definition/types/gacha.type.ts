@@ -142,6 +142,7 @@ export interface IMiyousheWikiCategoryWithChildren {
 export interface IMiyousheWikiItem {
   content_id: number;
   title: string;
+  alias_name: string;
   ext: string;
   icon: string;
 }
@@ -155,4 +156,25 @@ export interface IMiyousheWikiResponse {
   data: {
     list: IMiyousheWikiCategoryWithChildren[];
   };
+}
+
+/**
+ * 原神祈愿物品图鉴角色接口返回数据结构
+ */
+export interface IGenshinImpactAltasResponse {
+  response: number;
+  data: {
+    items: {
+      [id: string]: IGenshinImpactAltasItem;
+    };
+  };
+}
+
+/**
+ * 原神祈愿物品图鉴角色条目
+ */
+export interface IGenshinImpactAltasItem {
+  id: string;
+  rank: number;
+  name: string;
 }

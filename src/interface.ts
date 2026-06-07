@@ -157,3 +157,16 @@ export interface ISyncGachaAtlasConfig {
     };
   };
 }
+
+/**
+ * 原神祈愿物品图鉴API配置
+ * @param api_domain API域名
+ * @param api_path API路径
+ */
+export interface ISyncGenshinImpactAtlasConfig {
+  api_domain: string;
+  api_path: {
+    character: string;
+    weapon: string;
+  };
+}

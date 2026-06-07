@@ -215,15 +215,18 @@ export class GachaTaskService {
         }
       );
 
-      // 如果配置为国服，异步更新图鉴中的item_id
-      if (task.gacha_config_id && this.isCnServer(serverRegion)) {
-        this.logger.info(
-          `[GachaTaskService] CN server detected, triggering asyncUpdateAtlasItemId for task ${taskId}`
-        );
-        this.gachaRecordService.asyncUpdateAtlasItemIdFromSync(
-          gameType,
-          syncedItems
-        );
+      // 原神祈愿不更新图鉴
+      if (gameType !== GameTypeEnum.GENSHIN_IMPACT) {
+        // 如果配置为国服，异步更新图鉴中的item_id
+        if (task.gacha_config_id && this.isCnServer(serverRegion)) {
+          this.logger.info(
+            `[GachaTaskService] CN server detected, triggering asyncUpdateAtlasItemId for task ${taskId}`
+          );
+          this.gachaRecordService.asyncUpdateAtlasItemIdFromSync(
+            gameType,
+            syncedItems
+          );
+        }
       }
 
       this.logger.info(

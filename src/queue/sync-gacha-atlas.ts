@@ -27,22 +27,31 @@ import {
 import { GachaItemTypeEnum, GameTypeEnum } from '@/definition/enums/gacha.enum';
 import { QueueNameEnum } from '@/definition/enums/queue.enum';
 import {
+  IGenshinImpactAltasItem,
+  IGenshinImpactAltasResponse,
   IMiyousheGenshinImpactWikiResponse,
   IMiyousheWikiResponse,
 } from '@/definition/types/gacha.type';
 import { GachaAtlasEntity } from '@/entity/gacha-atlas.entity';
 import { AxiosHelper } from '@/helper/axios.helper';
-import { ISyncGachaAtlasConfig } from '@/interface';
+import {
+  ISyncGachaAtlasConfig,
+  ISyncGenshinImpactAtlasConfig,
+} from '@/interface';
 import { GachaAtlasService } from '@/service/gacha-atlas.service';
 
 @Processor(QueueNameEnum.SYNC_GACHA_ATLAS, {
   repeat: {
     pattern: FORMAT.CRONTAB.EVERY_HOUR,
+    immediately: true,
   },
 })
 export class SyncGachaAtlasProcessor implements IProcessor {
   @Config('syncGachaAtlas')
   syncGachaAtlasConfig: ISyncGachaAtlasConfig;
+
+  @Config('syncGenshinImpactAtlas')
+  syncGenshinImpactAtlasConfig: ISyncGenshinImpactAtlasConfig;
 
   @Inject()
   axiosHelper: AxiosHelper;
@@ -81,6 +90,7 @@ export class SyncGachaAtlasProcessor implements IProcessor {
       '[SyncGachaAtlasProcessor] Starting sync gacha atlas processor'
     );
 
+    // 获取米游社API Axios实例
     const axiosInstance = await this.axiosHelper.getAxiosInstance('miyoushe');
 
     // 同步原神祈愿物品图鉴
@@ -143,6 +153,37 @@ export class SyncGachaAtlasProcessor implements IProcessor {
     }
 
     const currentTime = Date.now().valueOf();
+
+    // 获取原神祈愿物品图鉴Axios实例
+    const genshinImpactAltasAxiosInstance =
+      await this.axiosHelper.getAxiosInstance('genshin_impact_atlas');
+
+    // 获取原神祈愿物品图鉴角色数据
+    let characterItems: IGenshinImpactAltasItem[] = [];
+    try {
+      const thirdPartyCharacterPath =
+        this.syncGenshinImpactAtlasConfig.api_path.character;
+      if (!thirdPartyCharacterPath) {
+        this.queueLogger.warn(
+          '[SyncGachaAtlasProcessor] Third party character path is not set, skipping character sync'
+        );
+      } else {
+        const characterResponse =
+          await genshinImpactAltasAxiosInstance.get<IGenshinImpactAltasResponse>(
+            thirdPartyCharacterPath
+          );
+
+        if (characterResponse.data.response === 200) {
+          characterItems = Object.values(characterResponse.data.data.items);
+        }
+      }
+    } catch (error) {
+      characterItems = [];
+      this.queueLogger.error(
+        '[SyncGachaAtlasProcessor] Sync genshin impact gacha atlas error',
+        error
+      );
+    }
 
     // 同步角色祈愿物品图鉴
     let newCharacterCount = 0;
@@ -220,6 +261,16 @@ export class SyncGachaAtlasProcessor implements IProcessor {
           // 创建新增角色的图鉴数据
           const gachaAtlasEntities: GachaAtlasEntity[] = newCharacters.map(
             item => {
+              const characterAtlasItem = characterItems.find(
+                atlasItem => atlasItem.name === item.title
+              );
+              if (!characterAtlasItem) {
+                this.queueLogger.warn(
+                  '[SyncGachaAtlasProcessor] Character item not found: %s',
+                  item.title
+                );
+              }
+
               const rankType = parseGenshinAndStarRailRankType(item.ext, 25);
               const characterElement = parseGenshinImpactCharacterElement(
                 item.ext
@@ -244,7 +295,7 @@ export class SyncGachaAtlasProcessor implements IProcessor {
               Object.assign(gachaAtlasEntity, {
                 game_type: GameTypeEnum.GENSHIN_IMPACT,
                 content_id: item.content_id,
-                item_id: '', // 暂时为空，后续会通过别的地方同步
+                item_id: characterAtlasItem?.id || '',
                 item_name: item.title,
                 item_type: GachaItemTypeEnum.CHARACTER,
                 rank_type: rankType,
@@ -289,6 +340,33 @@ export class SyncGachaAtlasProcessor implements IProcessor {
           error
         );
       }
+    }
+
+    // 获取原神祈愿物品图鉴武器数据
+    let weaponItems: IGenshinImpactAltasItem[] = [];
+    try {
+      const thirdPartyWeaponPath =
+        this.syncGenshinImpactAtlasConfig.api_path.weapon;
+      if (!thirdPartyWeaponPath) {
+        this.queueLogger.warn(
+          '[SyncGachaAtlasProcessor] Third party weapon path is not set, skipping weapon sync'
+        );
+      } else {
+        const weaponResponse =
+          await genshinImpactAltasAxiosInstance.get<IGenshinImpactAltasResponse>(
+            thirdPartyWeaponPath
+          );
+
+        if (weaponResponse.data.response === 200) {
+          weaponItems = Object.values(weaponResponse.data.data.items);
+        }
+      }
+    } catch (error) {
+      weaponItems = [];
+      this.queueLogger.error(
+        '[SyncGachaAtlasProcessor] Sync genshin impact gacha atlas error',
+        error
+      );
     }
 
     // 同步武器祈愿物品图鉴
@@ -353,6 +431,16 @@ export class SyncGachaAtlasProcessor implements IProcessor {
           // 创建新增武器的图鉴数据
           const gachaAtlasEntities: GachaAtlasEntity[] = newWeapons.map(
             item => {
+              const weaponAtlasItem = weaponItems.find(
+                atlasItem => atlasItem.name === item.title
+              );
+              if (!weaponAtlasItem) {
+                this.queueLogger.warn(
+                  '[SyncGachaAtlasProcessor] Weapon item not found: %s',
+                  item.title
+                );
+              }
+
               const rankType = parseGenshinImpactWeaponRankType(item.ext);
               const weaponType = parseGenshinImpactWeaponType(item.ext);
               this.queueLogger.info(
@@ -368,7 +456,7 @@ export class SyncGachaAtlasProcessor implements IProcessor {
               Object.assign(gachaAtlasEntity, {
                 game_type: GameTypeEnum.GENSHIN_IMPACT,
                 content_id: item.content_id,
-                item_id: '', // 暂时为空，后续会通过别的地方同步
+                item_id: weaponAtlasItem?.id || '',
                 item_name: item.title,
                 item_type: GachaItemTypeEnum.WEAPON,
                 rank_type: rankType,
@@ -807,7 +895,7 @@ export class SyncGachaAtlasProcessor implements IProcessor {
               game_type: GameTypeEnum.ZENLESS_ZONE_ZERO,
               content_id: item.content_id,
               item_id: '',
-              item_name: item.title,
+              item_name: item.alias_name || item.title,
               item_type: GachaItemTypeEnum.CHARACTER,
               rank_type: rankType,
               attribute: attribute,

@@ -66,6 +66,23 @@ export class GachaAtlasDao extends BaseDao<GachaAtlasEntity> {
     }
   }
 
+  async findAll(
+    queryCondition: Record<string, any>,
+    select?: string,
+    sort?: Record<string, any>
+  ) {
+    try {
+      return await this.gachaAtlasEntity
+        .find(queryCondition)
+        .select(select)
+        .sort(sort)
+        .lean();
+    } catch (error) {
+      this.logger.error('[GachaAtlasDao] findAll error', error);
+      throw error;
+    }
+  }
+
   /**
    * 批量写入操作
    */

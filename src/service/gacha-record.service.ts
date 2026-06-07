@@ -26,6 +26,7 @@ import {
   GameType,
   IMihoyoGachaLogFetchData,
 } from '@/definition/types/gacha.type';
+import { GachaAtlasEntity } from '@/entity/gacha-atlas.entity';
 import { GachaRecordEntity } from '@/entity/gacha-record.entity';
 import { AxiosHelper } from '@/helper/axios.helper';
 import { RedisHelper } from '@/helper/redis.helper';
@@ -354,6 +355,10 @@ export class GachaRecordService {
       `[GachaRecordService] Found ${recentGachaRecords.length} recent records for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
     );
 
+    // 查询所有祈愿物品图鉴
+    const gachaAtlasItems =
+      await this.gachaAtlasService.getAllGachaAtlas(gameType);
+
     let page = 1;
     const size = 20;
     let fetchMore = true;
@@ -425,16 +430,23 @@ export class GachaRecordService {
 
           const newGachaList: GachaRecordEntity[] = [];
           uniqueGachaList.forEach(r => {
+            let atlasItem: GachaAtlasEntity;
+            if (gameType === GameTypeEnum.GENSHIN_IMPACT) {
+              atlasItem = gachaAtlasItems.find(
+                item => item.item_name === r.name
+              );
+            }
+
             const newGachaRecordEntity = new GachaRecordEntity();
             Object.assign(newGachaRecordEntity, {
               game_type: gameType,
               server_region: serverRegion,
-              region_time_zone: data.region_time_zone,
+              region_time_zone: data.region_time_zone || data.region,
               uid,
               gacha_id: r.id,
               gacha_type: gachaType,
               gacha_time: new Date(r.time),
-              item_id: r.item_id,
+              item_id: r.item_id || atlasItem?.item_id,
               item_type: this.resolveItemType(gameType, r.item_id),
               item_name: r.name,
               rank_type: this.resolveRankType(gameType, r.rank_type),

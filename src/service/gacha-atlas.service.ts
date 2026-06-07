@@ -38,6 +38,15 @@ export class GachaAtlasService {
   }
 
   /**
+   * 查询所有祈愿物品图鉴
+   * @param game_type 游戏类型
+   * @returns 祈愿物品图鉴列表
+   */
+  async getAllGachaAtlas(game_type: GameType) {
+    return this.gachaAtlasDao.findAll({ game_type });
+  }
+
+  /**
    * 创建祈愿物品图鉴
    * @param data 祈愿物品图鉴数据
    * @returns 创建的祈愿物品图鉴数据

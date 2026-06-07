@@ -9,7 +9,7 @@ import { GameType } from '@/definition/types/gacha.type';
     server_region: 1,
     uid: 1,
     gacha_id: 1,
-    gacha_type: 1,
+    // gacha_type: 1,
   },
   { unique: true, background: true }
 )
