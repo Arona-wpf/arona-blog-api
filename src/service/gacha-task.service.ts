@@ -61,12 +61,21 @@ export class GachaTaskService {
       `[GachaTaskService] Creating gacha task for config: ${gachaConfigId}, uid: ${config.game_uid}, gameType: ${config.game_type}`
     );
 
+    // 检查账号是否正在同步
+    await this.gachaRecordService.assertAccountSyncNotInProgress(
+      config.game_type as GameType,
+      config.region,
+      config.game_uid
+    );
+
+    // 创建祈愿分析任务
     const task = await this.gachaTaskDao.createOne({
       game_type: config.game_type,
       uid: config.game_uid,
       gacha_url: gachaUrl,
       gacha_config_id: gachaConfigId,
       status: GachaTaskStatusEnum.PENDING,
+      server_region: config.region,
     });
 
     this.logger.info(
@@ -79,7 +88,7 @@ export class GachaTaskService {
     });
 
     // (异步)执行祈愿分析任务
-    this.executeGachaTask(task._id, account);
+    this.executeGachaTask(task._id, config.region, account);
 
     return task;
   }
@@ -102,7 +111,11 @@ export class GachaTaskService {
    * 执行祈愿分析任务（供定时任务或其他服务调用）
    * @param taskId 任务ID
    */
-  async executeGachaTask(taskId: string, account?: string): Promise<void> {
+  async executeGachaTask(
+    taskId: string,
+    configServerRegion: string,
+    account?: string
+  ): Promise<void> {
     const task = await this.getGachaTask(taskId);
 
     // 检查任务状态
@@ -161,12 +174,10 @@ export class GachaTaskService {
       if (!serverRegion) {
         throw BUSINESS_ERROR_CONSTANT.GACHA_SERVER_REGION_NOT_FOUND();
       }
-
-      // 更新任务的服务器区域
-      await this.gachaTaskDao.findOneAndUpdate(
-        { _id: taskId },
-        { $set: { server_region: serverRegion } }
-      );
+      // 检查服务器区域是否匹配
+      if (serverRegion !== configServerRegion) {
+        throw BUSINESS_ERROR_CONSTANT.GACHA_SERVER_REGION_MISMATCH();
+      }
 
       // 删除祈愿参数
       searchParams.delete('page');

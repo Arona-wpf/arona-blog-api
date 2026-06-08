@@ -144,15 +144,7 @@ export class PriV1GachaController {
     }
 
     return {
-      data: configList.map(config => ({
-        _id: config._id,
-        game_type: config.game_type,
-        region: config.region,
-        game_uid: config.game_uid,
-        game_nickname: config.game_nickname,
-        created_at: config.created_at,
-        updated_at: config.updated_at,
-      })),
+      data: configList,
       group: 'gacha',
       msg: 'gacha.config.list.success',
     };

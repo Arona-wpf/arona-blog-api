@@ -172,6 +172,9 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿服务器区域不存在
   GACHA_SERVER_REGION_NOT_FOUND: (args?: Record<string, string>) =>
     new BusinessError(1000902, 'error.gacha.server.region.not.found', args),
+  // 祈愿服务器区域与配置不一致
+  GACHA_SERVER_REGION_MISMATCH: (args?: Record<string, string>) =>
+    new BusinessError(1000912, 'error.gacha.server.region.mismatch', args),
   // 祈愿游戏类型不支持
   GACHA_GAME_TYPE_NOT_SUPPORTED: (args?: Record<string, string>) =>
     new BusinessError(1000903, 'error.gacha.game.type.not.supported', args),
@@ -196,4 +199,7 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿导出文件类型不支持
   GACHA_EXPORT_FILE_TYPE_INVALID: (args?: Record<string, string>) =>
     new BusinessError(1000910, 'error.gacha.export.file.type.invalid', args),
+  // 祈愿同步进行中
+  GACHA_SYNC_IN_PROGRESS: (args?: Record<string, string>) =>
+    new BusinessError(1000911, 'error.gacha.sync.in.progress', args),
 };

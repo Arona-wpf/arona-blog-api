@@ -92,7 +92,22 @@ export class GachaRecordService {
   }
 
   /**
-   * 生成锁的 key
+   * 生成账号级同步锁的 key
+   * @param gameType 游戏类型
+   * @param serverRegion 服务器区域
+   * @param uid 游戏uid
+   * @returns 账号级锁的 key
+   */
+  private generateAccountLockKey(
+    gameType: string,
+    serverRegion: string,
+    uid: string
+  ): string {
+    return `${GACHA_LOCK_PREFIX}:${gameType}:${serverRegion}:${uid}`;
+  }
+
+  /**
+   * 生成祈愿类型级锁的 key
    * @param gameType 游戏类型
    * @param serverRegion 服务器区域
    * @param uid 游戏uid
@@ -109,6 +124,42 @@ export class GachaRecordService {
   }
 
   /**
+   * 检查账号是否正在同步祈愿数据
+   * @param gameType 游戏类型
+   * @param serverRegion 服务器区域
+   * @param uid 游戏uid
+   * @returns 是否正在同步
+   */
+  async isAccountSyncInProgress(
+    gameType: GameType,
+    serverRegion: string,
+    uid: string
+  ): Promise<boolean> {
+    const lockKey = this.generateAccountLockKey(gameType, serverRegion, uid);
+    const redis = await this.redisHelper.getRedisInstance(
+      RedisStorageEnum.SCRIPT
+    );
+    const exists = await redis.exists(lockKey);
+    return exists === 1;
+  }
+
+  /**
+   * 断言账号未在同步祈愿数据，否则抛出业务异常
+   * @param gameType 游戏类型
+   * @param serverRegion 服务器区域
+   * @param uid 游戏uid
+   */
+  async assertAccountSyncNotInProgress(
+    gameType: GameType,
+    serverRegion: string,
+    uid: string
+  ): Promise<void> {
+    if (await this.isAccountSyncInProgress(gameType, serverRegion, uid)) {
+      throw BUSINESS_ERROR_CONSTANT.GACHA_SYNC_IN_PROGRESS();
+    }
+  }
+
+  /**
    * 尝试获取锁
    * @param lockKey 锁的 key
    * @returns 是否成功获取锁
@@ -117,7 +168,7 @@ export class GachaRecordService {
     const redis = await this.redisHelper.getRedisInstance(
       RedisStorageEnum.SCRIPT
     );
-    const result = await redis.setex(lockKey, GACHA_LOCK_TTL, '1');
+    const result = await redis.set(lockKey, '1', 'EX', GACHA_LOCK_TTL, 'NX');
     return result === 'OK';
   }
 
@@ -258,49 +309,73 @@ export class GachaRecordService {
       `[GachaRecordService] Starting gacha sync with items for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, serverRegion: ${serverRegion}`
     );
 
+    const accountLockKey = this.generateAccountLockKey(
+      gameType,
+      serverRegion,
+      uid
+    );
+    const accountLockAcquired = await this.acquireLock(accountLockKey);
+    if (!accountLockAcquired) {
+      this.logger.warn(
+        `[GachaRecordService] Account lock acquisition failed for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, serverRegion: ${serverRegion} (sync may be in progress)`
+      );
+      throw BUSINESS_ERROR_CONSTANT.GACHA_SYNC_IN_PROGRESS();
+    }
+
+    this.logger.info(
+      `[GachaRecordService] Acquired account lock for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, serverRegion: ${serverRegion}`
+    );
+
     let totalNewRecords = 0;
     const syncedItems: Array<{ name: string; item_id: string }> = [];
 
-    for (const gachaType of gachaTypeList) {
-      const gachaTypeLabel = this.getGachaTypeLabel(gachaType, gameType);
-      const lockKey = this.generateLockKey(
-        gameType,
-        serverRegion,
-        uid,
-        gachaType
-      );
-
-      const lockAcquired = await this.acquireLock(lockKey);
-      if (!lockAcquired) {
-        this.logger.warn(
-          `[GachaRecordService] Lock acquisition failed for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, skipping (may be in progress)`
-        );
-        continue;
-      }
-
-      this.logger.info(
-        `[GachaRecordService] Acquired lock for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
-      );
-
-      try {
-        const result = await this.syncGachaDataByTypeWithItems(
-          uid,
+    try {
+      for (const gachaType of gachaTypeList) {
+        const gachaTypeLabel = this.getGachaTypeLabel(gachaType, gameType);
+        const lockKey = this.generateLockKey(
           gameType,
-          axiosInstance,
-          searchParams,
           serverRegion,
-          gachaType,
-          apiPath,
-          onProgress
+          uid,
+          gachaType
         );
-        totalNewRecords += result.totalNewRecords;
-        syncedItems.push(...result.syncedItems);
-      } finally {
-        await this.releaseLock(lockKey);
+
+        const lockAcquired = await this.acquireLock(lockKey);
+        if (!lockAcquired) {
+          this.logger.warn(
+            `[GachaRecordService] Lock acquisition failed for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, skipping (may be in progress)`
+          );
+          continue;
+        }
+
         this.logger.info(
-          `[GachaRecordService] Released lock for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
+          `[GachaRecordService] Acquired lock for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
         );
+
+        try {
+          const result = await this.syncGachaDataByTypeWithItems(
+            uid,
+            gameType,
+            axiosInstance,
+            searchParams,
+            serverRegion,
+            gachaType,
+            apiPath,
+            onProgress
+          );
+          totalNewRecords += result.totalNewRecords;
+          syncedItems.push(...result.syncedItems);
+        } finally {
+          await this.releaseLock(lockKey);
+          this.logger.info(
+            `[GachaRecordService] Released lock for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
+          );
+        }
       }
+    } finally {
+      await this.releaseLock(accountLockKey);
+      this.logger.info(
+        `[GachaRecordService] Released account lock for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, serverRegion: ${serverRegion}`
+      );
     }
 
     this.logger.info(

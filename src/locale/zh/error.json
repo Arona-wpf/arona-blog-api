@@ -50,10 +50,12 @@
   "error.cdn.get.url.failed": "获取文件访问链接失败，请稍后重试",
   "error.gacha.auth.key.not.found": "祈愿认证密钥不存在",
   "error.gacha.server.region.not.found": "祈愿服务器区域不存在",
+  "error.gacha.server.region.mismatch": "祈愿链接的服务器区域与配置不一致",
   "error.gacha.game.type.not.supported": "祈愿游戏类型不支持",
   "error.gacha.task.not.found": "祈愿任务不存在",
   "error.gacha.config.not.found": "祈愿配置不存在",
   "error.gacha.config.account.mismatch": "祈愿配置账号不匹配",
   "error.gacha.config.limit.exceeded": "当前游戏账号数量已达上限（10个）",
+  "error.gacha.sync.in.progress": "该游戏账号正在同步祈愿数据，请稍后再试",
   "error.ws.unauthorized": "WebSocket 连接未授权，请先登录"
 }

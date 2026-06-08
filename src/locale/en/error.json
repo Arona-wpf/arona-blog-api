@@ -50,10 +50,12 @@
   "error.cdn.get.url.failed": "Failed to get file access URL, please try again later",
   "error.gacha.auth.key.not.found": "Gacha auth key not found",
   "error.gacha.server.region.not.found": "Gacha server region not found",
+  "error.gacha.server.region.mismatch": "The server region in the gacha URL does not match the config",
   "error.gacha.game.type.not.supported": "Gacha game type not supported",
   "error.gacha.task.not.found": "Gacha task not found",
   "error.gacha.config.not.found": "Gacha config not found",
   "error.gacha.config.account.mismatch": "Gacha config account mismatch",
   "error.gacha.config.limit.exceeded": "Game account limit reached (10 accounts max)",
+  "error.gacha.sync.in.progress": "Gacha sync is already in progress for this game account, please try again later",
   "error.ws.unauthorized": "WebSocket connection unauthorized, please login first"
 }
