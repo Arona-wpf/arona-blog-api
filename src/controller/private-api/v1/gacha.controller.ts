@@ -5,7 +5,6 @@ import {
   Files,
   Get,
   Inject,
-  Param,
   Post,
   Query,
   Session,
@@ -14,20 +13,26 @@ import { Context } from '@midwayjs/koa';
 import { UploadFileInfo } from '@midwayjs/upload';
 
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
+import { LocaleEnum } from '@/definition/enums/common.enum';
 import { GameType } from '@/definition/types/gacha.type';
 import {
   CreateGachaConfigDTO,
   CreateGachaTaskDTO,
   DeleteGachaConfigDTO,
+  DownloadGachaScriptDTO,
   ExportGachaDTO,
+  GetGachaAtlasIconsDTO,
+  GetGachaAtlasListDTO,
   GetGachaConfigListDTO,
   GetGachaRecordListDTO,
   ImportGachaDTO,
   UpdateGachaConfigDTO,
 } from '@/dto/gacha.dto';
 import { IUserSession } from '@/interface';
+import { GachaAtlasService } from '@/service/gacha-atlas.service';
 import { GachaConfigService } from '@/service/gacha-config.service';
 import { GachaRecordService } from '@/service/gacha-record.service';
+import { GachaScriptService } from '@/service/gacha-script.service';
 import { GachaTaskService } from '@/service/gacha-task.service';
 
 @Controller('/private-api/v1/gacha')
@@ -43,6 +48,76 @@ export class PriV1GachaController {
 
   @Inject()
   gachaRecordService: GachaRecordService;
+
+  @Inject()
+  gachaScriptService: GachaScriptService;
+
+  @Inject()
+  gachaAtlasService: GachaAtlasService;
+
+  /**
+   * 获取游戏祈愿图鉴列表（5 星 / S 级角色与武器）
+   */
+  @Get('/atlas/list')
+  async getAtlasList(@Query() query: GetGachaAtlasListDTO) {
+    const atlasList = await this.gachaAtlasService.getGachaAtlasGoldList(
+      query.game_type as GameType
+    );
+
+    return {
+      data: atlasList.map(item => ({
+        _id: item._id,
+        content_id: item.content_id,
+        item_id: item.item_id,
+        item_name: item.item_name,
+        item_type: item.item_type,
+        rank_type: item.rank_type,
+        icon_url: item.icon_url,
+      })),
+      group: 'gacha',
+      msg: 'gacha.atlas.list.success',
+    };
+  }
+
+  /**
+   * 根据 item_id 列表获取图鉴图标映射
+   */
+  @Get('/atlas/icons')
+  async getAtlasIcons(@Query() query: GetGachaAtlasIconsDTO) {
+    const itemIds = (query.item_ids || '')
+      .split(',')
+      .map(id => id.trim())
+      .filter(Boolean);
+
+    const iconMap = await this.gachaAtlasService.getAtlasIconMapByItemIds(
+      query.game_type as GameType,
+      itemIds
+    );
+
+    return {
+      data: iconMap,
+      group: 'gacha',
+      msg: 'gacha.atlas.icons.success',
+    };
+  }
+
+  /**
+   * 下载祈愿脚本（按当前语言返回对应脚本文件链接）
+   */
+  @Get('/script/download')
+  async downloadScript(@Query() query: DownloadGachaScriptDTO) {
+    const locale = (this.ctx as any).locale || LocaleEnum.ZH_CN;
+    const downloadUrl = await this.gachaScriptService.getScriptDownloadUrl(
+      query.game_type as GameType,
+      locale
+    );
+
+    return {
+      data: { url: downloadUrl },
+      group: 'gacha',
+      msg: 'gacha.script.download.success',
+    };
+  }
 
   /**
    * 创建祈愿同步任务
@@ -65,30 +140,6 @@ export class PriV1GachaController {
       },
       group: 'gacha',
       msg: 'gacha.task.create.success',
-    };
-  }
-
-  /**
-   * 查询祈愿任务状态
-   */
-  @Get('/task/:taskId')
-  async getTask(@Param('taskId') taskId: string) {
-    const task = await this.gachaTaskService.getGachaTask(taskId);
-
-    return {
-      data: {
-        task_id: task._id,
-        game_type: task.game_type,
-        uid: task.uid,
-        status: task.status,
-        server_region: task.server_region,
-        total_records: task.total_records,
-        error_message: task.error_message,
-        created_at: task.created_at,
-        updated_at: task.updated_at,
-      },
-      group: 'gacha',
-      msg: 'gacha.task.get.success',
     };
   }
 
@@ -198,7 +249,7 @@ export class PriV1GachaController {
   /**
    * 导入祈愿记录（JSON文件）
    */
-  @Post('/import')
+  @Post('/record/import')
   async importGacha(
     @Files('file') files: Array<UploadFileInfo<string>>,
     @Fields() fields: ImportGachaDTO
@@ -222,13 +273,13 @@ export class PriV1GachaController {
   /**
    * 导出祈愿记录（JSON/Excel），上传到 MinIO 返回下载链接
    */
-  @Post('/export')
+  @Post('/record/export')
   async exportGacha(@Body() body: ExportGachaDTO) {
     const locale = (this.ctx as any).locale || 'zh-cn';
     const downloadUrl = await this.gachaRecordService.exportGachaRecords(
       body.gacha_config_id,
       body.file_name,
-      body.file_type as 'json' | 'excel',
+      body.file_type,
       locale
     );
 

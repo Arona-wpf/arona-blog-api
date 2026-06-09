@@ -2,6 +2,7 @@ import {
   CreateBucketCommand,
   GetObjectCommand,
   HeadBucketCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -198,6 +199,24 @@ export class MinioService {
         expiresIn,
       }
     );
+  }
+
+  /**
+   * 检查对象是否存在
+   * @param objectName 对象名称
+   */
+  async objectExists(objectName: string) {
+    try {
+      await this.client.send(
+        new HeadObjectCommand({
+          Bucket: this.bucket,
+          Key: objectName,
+        })
+      );
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**

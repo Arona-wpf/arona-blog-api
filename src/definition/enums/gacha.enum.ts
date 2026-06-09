@@ -8,6 +8,14 @@ export enum GameTypeEnum {
 }
 
 /**
+ * 祈愿记录导出文件类型枚举。
+ */
+export enum GachaExportFileTypeEnum {
+  JSON = 'json',
+  EXCEL = 'excel',
+}
+
+/**
  * 祈愿记录中的物品类型枚举。
  */
 export enum GachaItemTypeEnum {

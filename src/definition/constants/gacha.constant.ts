@@ -4,6 +4,25 @@ import {
   HonkaiStarRailGachaTypeEnum,
   ZenlessZoneZeroGachaTypeEnum,
 } from '../enums/gacha.enum';
+import type { GameType } from '../types/gacha.type';
+
+/**
+ * 各游戏图鉴 5 星 / S 级 rank_type 取值。
+ */
+export const GACHA_ATLAS_GOLD_RANK_TYPE_MAP: Record<GameType, string[]> = {
+  [GameTypeEnum.GENSHIN_IMPACT]: ['5'],
+  [GameTypeEnum.HONKAI_STAR_RAIL]: ['5'],
+  [GameTypeEnum.ZENLESS_ZONE_ZERO]: ['S'],
+};
+
+/**
+ * 祈愿脚本文件名中的游戏标识映射。
+ */
+export const GACHA_SCRIPT_NAME_MAP: Record<GameType, string> = {
+  [GameTypeEnum.GENSHIN_IMPACT]: 'Genshin',
+  [GameTypeEnum.HONKAI_STAR_RAIL]: 'StarRail',
+  [GameTypeEnum.ZENLESS_ZONE_ZERO]: 'ZenlessZoneZero',
+};
 
 /**
  * 原神祈愿类型到 i18n key 的映射。

@@ -65,4 +65,21 @@ export class ConfigDao extends BaseDao<ConfigEntity> {
       throw error;
     }
   }
+
+  async findAll(
+    queryCondition: Record<string, any>,
+    select?: string,
+    sort?: Record<string, any>
+  ) {
+    try {
+      return await this.configEntity
+        .find(queryCondition)
+        .select(select)
+        .sort(sort)
+        .lean();
+    } catch (error) {
+      this.logger.error('[ConfigDao] findAll error', error);
+      throw error;
+    }
+  }
 }

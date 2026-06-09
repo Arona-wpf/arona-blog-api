@@ -1,7 +1,11 @@
 import { Rule } from '@midwayjs/validate';
 
 import { createStringRuleType } from '.';
-import { GameTypeEnum } from '@/definition/enums/gacha.enum';
+import {
+  GachaExportFileTypeEnum,
+  GameTypeEnum,
+} from '@/definition/enums/gacha.enum';
+import { GachaExportFileType } from '@/definition/types/gacha.type';
 import { PageDto } from './page.dto';
 
 export class CreateGachaTaskDTO {
@@ -19,6 +23,27 @@ export class GetGachaAtlasDTO extends PageDto {
     })
   )
   game_type: string;
+}
+
+export class GetGachaAtlasListDTO {
+  @Rule(
+    createStringRuleType('gacha.dto.game_type', true, 'gacha', {
+      enum: Object.values(GameTypeEnum),
+    })
+  )
+  game_type: string;
+}
+
+export class GetGachaAtlasIconsDTO {
+  @Rule(
+    createStringRuleType('gacha.dto.game_type', true, 'gacha', {
+      enum: Object.values(GameTypeEnum),
+    })
+  )
+  game_type: string;
+
+  @Rule(createStringRuleType('gacha.dto.item_ids', false, 'gacha'))
+  item_ids?: string;
 }
 
 export class CreateGachaConfigDTO {
@@ -105,6 +130,15 @@ export class GetGachaRecordListDTO {
   gacha_config_id: string;
 }
 
+export class DownloadGachaScriptDTO {
+  @Rule(
+    createStringRuleType('gacha.dto.game_type', true, 'gacha', {
+      enum: Object.values(GameTypeEnum),
+    })
+  )
+  game_type: string;
+}
+
 export class ExportGachaDTO {
   @Rule(createStringRuleType('gacha.dto.gacha_config_id', true, 'gacha'))
   gacha_config_id: string;
@@ -114,8 +148,8 @@ export class ExportGachaDTO {
 
   @Rule(
     createStringRuleType('gacha.dto.file_type', true, 'gacha', {
-      enum: ['json', 'excel'],
+      enum: Object.values(GachaExportFileTypeEnum),
     })
   )
-  file_type: string;
+  file_type: GachaExportFileType;
 }

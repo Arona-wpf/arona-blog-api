@@ -6,5 +6,8 @@
   "config.description": "配置描述",
   "config.creator": "创建人",
   "config.updator": "更新人",
-  "config.create.success": "创建配置成功"
+  "config.create.success": "创建配置成功",
+  "config.get.success": "配置列表查询成功",
+  "config.set.success": "配置保存成功",
+  "config.key.pattern.invalid": "配置 key 仅允许小写英文字母与点号，且不能以点号开头或结尾"
 }

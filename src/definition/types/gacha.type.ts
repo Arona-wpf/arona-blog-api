@@ -1,4 +1,5 @@
 import {
+  GachaExportFileTypeEnum,
   GachaItemTypeEnum,
   GachaTaskStatusEnum,
   GameTypeEnum,
@@ -14,6 +15,12 @@ import {
  * 游戏类型。
  */
 export type GameType = (typeof GameTypeEnum)[keyof typeof GameTypeEnum];
+
+/**
+ * 祈愿记录导出文件类型。
+ */
+export type GachaExportFileType =
+  (typeof GachaExportFileTypeEnum)[keyof typeof GachaExportFileTypeEnum];
 
 /**
  * 祈愿物品类型。

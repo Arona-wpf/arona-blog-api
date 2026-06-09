@@ -6,5 +6,8 @@
   "config.description": "Config Description",
   "config.creator": "Creator",
   "config.updator": "Updator",
-  "config.create.success": "Create config success"
+  "config.create.success": "Create config success",
+  "config.get.success": "Config list retrieved successfully",
+  "config.set.success": "Config saved successfully",
+  "config.key.pattern.invalid": "Config key may only contain lowercase letters and dots, and cannot start or end with a dot"
 }

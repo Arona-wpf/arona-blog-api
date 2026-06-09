@@ -2,6 +2,8 @@ import { Inject, Logger, Provide } from '@midwayjs/core';
 import { ILogger } from '@midwayjs/logger';
 
 import { GachaAtlasDao } from '@/dao/gacha-atlas.dao';
+import { GACHA_ATLAS_GOLD_RANK_TYPE_MAP } from '@/definition/constants/gacha.constant';
+import { GachaItemTypeEnum } from '@/definition/enums/gacha.enum';
 import { GameType } from '@/definition/types/gacha.type';
 import { GetGachaAtlasDTO } from '@/dto/gacha.dto';
 import { GachaAtlasEntity } from '@/entity/gacha-atlas.entity';
@@ -44,6 +46,26 @@ export class GachaAtlasService {
    */
   async getAllGachaAtlas(game_type: GameType) {
     return this.gachaAtlasDao.findAll({ game_type });
+  }
+
+  /**
+   * 获取指定游戏的 5 星 / S 级角色与武器图鉴列表
+   * @param game_type 游戏类型
+   */
+  async getGachaAtlasGoldList(game_type: GameType) {
+    const goldRankTypes = GACHA_ATLAS_GOLD_RANK_TYPE_MAP[game_type] || [];
+
+    return this.gachaAtlasDao.findAll(
+      {
+        game_type,
+        rank_type: { $in: goldRankTypes },
+        item_type: {
+          $in: [GachaItemTypeEnum.CHARACTER, GachaItemTypeEnum.WEAPON],
+        },
+      },
+      '_id content_id item_id item_name item_type rank_type icon_url',
+      { item_name: 1 }
+    );
   }
 
   /**
@@ -185,7 +207,31 @@ export class GachaAtlasService {
       },
       1,
       item_ids.length,
-      'item_id icon_url item_name'
+      'item_id icon_url item_name item_type'
     );
+  }
+
+  /**
+   * 根据 item_id 列表获取图标映射
+   * @param game_type 游戏类型
+   * @param item_ids item_id 列表
+   */
+  async getAtlasIconMapByItemIds(game_type: GameType, item_ids: string[]) {
+    const items = await this.findByItemIds(game_type, item_ids);
+    const iconMap: Record<
+      string,
+      { icon_url: string; item_name: string; item_type: string }
+    > = {};
+
+    for (const item of items) {
+      if (!item.item_id || !item.icon_url) continue;
+      iconMap[item.item_id] = {
+        icon_url: item.icon_url,
+        item_name: item.item_name,
+        item_type: item.item_type,
+      };
+    }
+
+    return iconMap;
   }
 }

@@ -19,7 +19,7 @@ export class ConfigEntity {
   @prop({ type: String, required: true, unique: true })
   key: string; // 配置key
 
-  @prop({ type: String, required: true })
+  @prop({ type: String, default: '' })
   value: string; // 配置value
 
   @prop({ type: String, default: '' })

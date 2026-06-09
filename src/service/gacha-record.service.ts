@@ -16,6 +16,7 @@ import {
 } from '@/definition/constants/gacha.constant';
 import { LocaleEnum, RedisStorageEnum } from '@/definition/enums/common.enum';
 import {
+  GachaExportFileTypeEnum,
   GachaItemTypeEnum,
   GameTypeEnum,
   GenshinImpactGachaTypeEnum,
@@ -23,6 +24,7 @@ import {
   ZenlessZoneZeroGachaTypeEnum,
 } from '@/definition/enums/gacha.enum';
 import {
+  GachaExportFileType,
   GameType,
   IMihoyoGachaLogFetchData,
 } from '@/definition/types/gacha.type';
@@ -909,7 +911,7 @@ export class GachaRecordService {
   async exportGachaRecords(
     gachaConfigId: string,
     fileName: string,
-    fileType: 'json' | 'excel',
+    fileType: GachaExportFileType,
     locale: string
   ): Promise<string> {
     const config =
@@ -933,7 +935,7 @@ export class GachaRecordService {
     const safeFileName = fileName.replace(/[^a-zA-Z0-9一-龥_-]/g, '');
     const timestamp = dayjs().format('YYYYMMDD_HHmmss');
 
-    if (fileType === 'json') {
+    if (fileType === GachaExportFileTypeEnum.JSON) {
       const ext = 'json';
       const objectKey = `gacha/export/${dayjs().format('YYYY-MM')}/${safeFileName}_${timestamp}.${ext}`;
 
@@ -979,7 +981,7 @@ export class GachaRecordService {
       );
     }
 
-    if (fileType === 'excel') {
+    if (fileType === GachaExportFileTypeEnum.EXCEL) {
       const ext = 'xlsx';
       const objectKey = `gacha/export/${dayjs().format('YYYY-MM')}/${safeFileName}_${timestamp}.${ext}`;
       const records = this.groupRecordsByGachaType(allRecords);
