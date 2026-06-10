@@ -46,7 +46,7 @@ export function registerPermissionMethod(options: {
       const session = ctx.session as IUserSession;
       const userPermissions = session.user?.permissions ?? [];
       // 如果角色里包含administrator，直接放行
-      if (session.user.roles.includes('administrator')) {
+      if (session.user?.roles?.includes('administrator')) {
         return await joinPoint.proceed(...joinPoint.args);
       }
       // 如果接口鉴权的权限列表是用户权限列表的子集，放行

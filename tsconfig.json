@@ -3,33 +3,27 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "commonjs",
-    "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
-    "inlineSourceMap":true,
+    "inlineSourceMap": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "stripInternal": true,
     "skipLibCheck": true,
+    "strictPropertyInitialization": false,
     "pretty": true,
     "paths": {
       "@/*": ["./src/*"]
     },
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
-    "typeRoots": [ "./typings", "./node_modules/@types"],
+    "typeRoots": ["./typings", "./node_modules/@types"],
     "types": ["node"],
     "outDir": "dist",
     "rootDir": "src"
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "*.js",
-    "*.ts",
-    "dist",
-    "node_modules",
-    "test"
-  ]
+  "exclude": ["*.js", "*.ts", "dist", "node_modules", "test"]
 }

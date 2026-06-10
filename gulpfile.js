@@ -12,7 +12,7 @@ const buildZip = `${projectName}-${projectVersion}.zip`;
 
 gulp.task('clean', () => deleteAsync(['build/**', '!*.zip']));
 
-gulp.task('fix', shell.task(['yarn fix']));
+gulp.task('lint:fix', shell.task(['yarn lint:fix']));
 
 gulp.task('lint', shell.task(['yarn lint']));
 
@@ -50,7 +50,7 @@ gulp.task('zip', async () => {
 
 exports.default = gulp.series(
   'clean',
-  'fix',
+  'lint:fix',
   'lint',
   'tsc',
   'copy',

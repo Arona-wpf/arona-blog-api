@@ -1,6 +1,6 @@
 {
   "name": "arona-blog-api",
-  "version": "26.6.9",
+  "version": "26.6.10",
   "author": "Arona-wpf",
   "description": "Aronaの小屋——后端api服务",
   "license": "MIT",
@@ -73,7 +73,7 @@
     "test": "cross-env NODE_ENV=unittest jest",
     "cov": "jest --coverage",
     "lint": "eslint . --ignore-pattern .gitignore",
-    "fix": "mwts fix",
+    "lint:fix": "mwts fix",
     "ci": "npm run cov",
     "build": "gulp"
   },

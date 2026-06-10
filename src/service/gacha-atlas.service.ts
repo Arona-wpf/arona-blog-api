@@ -193,6 +193,49 @@ export class GachaAtlasService {
   }
 
   /**
+   * 根据游戏类型和 _id 列表批量查找祈愿物品图鉴
+   * @param game_type 游戏类型
+   * @param ids _id列表
+   * @returns 祈愿物品图鉴列表
+   */
+  async findByIds(game_type: GameType, ids: string[]) {
+    if (ids.length === 0) return [];
+    return this.gachaAtlasDao.findMany(
+      {
+        game_type,
+        _id: { $in: ids },
+      },
+      1,
+      ids.length,
+      '_id icon_url item_name item_type'
+    );
+  }
+
+  /**
+   * 根据 _id 列表获取图标映射
+   * @param game_type 游戏类型
+   * @param ids _id 列表
+   */
+  async getAtlasIconMapByIds(game_type: GameType, ids: string[]) {
+    const items = await this.findByIds(game_type, ids);
+    const iconMap: Record<
+      string,
+      { icon_url: string; item_name: string; item_type: string }
+    > = {};
+
+    for (const item of items) {
+      if (!item._id || !item.icon_url) continue;
+      iconMap[item._id] = {
+        icon_url: item.icon_url,
+        item_name: item.item_name,
+        item_type: item.item_type,
+      };
+    }
+
+    return iconMap;
+  }
+
+  /**
    * 根据游戏类型和item_id列表批量查找祈愿物品图鉴
    * @param game_type 游戏类型
    * @param item_ids item_id列表

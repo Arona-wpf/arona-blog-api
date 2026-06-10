@@ -80,18 +80,15 @@ export class PriV1GachaController {
   }
 
   /**
-   * 根据 item_id 列表获取图鉴图标映射
+   * 根据 _id 列表获取图鉴图标映射
    */
-  @Get('/atlas/icons')
-  async getAtlasIcons(@Query() query: GetGachaAtlasIconsDTO) {
-    const itemIds = (query.item_ids || '')
-      .split(',')
-      .map(id => id.trim())
-      .filter(Boolean);
+  @Post('/atlas/icons')
+  async getAtlasIcons(@Body() body: GetGachaAtlasIconsDTO) {
+    const ids = (body.ids || []).map(id => id.trim()).filter(Boolean);
 
-    const iconMap = await this.gachaAtlasService.getAtlasIconMapByItemIds(
-      query.game_type as GameType,
-      itemIds
+    const iconMap = await this.gachaAtlasService.getAtlasIconMapByIds(
+      body.game_type as GameType,
+      ids
     );
 
     return {
@@ -127,7 +124,16 @@ export class PriV1GachaController {
     @Body() body: CreateGachaTaskDTO,
     @Session() session: IUserSession
   ) {
-    const account = session.user.account;
+    const account = session?.user?.account;
+
+    if (!account) {
+      return {
+        data: null,
+        group: 'gacha',
+        msg: 'user.not.login',
+      };
+    }
+
     const task = await this.gachaTaskService.createGachaTask(
       body.gacha_config_id,
       body.gacha_url,
@@ -151,7 +157,16 @@ export class PriV1GachaController {
     @Body() body: CreateGachaConfigDTO,
     @Session() session: IUserSession
   ) {
-    const account = session.user.account;
+    const account = session?.user?.account;
+
+    if (!account) {
+      return {
+        data: null,
+        group: 'gacha',
+        msg: 'user.not.login',
+      };
+    }
+
     const config = await this.gachaConfigService.createGachaConfig(
       account,
       body.game_type as GameType,
@@ -183,7 +198,16 @@ export class PriV1GachaController {
     @Query() query: GetGachaConfigListDTO,
     @Session() session: IUserSession
   ) {
-    const account = session.user.account;
+    const account = session?.user?.account;
+
+    if (!account) {
+      return {
+        data: null,
+        group: 'gacha',
+        msg: 'user.not.login',
+      };
+    }
+
     let configList;
     if (query.game_type) {
       configList = await this.gachaConfigService.getGachaConfigListByGameType(
@@ -209,7 +233,16 @@ export class PriV1GachaController {
     @Body() body: UpdateGachaConfigDTO,
     @Session() session: IUserSession
   ) {
-    const account = session.user.account;
+    const account = session?.user?.account;
+
+    if (!account) {
+      return {
+        data: null,
+        group: 'gacha',
+        msg: 'user.not.login',
+      };
+    }
+
     const updateData: Record<string, any> = {};
     if (body.game_uid) updateData.game_uid = body.game_uid;
     if (body.game_nickname) updateData.game_nickname = body.game_nickname;
@@ -236,7 +269,16 @@ export class PriV1GachaController {
     @Body() body: DeleteGachaConfigDTO,
     @Session() session: IUserSession
   ) {
-    const account = session.user.account;
+    const account = session?.user?.account;
+
+    if (!account) {
+      return {
+        data: null,
+        group: 'gacha',
+        msg: 'user.not.login',
+      };
+    }
+
     await this.gachaConfigService.deleteGachaConfig(body._id, account);
 
     return {

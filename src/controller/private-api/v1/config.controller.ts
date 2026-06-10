@@ -15,7 +15,15 @@ export class PriV1ConfigController {
     @Body() body: CreateConfigDto,
     @Session() session: IUserSession
   ) {
-    const account = session.user.account;
+    const account = session?.user?.account;
+
+    if (!account) {
+      return {
+        data: null,
+        group: 'config',
+        msg: 'user.not.login',
+      };
+    }
 
     const createData = cloneDeep(body);
     await this.configService.createConfig(createData, account);
@@ -43,7 +51,15 @@ export class PriV1ConfigController {
     @Body() body: SetConfigDto,
     @Session() session: IUserSession
   ) {
-    const account = session.user.account;
+    const account = session?.user?.account;
+
+    if (!account) {
+      return {
+        data: null,
+        group: 'config',
+        msg: 'user.not.login',
+      };
+    }
 
     await this.configService.setConfigByKey(body.key, body.value, account);
 

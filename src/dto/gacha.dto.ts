@@ -1,6 +1,6 @@
-import { Rule } from '@midwayjs/validate';
+import { Rule, RuleType } from '@midwayjs/validate';
 
-import { createStringRuleType } from '.';
+import { createArrayRuleType, createStringRuleType } from '.';
 import {
   GachaExportFileTypeEnum,
   GameTypeEnum,
@@ -42,8 +42,8 @@ export class GetGachaAtlasIconsDTO {
   )
   game_type: string;
 
-  @Rule(createStringRuleType('gacha.dto.item_ids', false, 'gacha'))
-  item_ids?: string;
+  @Rule(createArrayRuleType('gacha.dto.ids', false, 'gacha', RuleType.string()))
+  ids?: string[];
 }
 
 export class CreateGachaConfigDTO {
