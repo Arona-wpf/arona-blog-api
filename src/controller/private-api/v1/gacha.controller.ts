@@ -21,7 +21,7 @@ import {
   DeleteGachaConfigDTO,
   DownloadGachaScriptDTO,
   ExportGachaDTO,
-  GetGachaAtlasIconsDTO,
+  GetGachaAtlasItemsDTO,
   GetGachaAtlasListDTO,
   GetGachaConfigListDTO,
   GetGachaRecordListDTO,
@@ -80,21 +80,21 @@ export class PriV1GachaController {
   }
 
   /**
-   * 根据 _id 列表获取图鉴图标映射
+   * 根据 _id 列表获取图鉴完整数据
    */
-  @Post('/atlas/icons')
-  async getAtlasIcons(@Body() body: GetGachaAtlasIconsDTO) {
+  @Post('/atlas/items')
+  async getAtlasItems(@Body() body: GetGachaAtlasItemsDTO) {
     const ids = (body.ids || []).map(id => id.trim()).filter(Boolean);
 
-    const iconMap = await this.gachaAtlasService.getAtlasIconMapByIds(
+    const items = await this.gachaAtlasService.getAtlasItemsByIds(
       body.game_type as GameType,
       ids
     );
 
     return {
-      data: iconMap,
+      data: items,
       group: 'gacha',
-      msg: 'gacha.atlas.icons.success',
+      msg: 'gacha.atlas.items.success',
     };
   }
 

@@ -212,6 +212,23 @@ export class GachaAtlasService {
   }
 
   /**
+   * 根据 _id 列表获取完整图鉴数据
+   * @param game_type 游戏类型
+   * @param ids _id 列表
+   */
+  async getAtlasItemsByIds(game_type: GameType, ids: string[]) {
+    if (ids.length === 0) return [];
+    return this.gachaAtlasDao.findMany(
+      {
+        game_type,
+        _id: { $in: ids },
+      },
+      1,
+      ids.length
+    );
+  }
+
+  /**
    * 根据 _id 列表获取图标映射
    * @param game_type 游戏类型
    * @param ids _id 列表
@@ -220,12 +237,18 @@ export class GachaAtlasService {
     const items = await this.findByIds(game_type, ids);
     const iconMap: Record<
       string,
-      { icon_url: string; item_name: string; item_type: string }
+      {
+        item_id: string;
+        icon_url: string;
+        item_name: string;
+        item_type: string;
+      }
     > = {};
 
     for (const item of items) {
       if (!item._id || !item.icon_url) continue;
       iconMap[item._id] = {
+        item_id: item.item_id,
         icon_url: item.icon_url,
         item_name: item.item_name,
         item_type: item.item_type,

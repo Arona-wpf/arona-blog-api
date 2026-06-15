@@ -34,7 +34,7 @@ export class GetGachaAtlasListDTO {
   game_type: string;
 }
 
-export class GetGachaAtlasIconsDTO {
+export class GetGachaAtlasItemsDTO {
   @Rule(
     createStringRuleType('gacha.dto.game_type', true, 'gacha', {
       enum: Object.values(GameTypeEnum),
