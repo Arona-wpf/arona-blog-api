@@ -7,12 +7,12 @@ import { IEmailConfig } from '@/interface';
 
 // Gmail/Tencent SMTP 配置
 const emailConfig: IEmailConfig = {
-  host: process.env.EMAIL_TENCENT_HOST,
-  port: parseInt(process.env.EMAIL_TENCENT_PORT),
+  host: process.env.EMAIL_TENCENT_HOST as string,
+  port: parseInt(process.env.EMAIL_TENCENT_PORT as string),
   secure: true,
   auth: {
-    user: process.env.TENCENT_ACCOUNT,
-    pass: process.env.TENCENT_PASS,
+    user: process.env.TENCENT_ACCOUNT as string,
+    pass: process.env.TENCENT_PASS as string,
   },
 };
 
@@ -59,7 +59,7 @@ export async function renderEmailTemplate(
   // 运行时从项目根目录读取模板（开发/单测通常可用）
   const templatePath = path.resolve(
     process.cwd(),
-    'src',
+    process.env.NODE_ENV === 'development' ? 'src' : 'dist',
     'template',
     templateRelativePath
   );
