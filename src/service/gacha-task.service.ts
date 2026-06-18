@@ -2,6 +2,7 @@ import { Inject, Logger, Provide } from '@midwayjs/core';
 import { MidwayI18nService } from '@midwayjs/i18n';
 import { ILogger } from '@midwayjs/logger';
 
+import { BusinessError } from '@/class/error/business.error';
 import { GachaTaskDao } from '@/dao/gacha-task.dao';
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
 import { LocaleEnum } from '@/definition/enums/common.enum';
@@ -10,6 +11,7 @@ import {
   GameTypeEnum,
 } from '@/definition/enums/gacha.enum';
 import { GameType } from '@/definition/types/gacha.type';
+import { ResultHelper } from '@/helper/result.helper';
 import { WsConnectionManager } from '@/manage/ws-connection.manage';
 import { GachaConfigService } from '@/service/gacha-config.service';
 import {
@@ -33,6 +35,9 @@ export class GachaTaskService {
 
   @Inject()
   i18nService: MidwayI18nService;
+
+  @Inject()
+  resultHelper: ResultHelper;
 
   @Logger()
   logger: ILogger;
@@ -256,7 +261,11 @@ export class GachaTaskService {
       );
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : String(error);
+        error instanceof Error
+          ? error.message
+          : error instanceof BusinessError
+            ? this.resultHelper.translate(error.message, 'error')
+            : 'Unknown error';
 
       // 更新任务状态为失败
       await this.gachaTaskDao.findOneAndUpdate(
@@ -278,7 +287,9 @@ export class GachaTaskService {
           this.i18nService.translate('gacha.sync.progress.task.failed', {
             group: 'gacha',
             locale,
-            args: { error: errorMessage },
+            args: {
+              error: errorMessage,
+            },
           }),
         'failed'
       );
@@ -329,6 +340,19 @@ export class GachaTaskService {
             count: String(payload.totalNewRecords || 0),
           },
         })
+      );
+      return;
+    }
+
+    if (payload.type === 'authkey_expired') {
+      // 推送 authkey 过期提示，供前端 toast 展示
+      this.pushSyncLog(
+        account,
+        locale =>
+          locale === LocaleEnum.EN_US
+            ? payload.authKeyExpiredMessage?.en || ''
+            : payload.authKeyExpiredMessage?.zh || '',
+        'failed'
       );
     }
   }

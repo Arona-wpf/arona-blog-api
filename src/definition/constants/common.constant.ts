@@ -205,6 +205,9 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿脚本文件不存在
   GACHA_SCRIPT_NOT_FOUND: (args?: Record<string, string>) =>
     new BusinessError(1000913, 'error.gacha.script.not.found', args),
+  // 祈愿链接已过期
+  GACHA_AUTHKEY_EXPIRED: (args?: Record<string, string>) =>
+    new BusinessError(1000914, 'error.gacha.authkey.expired', args),
   // 系统配置不存在
   CONFIG_NOT_FOUND: (args?: Record<string, string>) =>
     new BusinessError(1001001, 'error.config.not.found', args),

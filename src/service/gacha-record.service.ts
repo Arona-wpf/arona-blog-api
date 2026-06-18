@@ -41,10 +41,11 @@ const GACHA_LOCK_PREFIX = 'gacha:lock';
 const GACHA_LOCK_TTL = 300; // 5 minutes
 
 export interface GachaSyncProgressPayload {
-  type: 'fetch_page' | 'pool_completed';
+  type: 'fetch_page' | 'pool_completed' | 'authkey_expired';
   gachaTypeLabel: { zh: string; en: string };
   page?: number;
   totalNewRecords?: number;
+  authKeyExpiredMessage?: { zh: string; en: string };
 }
 
 @Provide()
@@ -479,7 +480,7 @@ export class GachaRecordService {
         response = await axiosInstance.get(
           `${apiPath}?${currentSearchParams.toString()}`
         );
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(
           `[GachaRecordService] Request failed for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, page: ${page}, error: ${error.message}`
         );
@@ -507,7 +508,7 @@ export class GachaRecordService {
 
           const newGachaList: GachaRecordEntity[] = [];
           uniqueGachaList.forEach(r => {
-            let atlasItem: GachaAtlasEntity;
+            let atlasItem: GachaAtlasEntity | undefined;
             if (gameType === GameTypeEnum.GENSHIN_IMPACT) {
               atlasItem = gachaAtlasItems.find(
                 item => item.item_name === r.name
@@ -553,6 +554,10 @@ export class GachaRecordService {
           `[GachaRecordService] API returned error for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, retcode: ${retcode}, message: ${message}`
         );
         fetchMore = false;
+        // 如果是 authkey 过期的错误码，抛出业务异常
+        if (retcode === -101) {
+          throw BUSINESS_ERROR_CONSTANT.GACHA_AUTHKEY_EXPIRED();
+        }
       }
 
       // 等待1秒后继续获取下一页数据，防止请求过于频繁被封禁
