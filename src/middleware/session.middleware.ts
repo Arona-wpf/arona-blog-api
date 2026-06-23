@@ -20,7 +20,10 @@ export class SessionMiddleware implements IMiddleware<Context, NextFunction> {
       const resultHelper = await ctx.requestContext.getAsync(ResultHelper);
       try {
         // 公共api/cdn 不进行session校验
-        if (ctx.path.startsWith('/public-api') || ctx.path.startsWith('/cdn')) {
+        if (
+          ctx.path.startsWith('/public-api') ||
+          ctx.path.startsWith('/minio')
+        ) {
           await next();
           return;
         }
@@ -38,7 +41,7 @@ export class SessionMiddleware implements IMiddleware<Context, NextFunction> {
 
         await next();
       } finally {
-        if (!ctx.session?.user && !ctx.session?.guest) {
+        if (ctx.session && !ctx.session?.user && !ctx.session?.guest) {
           // 如果 session 中没有 user 和 guest 对象，初始化 guest 对象
           ctx.session.guest = {
             tmpId: randomId(),
