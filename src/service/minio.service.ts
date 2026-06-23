@@ -127,11 +127,15 @@ export class MinioService {
       })
     );
 
-    return this.getAttachmentDownloadUrl(
-      objectKey,
-      10 * 60,
-      objectKey.split('/').pop()
-    );
+    return {
+      bucket: this.bucket,
+      object_name: objectKey,
+      url: await this.getAttachmentDownloadUrl(
+        objectKey,
+        10 * 60,
+        file.filename
+      ),
+    };
   }
 
   /**
