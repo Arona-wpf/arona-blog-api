@@ -3,7 +3,6 @@ import { Context } from '@midwayjs/koa';
 import { ILogger } from '@midwayjs/logger';
 import COS from 'cos-nodejs-sdk-v5';
 import * as STS from 'qcloud-cos-sts';
-import { promisify } from 'util';
 
 import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant';
 import { RedisStorageEnum } from '@/definition/enums/common.enum';
@@ -74,7 +73,7 @@ export class CosService {
     const privateAllowPrefix = this.cosConfig.prefix.private + account + '/*';
 
     // 根据角色构建资源权限列表
-    const cosPolicyResourceList = [];
+    const cosPolicyResourceList: string[] = [];
     if (isAdmin) {
       // 管理员：整个桶的资源权限
       const adminPolicyResource =
@@ -118,62 +117,64 @@ export class CosService {
       cosPolicyResourceList.push(publicPolicyResource);
     }
 
-    try {
-      // 调用 STS 接口获取临时凭证
-      const result = await STS.getCredential({
-        secretId: this.cosConfig.secretId,
-        secretKey: this.cosConfig.secretKey,
-        durationSeconds: this.cosConfig.durationSeconds,
-        endpoint: this.cosConfig.endPoint,
-        policy: {
-          version: this.cosConfig.policyVersion,
-          statement: [
-            {
-              action: this.cosConfig.allowActions,
-              effect: 'allow',
-              principal: {
-                qcs: [
-                  `qcs::cam::uin/${this.cosConfig.secretId}:uin/${this.cosConfig.secretId}`,
-                ],
+    return new Promise<ICredentialData>((resolve, reject) => {
+      STS.getCredential(
+        {
+          secretId: this.cosConfig.secretId,
+          secretKey: this.cosConfig.secretKey,
+          durationSeconds: this.cosConfig.durationSeconds,
+          endpoint: this.cosConfig.endPoint,
+          policy: {
+            version: this.cosConfig.policyVersion,
+            statement: [
+              {
+                action: this.cosConfig.allowActions,
+                effect: 'allow',
+                principal: {
+                  qcs: [
+                    `qcs::cam::uin/${this.cosConfig.secretId}:uin/${this.cosConfig.secretId}`,
+                  ],
+                },
+                resource: cosPolicyResourceList,
               },
-              resource: cosPolicyResourceList,
-            },
-          ],
-        },
-      });
-
-      if (result.credentials) {
-        this.logger.info(
-          `[CosService] getCosTempToken success, account: ${account}`
-        );
-        const resolveResult = {
-          ...result,
-          config: {
-            bucket: this.cosConfig.bucket,
-            region: this.cosConfig.region,
+            ],
           },
-        };
-        // 缓存到 Redis
-        redisService.setex(
-          `${RedisStorageEnum.SCRIPT}.token:${account}`,
-          this.cosConfig.durationSeconds,
-          JSON.stringify(resolveResult)
-        );
-        return resolveResult;
-      }
-
-      this.logger.error(
-        `[CosService] getCosTempToken failed, account: ${account}, reason: ${JSON.stringify(
-          result
-        )}`
+        },
+        (err, result) => {
+          if (err) {
+            this.logger.error(
+              `[CosService] getCosTempToken failed, account: ${account}, reason: ${JSON.stringify(err)}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_CREDENTIAL_FETCH_FAILED());
+          } else if (result.credentials) {
+            this.logger.info(
+              `[CosService] getCosTempToken success, account: ${account}`
+            );
+            const resolveResult = {
+              ...result,
+              config: {
+                bucket: this.cosConfig.bucket,
+                region: this.cosConfig.region,
+              },
+            };
+            // 缓存到 Redis
+            redisService.setex(
+              `${RedisStorageEnum.SCRIPT}.token:${account}`,
+              this.cosConfig.durationSeconds,
+              JSON.stringify(resolveResult)
+            );
+            resolve(resolveResult);
+          } else {
+            this.logger.error(
+              `[CosService] getCosTempToken failed, account: ${account}, reason: ${JSON.stringify(
+                result
+              )}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_CREDENTIAL_FETCH_FAILED());
+          }
+        }
       );
-      throw BUSINESS_ERROR_CONSTANT.COS_CREDENTIAL_FETCH_FAILED();
-    } catch (error) {
-      this.logger.error(
-        `[CosService] getCosTempToken failed, account: ${account}, reason: ${error.message}`
-      );
-      throw BUSINESS_ERROR_CONSTANT.COS_CREDENTIAL_FETCH_FAILED();
-    }
+    });
   }
 
   // ==================== COS 实例管理 ====================
@@ -264,33 +265,34 @@ export class CosService {
       },
     }));
 
-    const uploadFilesAsync = promisify(
-      cosInstance.uploadFiles.bind(cosInstance)
-    );
-
-    try {
-      const data = await uploadFilesAsync({
-        files: bufferList,
-        SliceSize: 10 * 1024 * 1024,
-      });
-
-      // 检查是否有单个文件失败
-      if (failedList.length > 0) {
-        this.logger.error(
-          `[CosService] upload files partially failed, account: ${account}, failedList: ${JSON.stringify(
-            failedList
-          )}`
-        );
-        throw BUSINESS_ERROR_CONSTANT.COS_UPLOAD_FAILED();
-      }
-
-      return data;
-    } catch (error) {
-      this.logger.error(
-        `[CosService] upload files failed, account: ${account}, err: ${error.message}`
+    return new Promise<COS.UploadFilesResult>((resolve, reject) => {
+      cosInstance.uploadFiles(
+        {
+          files: bufferList,
+          SliceSize: 10 * 1024 * 1024,
+        },
+        (err, data) => {
+          if (err) {
+            this.logger.error(
+              `[CosService] upload files failed, account: ${account}, err: ${err.message}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_UPLOAD_FAILED());
+          } else {
+            // 检查是否有单个文件失败
+            if (failedList.length > 0) {
+              this.logger.error(
+                `[CosService] upload files partially failed, account: ${account}, failedList: ${JSON.stringify(
+                  failedList
+                )}`
+              );
+              reject(BUSINESS_ERROR_CONSTANT.COS_UPLOAD_FAILED());
+            } else {
+              resolve(data);
+            }
+          }
+        }
       );
-      throw BUSINESS_ERROR_CONSTANT.COS_UPLOAD_FAILED();
-    }
+    });
   }
 
   /**
@@ -308,24 +310,29 @@ export class CosService {
     const account = user.account;
     const cosInstance = await this.getCosInstance(user, isAdmin);
 
-    const headObjectAsync = promisify(cosInstance.headObject.bind(cosInstance));
-
-    try {
-      await headObjectAsync({
-        Bucket: this.cosConfig.bucket,
-        Region: this.cosConfig.region,
-        Key: objectKey,
-      });
-      return true;
-    } catch (error) {
-      if (error.statusCode === 404) {
-        return false;
-      }
-      this.logger.warn(
-        `[CosService] doesObjectExist failed, account: ${account}, objectKey: ${objectKey}, statusCode: ${error.statusCode}`
+    return new Promise<boolean>((resolve, reject) => {
+      cosInstance.headObject(
+        {
+          Bucket: this.cosConfig.bucket,
+          Region: this.cosConfig.region,
+          Key: objectKey,
+        },
+        err => {
+          if (err) {
+            if (err.statusCode === 404) {
+              resolve(false);
+            } else {
+              this.logger.warn(
+                `[CosService] doesObjectExist failed, account: ${account}, objectKey: ${objectKey}, statusCode: ${err.statusCode}`
+              );
+              reject(BUSINESS_ERROR_CONSTANT.COS_OBJECT_NO_ACCESS());
+            }
+          } else {
+            resolve(true);
+          }
+        }
       );
-      throw BUSINESS_ERROR_CONSTANT.COS_OBJECT_NO_ACCESS();
-    }
+    });
   }
 
   /**
@@ -344,32 +351,34 @@ export class CosService {
   ): Promise<string> {
     const cosInstance = await this.getCosInstance(user, isAdmin);
 
-    const getUrlAsync = promisify(cosInstance.getObjectUrl.bind(cosInstance));
-
-    try {
-      const data = await getUrlAsync({
-        Bucket: this.cosConfig.bucket,
-        Region: this.cosConfig.region,
-        Key: objectKey,
-        Sign: true,
-        Expires: this.cosConfig.durationSeconds,
-      });
-
-      if (!data.Url) {
-        this.logger.error(
-          `[CosService] getObjectUrlWithSignature: empty URL returned, account: ${user.account}, objectKey: ${objectKey}`
-        );
-        throw BUSINESS_ERROR_CONSTANT.COS_GET_URL_FAILED();
-      }
-
-      // 替换为 CDN 域名
-      return replaceUrl(data.Url, this.cdnConfig[type]);
-    } catch (error) {
-      this.logger.error(
-        `[CosService] getObjectUrlWithSignature failed, err: ${error.message}`
+    return new Promise<string>((resolve, reject) => {
+      cosInstance.getObjectUrl(
+        {
+          Bucket: this.cosConfig.bucket,
+          Region: this.cosConfig.region,
+          Key: objectKey,
+          Sign: true,
+          Expires: this.cosConfig.durationSeconds,
+        },
+        (err, data) => {
+          if (err) {
+            this.logger.error(
+              `[CosService] getObjectUrlWithSignature failed, account: ${user.account}, objectKey: ${objectKey}, err: ${err.message}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_GET_URL_FAILED());
+          } else if (!data.Url) {
+            this.logger.error(
+              `[CosService] getObjectUrlWithSignature: empty URL returned, account: ${user.account}, objectKey: ${objectKey}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_GET_URL_FAILED());
+          } else {
+            // 替换为 CDN 域名
+            const cdnUrl = replaceUrl(data.Url, this.cdnConfig.prefix[type]);
+            resolve(cdnUrl);
+          }
+        }
       );
-      throw BUSINESS_ERROR_CONSTANT.COS_GET_URL_FAILED();
-    }
+    });
   }
 
   // ==================== 存储桶操作 ====================
@@ -390,33 +399,34 @@ export class CosService {
   ): Promise<COS.GetBucketResult> {
     const cosInstance = await this.getCosInstance(user, isAdmin);
 
-    const getBucketAsync = promisify(cosInstance.getBucket.bind(cosInstance));
-
-    try {
-      const data = await getBucketAsync({
-        Bucket: this.cosConfig.bucket,
-        Region: this.cosConfig.region,
-        Prefix: prefix,
-        Delimiter: deep ? undefined : '/',
-      });
-
-      if (data.statusCode === 200) {
-        this.logger.info(
-          `[CosService] getBucketData success, account: ${user.account}`
-        );
-        return data;
-      }
-
-      this.logger.error(
-        `[CosService] getBucketData failed, statusCode: ${data.statusCode}`
+    return new Promise<COS.GetBucketResult>((resolve, reject) => {
+      cosInstance.getBucket(
+        {
+          Bucket: this.cosConfig.bucket,
+          Region: this.cosConfig.region,
+          Prefix: prefix,
+          Delimiter: deep ? undefined : '/',
+        },
+        (err, data) => {
+          if (err) {
+            this.logger.error(
+              `[CosService] getBucketData failed, account: ${user.account}, prefix: ${prefix}, err: ${err.message}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_GET_BUCKET_DATA_FAILED());
+          } else if (data.statusCode === 200) {
+            this.logger.info(
+              `[CosService] getBucketData success, account: ${user.account}`
+            );
+            resolve(data);
+          } else {
+            this.logger.error(
+              `[CosService] getBucketData failed, account: ${user.account}, statusCode: ${data.statusCode}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_GET_BUCKET_DATA_FAILED());
+          }
+        }
       );
-      throw BUSINESS_ERROR_CONSTANT.COS_GET_BUCKET_DATA_FAILED();
-    } catch (error) {
-      this.logger.error(
-        `[CosService] getBucketData failed, err: ${error.message}`
-      );
-      throw BUSINESS_ERROR_CONSTANT.COS_GET_BUCKET_DATA_FAILED();
-    }
+    });
   }
 
   /**
@@ -440,26 +450,34 @@ export class CosService {
       throw BUSINESS_ERROR_CONSTANT.COS_OBJECT_HAS_EXISTS();
     }
 
-    const putObjectAsync = promisify(cosInstance.putObject.bind(cosInstance));
-
-    try {
-      const data = await putObjectAsync({
-        Bucket: this.cosConfig.bucket,
-        Region: this.cosConfig.region,
-        Key: objectKey,
-        Body: '',
-      });
-
-      this.logger.info(
-        `[CosService] createFolder success, account: ${account}, key: ${objectKey}`
+    return new Promise<COS.PutObjectResult>((resolve, reject) => {
+      cosInstance.putObject(
+        {
+          Bucket: this.cosConfig.bucket,
+          Region: this.cosConfig.region,
+          Key: objectKey,
+          Body: '',
+        },
+        (err, data) => {
+          if (err) {
+            this.logger.error(
+              `[CosService] createFolder failed, account: ${account}, key: ${objectKey}, err: ${err.message}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_CREATE_FOLDER_FAILED());
+          } else if (data.statusCode === 200) {
+            this.logger.info(
+              `[CosService] createFolder success, account: ${account}, key: ${objectKey}`
+            );
+            resolve(data);
+          } else {
+            this.logger.error(
+              `[CosService] createFolder failed, account: ${account}, statusCode: ${data.statusCode}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_CREATE_FOLDER_FAILED());
+          }
+        }
       );
-      return data;
-    } catch (error) {
-      this.logger.error(
-        `[CosService] createFolder failed, account: ${account}, err: ${error.message}`
-      );
-      throw error;
-    }
+    });
   }
 
   /**
@@ -475,7 +493,7 @@ export class CosService {
     isAdmin: boolean,
     type: CosBucketOperateObjectType,
     objectKey: string
-  ): Promise<COS.DeleteObjectResult> {
+  ): Promise<COS.DeleteObjectResult | null> {
     const account = user.account;
     const cosInstance = await this.getCosInstance(user, isAdmin);
 
@@ -507,33 +525,32 @@ export class CosService {
       }
     }
 
-    const deleteObjectAsync = promisify(
-      cosInstance.deleteObject.bind(cosInstance)
-    );
-
-    try {
-      const data = await deleteObjectAsync({
-        Bucket: this.cosConfig.bucket,
-        Region: this.cosConfig.region,
-        Key: objectKey,
-      });
-
-      if (data.statusCode === 204) {
-        this.logger.info(
-          `[CosService] deleteObject success, account: ${account}, key: ${objectKey}`
-        );
-        return data;
-      }
-
-      this.logger.error(
-        `[CosService] deleteObject failed, account: ${account}, statusCode: ${data.statusCode}`
+    return new Promise<COS.DeleteObjectResult>((resolve, reject) => {
+      cosInstance.deleteObject(
+        {
+          Bucket: this.cosConfig.bucket,
+          Region: this.cosConfig.region,
+          Key: objectKey,
+        },
+        (err, data) => {
+          if (err) {
+            this.logger.error(
+              `[CosService] deleteObject failed, account: ${account}, key: ${objectKey}, err: ${err.message}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_DELETE_FILE_FAILED());
+          } else if (data.statusCode === 204) {
+            this.logger.info(
+              `[CosService] deleteObject success, account: ${account}, key: ${objectKey}`
+            );
+            resolve(data);
+          } else {
+            this.logger.error(
+              `[CosService] deleteObject failed, account: ${account}, statusCode: ${data.statusCode}`
+            );
+            reject(BUSINESS_ERROR_CONSTANT.COS_DELETE_FOLDER_FAILED());
+          }
+        }
       );
-      throw BUSINESS_ERROR_CONSTANT.COS_DELETE_FOLDER_FAILED();
-    } catch (error) {
-      this.logger.error(
-        `[CosService] deleteObject failed, account: ${account}, err: ${error.message}`
-      );
-      throw BUSINESS_ERROR_CONSTANT.COS_DELETE_FILE_FAILED();
-    }
+    });
   }
 }

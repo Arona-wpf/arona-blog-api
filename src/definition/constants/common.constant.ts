@@ -155,6 +155,9 @@ export const BUSINESS_ERROR_CONSTANT = {
   // COS删除文件失败
   COS_DELETE_FILE_FAILED: (args?: Record<string, string>) =>
     new BusinessError(1000710, 'error.cos.delete.file.failed', args),
+  // COS创建文件夹失败
+  COS_CREATE_FOLDER_FAILED: (args?: Record<string, string>) =>
+    new BusinessError(1000711, 'error.cos.create.folder.failed', args),
 
   // MinIO Origin 不允许访问
   MINIO_ORIGIN_NOT_ALLOWED: (args?: Record<string, string>) =>

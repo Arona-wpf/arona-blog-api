@@ -44,6 +44,7 @@
   "error.cos.delete.folder.failed": "Failed to delete folder, please ensure it is empty",
   "error.cos.folder.has.object": "The folder still contains files or subfolders and cannot be deleted",
   "error.cos.delete.file.failed": "Failed to delete file, please try again later",
+  "error.cos.create.folder.failed": "Failed to create folder, please try again later",
   "error.url.replace.failed": "URL replacement failed, please check the format",
   "error.cdn.origin.not.allowed": "No permission to access CDN resources",
   "error.cdn.object.name.not.found": "Please provide the file object name",

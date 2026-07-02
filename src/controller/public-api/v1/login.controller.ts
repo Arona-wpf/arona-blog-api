@@ -14,8 +14,10 @@ import { RedisStorageEnum } from '@/definition/enums/common.enum';
 import { LoginDto } from '@/dto/login.dto';
 import { UserEntity } from '@/entity/user.entity';
 import { IUserSession } from '@/interface';
+import { CosInstanceManager } from '@/manage/cos-instance.manage';
 import { UserSessionManager } from '@/manage/user-session.manage';
 import { WsConnectionManager } from '@/manage/ws-connection.manage';
+import { CosService } from '@/service/cos.service';
 import { RoleService } from '@/service/role.service';
 import { UserService } from '@/service/user.service';
 import { parseCookiesValue } from '@/utils/common';
@@ -23,10 +25,16 @@ import { parseCookiesValue } from '@/utils/common';
 @Controller('/public-api/v1/login')
 export class PubV1LoginController {
   @Inject()
-  userService: UserService;
+  cosService: CosService;
 
   @Inject()
   roleService: RoleService;
+
+  @Inject()
+  userService: UserService;
+
+  @Inject()
+  cosInstanceManager: CosInstanceManager;
 
   @Inject()
   redisServiceFactory: RedisServiceFactory;
@@ -59,9 +67,9 @@ export class PubV1LoginController {
       user = await this.userService.loginByPassword(account, password);
     } else {
       user = await this.userService.loginByEmail(
-        email,
-        cache_id,
-        session.guest?.tmpId
+        email as string,
+        cache_id as string,
+        session.guest?.tmpId as string
       );
     }
 
@@ -77,7 +85,7 @@ export class PubV1LoginController {
 
     // 构建session用户对象
     const sessionUser = {
-      _id: user._id,
+      _id: user._id as string,
       account: user.account,
       nickname: user.nickname,
       avatar: user.avatar,
@@ -121,6 +129,15 @@ export class PubV1LoginController {
     session.guest = undefined;
     if (currentSessionId) {
       this.userSessionManager.bind(sessionUser.account, currentSessionId);
+    }
+
+    // 管理员登录：预初始化 COS 实例
+    const isAdmin = sessionUser.roles?.includes('administrator');
+    if (isAdmin) {
+      // 清理可能存在的旧实例（顶号场景）
+      this.cosInstanceManager.remove(sessionUser.account);
+      // 预初始化 COS 实例并注册到管理器
+      await this.cosService.getCosInstance(user, true);
     }
 
     return {
