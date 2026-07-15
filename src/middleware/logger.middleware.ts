@@ -44,6 +44,10 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
         let realIpCountry: string;
         let isp = '';
 
+        const ip2Region = this.decodeHeader(
+          ctx.request.header['x-geo-region'] as string
+        );
+
         if (
           realIp.startsWith('127.') ||
           realIp.startsWith('172.') ||
@@ -73,7 +77,7 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
         }
 
         this.logger.info(
-          `[${ctx.path}] ${ctx.method} ${realIp} ${realIpCountry}${isp ? ` [${isp}]` : ''} ${responseTime}ms, full region: ${ctx.request.header['x-geo-region']}`
+          `[${ctx.path}] ${ctx.method} ${realIp} ${realIpCountry}${isp ? ` [${isp}]` : ''} ${responseTime}ms, full region: ${ip2Region}`
         );
       }
     };
