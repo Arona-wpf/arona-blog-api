@@ -53,17 +53,17 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
           realIpCountry = 'Reserved Address';
         } else {
           const countryName = this.decodeHeader(
-            ctx.request.header['x-geo-country-name'] as string
+            ctx.request.header['x-geo-country'] as string
           );
-          const regionName = this.decodeHeader(
-            ctx.request.header['x-geo-region'] as string
+          const provinceName = this.decodeHeader(
+            ctx.request.header['x-geo-province'] as string
           );
           const cityName = this.decodeHeader(
             ctx.request.header['x-geo-city'] as string
           );
           isp = this.decodeHeader(ctx.request.header['x-geo-isp'] as string);
 
-          const locationParts = [countryName, regionName, cityName].filter(
+          const locationParts = [countryName, provinceName, cityName].filter(
             Boolean
           );
           realIpCountry =
@@ -73,7 +73,7 @@ export class LoggerMiddleware implements IMiddleware<Context, NextFunction> {
         }
 
         this.logger.info(
-          `[${ctx.path}] ${ctx.method} ${realIp} ${realIpCountry}${isp ? ` [${isp}]` : ''} ${responseTime}ms`
+          `[${ctx.path}] ${ctx.method} ${realIp} ${realIpCountry}${isp ? ` [${isp}]` : ''} ${responseTime}ms, full region: ${ctx.request.header['x-geo-region']}`
         );
       }
     };

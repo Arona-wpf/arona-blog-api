@@ -64,7 +64,10 @@ export function parseCookie(cookieStr: string): Record<string, string> {
  * @param key 指定 key
  * @returns 指定 key 的值
  */
-export function parseCookiesValue(cookies: string, key: string): string | null {
+export function parseCookiesValue(
+  cookies: string | undefined,
+  key: string
+): string | null {
   try {
     if (!cookies || !key) return null;
 
