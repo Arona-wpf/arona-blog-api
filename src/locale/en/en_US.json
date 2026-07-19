@@ -6,5 +6,6 @@
     "forbidden": "Forbidden",
     "request.path.not.found": "Request Path Not Found",
     "internal.server.error": "Internal Server Error",
-    "website.title": "Arona's Cabin"
+    "website.title": "Arona's Cabin",
+    "error.user.is.administrator": "Cannot delete administrator user"
 }

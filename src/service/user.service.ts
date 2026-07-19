@@ -10,9 +10,12 @@ import { IPageResult } from '@/definition/types/page.type';
 import { RegisterDto } from '@/dto/register.dto';
 import {
   ChangePasswordDto,
+  CreateUserDto,
+  DeleteUserDto,
   GetUserListDto,
   ResetPasswordDto,
   UpdateProfileDto,
+  UpdateUserDto,
   UpdateUserRolesDto,
 } from '@/dto/user.dto';
 import { UserEntity } from '@/entity/user.entity';
@@ -424,5 +427,134 @@ export class UserService {
     await redis.del(cacheKey);
 
     return true;
+  }
+
+  /**
+   * 创建用户（管理员操作）
+   * @param data 创建用户参数
+   * @returns 新创建的用户
+   */
+  async createUser(data: CreateUserDto) {
+    const { account, password, nickname, birthday, gender, email, roles } =
+      data;
+    // 检查账号是否已存在
+    const existingUser = await this.userDao.findOne({ account });
+    if (existingUser) {
+      throw BUSINESS_ERROR_CONSTANT.USER_ALREADY_EXISTS();
+    }
+    // 检查邮箱是否已存在
+    const existingEmail = await this.userDao.findOne({ email });
+    if (existingEmail) {
+      throw BUSINESS_ERROR_CONSTANT.USER_ALREADY_EXISTS();
+    }
+    // 验证角色是否存在
+    if (roles && roles.length > 0) {
+      const roleIds = uniq(roles);
+      const roleCount = await this.roleService.countRolesByIds(roleIds);
+      if (roleCount !== roleIds.length) {
+        throw BUSINESS_ERROR_CONSTANT.USER_ROLE_NOT_EXIST();
+      }
+    }
+    // 生成盐
+    const salt = generateSalt();
+    // 加密密码
+    const hashedPassword = sm3Hash(password + salt);
+    // 创建用户实体
+    const newUserEntity = new UserEntity();
+    Object.assign(newUserEntity, {
+      account,
+      password: hashedPassword,
+      salt,
+      nickname,
+      birthday,
+      gender,
+      email,
+      roles: roles && roles.length > 0 ? uniq(roles) : [],
+    });
+    // 创建用户
+    const newUser = await this.userDao.createOne(newUserEntity);
+    return newUser;
+  }
+
+  /**
+   * 更新用户信息（管理员操作）
+   * @param data 更新用户参数
+   * @returns 更新后的用户
+   */
+  async updateUser(data: UpdateUserDto) {
+    const { _id, nickname, email, birthday, gender, password, roles } = data;
+    // 检查用户是否存在
+    const user = await this.userDao.findById(_id);
+    if (!user) {
+      throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
+    }
+    // 检查邮箱是否被其他用户占用
+    if (email && email !== user.email) {
+      const existingEmail = await this.userDao.findOne({ email });
+      if (existingEmail) {
+        throw BUSINESS_ERROR_CONSTANT.USER_ALREADY_EXISTS();
+      }
+    }
+    // 验证角色是否存在
+    if (roles && roles.length > 0) {
+      const roleIds = uniq(roles);
+      const roleCount = await this.roleService.countRolesByIds(roleIds);
+      if (roleCount !== roleIds.length) {
+        throw BUSINESS_ERROR_CONSTANT.USER_ROLE_NOT_EXIST();
+      }
+    }
+    // 构建更新数据
+    const updateData: Record<string, any> = {};
+    if (nickname !== undefined) {
+      updateData.nickname = nickname;
+    }
+    if (email !== undefined) {
+      updateData.email = email;
+    }
+    if (birthday !== undefined) {
+      updateData.birthday = birthday;
+    }
+    if (gender !== undefined) {
+      updateData.gender = gender;
+    }
+    if (roles !== undefined) {
+      updateData.roles = uniq(roles);
+    }
+    // 如果需要更新密码
+    if (password) {
+      const newSalt = generateSalt();
+      const hashedPassword = sm3Hash(password + newSalt);
+      updateData.password = hashedPassword;
+      updateData.salt = newSalt;
+    }
+    // 执行更新
+    const updatedUser = await this.userDao.findByIdAndUpdate(_id, {
+      $set: updateData,
+    });
+    if (!updatedUser) {
+      throw BUSINESS_ERROR_CONSTANT.USER_UPDATE_PROFILE_FAILED();
+    }
+    return updatedUser;
+  }
+
+  /**
+   * 删除用户（管理员操作）
+   * @param data 删除用户参数
+   * @returns 删除结果
+   */
+  async deleteUser(data: DeleteUserDto) {
+    const { _id } = data;
+    // 检查用户是否存在
+    const user = await this.userDao.findById(_id);
+    if (!user) {
+      throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
+    }
+    // 检查是否为管理员
+    if (user.roles && user.roles.includes('administrator')) {
+      throw BUSINESS_ERROR_CONSTANT.USER_IS_ADMINISTRATOR();
+    }
+    // 删除用户
+    await this.userDao.findByIdAndDelete(_id);
+    return null;
   }
 }

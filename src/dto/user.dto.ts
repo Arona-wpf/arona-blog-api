@@ -1,6 +1,7 @@
 import { Rule, RuleType } from '@midwayjs/validate';
 
 import { GenderEnum } from '@/definition/enums/common.enum';
+import { GenderType } from '@/definition/types/common.type';
 
 import { PageDto } from './page.dto';
 import { createArrayRuleType, createStringRuleType } from '.';
@@ -75,4 +76,75 @@ export class ResetPasswordDto {
 
   @Rule(createStringRuleType('user.confirmPassword', true, 'user'))
   confirm_password: string;
+}
+
+export class CreateUserDto {
+  @Rule(createStringRuleType('user.account', true, 'user', { min: 3, max: 20 }))
+  account: string;
+
+  @Rule(
+    createStringRuleType('user.password', true, 'user', { min: 8, max: 30 })
+  )
+  password: string;
+
+  @Rule(createStringRuleType('user.nickname', true, 'user', { max: 20 }))
+  nickname: string;
+
+  @Rule(createStringRuleType('user.birthday', true, 'user'))
+  birthday: string;
+
+  @Rule(
+    createStringRuleType('user.gender', true, 'user', {
+      enum: Object.values(GenderEnum),
+    })
+  )
+  gender: GenderType;
+
+  @Rule(createStringRuleType('user.email', true, 'user', { email: true }))
+  email: string;
+
+  @Rule(
+    createArrayRuleType('user.roles', false, 'user', RuleType.string(), {
+      min: 0,
+    })
+  )
+  roles?: string[];
+}
+
+export class UpdateUserDto {
+  @Rule(createStringRuleType('user._id', true, 'user'))
+  _id: string;
+
+  @Rule(createStringRuleType('user.nickname', false, 'user', { max: 20 }))
+  nickname?: string;
+
+  @Rule(createStringRuleType('user.email', false, 'user', { email: true }))
+  email?: string;
+
+  @Rule(createStringRuleType('user.birthday', false, 'user'))
+  birthday?: string;
+
+  @Rule(
+    createStringRuleType('user.gender', false, 'user', {
+      enum: Object.values(GenderEnum),
+    })
+  )
+  gender?: GenderType;
+
+  @Rule(
+    createStringRuleType('user.password', false, 'user', { min: 8, max: 30 })
+  )
+  password?: string;
+
+  @Rule(
+    createArrayRuleType('user.roles', false, 'user', RuleType.string(), {
+      min: 0,
+    })
+  )
+  roles?: string[];
+}
+
+export class DeleteUserDto {
+  @Rule(createStringRuleType('user._id', true, 'user'))
+  _id: string;
 }

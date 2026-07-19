@@ -2,8 +2,11 @@ import { Body, Controller, Inject, Post, Session } from '@midwayjs/core';
 
 import {
   ChangePasswordDto,
+  CreateUserDto,
+  DeleteUserDto,
   GetUserListDto,
   UpdateProfileDto,
+  UpdateUserDto,
   UpdateUserRolesDto,
 } from '@/dto/user.dto';
 import { IUserSession } from '@/interface';
@@ -21,6 +24,36 @@ export class PriV1UserController {
       data,
       group: 'user',
       msg: 'user.list.success',
+    };
+  }
+
+  @Post('/create')
+  async createUser(@Body() body: CreateUserDto) {
+    const data = await this.userService.createUser(body);
+    return {
+      data,
+      group: 'user',
+      msg: 'user.create.success',
+    };
+  }
+
+  @Post('/update')
+  async updateUser(@Body() body: UpdateUserDto) {
+    const data = await this.userService.updateUser(body);
+    return {
+      data,
+      group: 'user',
+      msg: 'user.update.success',
+    };
+  }
+
+  @Post('/delete')
+  async deleteUser(@Body() body: DeleteUserDto) {
+    await this.userService.deleteUser(body);
+    return {
+      data: null,
+      group: 'user',
+      msg: 'user.delete.success',
     };
   }
 

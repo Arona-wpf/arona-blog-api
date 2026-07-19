@@ -78,6 +78,9 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 重置密码失败
   USER_RESET_PASSWORD_FAILED: (args?: Record<string, string>) =>
     new BusinessError(1000215, 'error.user.reset.password.failed', args),
+  // 用户是管理员，无法删除
+  USER_IS_ADMINISTRATOR: (args?: Record<string, string>) =>
+    new BusinessError(1000216, 'error.user.is.administrator', args),
 
   // 文件上传缺失
   FILE_UPLOAD_NOT_FOUND: (args?: Record<string, string>) =>
