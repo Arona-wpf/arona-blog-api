@@ -1,4 +1,4 @@
-const archiver = require('archiver');
+const { ZipArchive } = require('archiver');
 const deleteAsync = require('del');
 const fs = require('fs');
 const gulp = require('gulp');
@@ -34,7 +34,8 @@ gulp.task(
 );
 
 gulp.task('zip', async () => {
-  const archive = archiver('zip', { zlib: { level: 9 } });
+  // const { ZipArchive } = await import('archiver');
+  const archive = new ZipArchive({ zlib: { level: 9 } });
   const output = fs.createWriteStream(`build/${buildZip}`);
   output.on('close', () => {
     console.log(
