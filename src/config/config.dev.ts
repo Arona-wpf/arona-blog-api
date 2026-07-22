@@ -1,10 +1,11 @@
 /* eslint-disable n/no-unpublished-import */
 import { FORMAT, MidwayConfig } from '@midwayjs/core';
 
-import * as BasicConfig from '@/config/config.json';
 import { LocaleEnum } from '@/definition/enums/common.enum';
 import { en_US } from '@/locale/en';
 import { zh_CN } from '@/locale/zh';
+
+import BasicConfig from './config.json';
 
 export default {
   // 数据库

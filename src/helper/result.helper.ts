@@ -62,6 +62,14 @@ export class ResultHelper {
   translateValidateErrorResult(err: ValidationError) {
     const { checkResult, message, field, group } = err;
 
+    if (!field) {
+      return {
+        code: 422,
+        msg: '',
+        success: false,
+      };
+    }
+
     const fieldLabel = this.i18nService.translate(field, {
       group,
       locale: this.ctx.state.locale,

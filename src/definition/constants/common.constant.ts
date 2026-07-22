@@ -111,6 +111,9 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 角色关联权限不存在
   ROLE_PERMISSION_NOT_EXIST: (args?: Record<string, string>) =>
     new BusinessError(1000504, 'error.role.permission.not.exist', args),
+  // 角色为系统角色，无法删除
+  ROLE_IS_SYSTEM: (args?: Record<string, string>) =>
+    new BusinessError(1000505, 'error.role.is.system', args),
 
   // SM3密钥未配置
   CRYPTO_SM3_SECRET_NOT_SET: (args?: Record<string, string>) =>

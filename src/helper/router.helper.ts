@@ -47,7 +47,9 @@ export class RouterHelper {
       if (!metaData?.length) {
         return;
       }
-      const isControllerDecorator = metaData.some(md => !md.propertyKey);
+      const isControllerDecorator = metaData.some(
+        (md: { propertyKey?: string }) => !md.propertyKey
+      );
       if (isControllerDecorator) {
         path.push(rpl.prefix);
       } else {
@@ -55,7 +57,7 @@ export class RouterHelper {
         if (!routerInfoArr?.length) {
           return;
         }
-        metaData.forEach(md => {
+        metaData.forEach((md: { propertyKey?: string }) => {
           const matchRouterInfo = routerInfoArr.find(
             ri => ri.method === md.propertyKey
           );

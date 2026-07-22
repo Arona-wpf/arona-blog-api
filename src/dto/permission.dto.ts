@@ -55,33 +55,30 @@ export class DeletePermissionDto {
   _id: string;
 }
 
-export class GetPermissionListDto extends PageDto {
-  @Rule(
-    createStringRuleType('permission.group', false, 'permission', {
-      enum: Object.values(PermissionGroupEnum),
-    })
-  )
-  group: PermissionGroupType;
+export class UpdatePermissionDto {
+  @Rule(createStringRuleType('permission._id', true, 'permission'))
+  _id: string;
 
   @Rule(
-    createStringRuleType('permission.type', false, 'permission', {
-      enum: Object.values(PermissionTypeEnum),
-    })
+    createStringRuleType('permission.name', false, 'permission', { max: 20 })
   )
-  type: PermissionType;
-
-  @Rule(
-    createStringRuleType('permission.code', false, 'permission', {
-      max: 50,
-      pattern: /^[a-z]+(:[a-z]+)*$/,
-    })
-  )
-  code: string;
+  name?: string;
 
   @Rule(
     createStringRuleType('permission.action', false, 'permission', {
       enum: Object.values(PermissionActionEnum),
     })
   )
-  action: PermissionActionType;
+  action?: PermissionActionType;
+}
+
+export class GetPermissionListDto extends PageDto {
+  @Rule(createStringRuleType('permission.group', false, 'permission'))
+  group?: PermissionGroupType;
+
+  @Rule(createStringRuleType('permission.type', false, 'permission'))
+  type?: PermissionType;
+
+  @Rule(createStringRuleType('permission.action', false, 'permission'))
+  action?: PermissionActionType;
 }

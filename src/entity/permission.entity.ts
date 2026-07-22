@@ -15,9 +15,6 @@ export class PermissionEntity {
   @prop({ type: String, default: randomId })
   _id?: string;
 
-  @prop({ type: Number })
-  seq?: number;
-
   @prop({ type: String, unique: true })
   name: string; // 权限名称
 

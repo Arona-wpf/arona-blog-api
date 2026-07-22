@@ -33,7 +33,7 @@ export class WsConnectionManager {
     if (!this.userConnections.has(account)) {
       this.userConnections.set(account, new Set());
     }
-    this.userConnections.get(account).add(ctx);
+    this.userConnections.get(account)!.add(ctx);
 
     // 建立反向映射
     this.connectionUser.set(ctx, user);

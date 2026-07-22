@@ -37,7 +37,7 @@ export function registerPermissionMethod(options: {
       const { metadata } = options;
       // 如果权限代码为空，直接放行
       if (checkEmpty(metadata.permissionKeys)) {
-        return await joinPoint.proceed(...joinPoint.args);
+        return await joinPoint.proceed?.(...joinPoint.args);
       }
 
       const instance = joinPoint.target;
@@ -47,11 +47,11 @@ export function registerPermissionMethod(options: {
       const userPermissions = session.user?.permissions ?? [];
       // 如果角色里包含administrator，直接放行
       if (session.user?.roles?.includes('administrator')) {
-        return await joinPoint.proceed(...joinPoint.args);
+        return await joinPoint.proceed?.(...joinPoint.args);
       }
       // 如果接口鉴权的权限列表是用户权限列表的子集，放行
       if (metadata.permissionKeys.every(key => userPermissions.includes(key))) {
-        return await joinPoint.proceed(...joinPoint.args);
+        return await joinPoint.proceed?.(...joinPoint.args);
       }
 
       const resultHelper = await ctx.requestContext.getAsync(ResultHelper);

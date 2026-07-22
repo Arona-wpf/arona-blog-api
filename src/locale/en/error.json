@@ -29,6 +29,7 @@
   "error.role.not.exist": "The role does not exist",
   "error.role.in.use": "The role is used by user and cannot be deleted",
   "error.role.permission.not.exist": "The role permission does not exist",
+  "error.role.is.system": "System role cannot be deleted",
   "error.crypto.sm3.secret.not.set": "SM3 secret key is not configured. Please contact the administrator",
   "error.crypto.sm3.hash.failed": "SM3 hashing failed. Please check the secret key configuration",
   "error.crypto.sm4.secret.not.set": "SM4 secret key is not configured. Please contact the administrator",

@@ -21,18 +21,13 @@ import {
 import { UserEntity } from '@/entity/user.entity';
 import { RedisHelper } from '@/helper/redis.helper';
 import { ResultHelper } from '@/helper/result.helper';
+import { RoleService } from '@/service/role.service';
 import { generateSalt, sm3Hash } from '@/utils/crypto';
-
-import { CounterService } from './counter.service';
-import { RoleService } from './role.service';
 
 @Provide()
 export class UserService {
   @Inject()
   captchaService: CaptchaService;
-
-  @Inject()
-  counterService: CounterService;
 
   @Inject()
   redisHelper: RedisHelper;
@@ -188,7 +183,7 @@ export class UserService {
    * @returns 用户分页结果（含角色与权限）
    */
   async getUserList(data: GetUserListDto): Promise<IPageResult<UserEntity>> {
-    const { current_page, page_size, account, nickname, email, role_id } = data;
+    const { current_page, page_size, account, nickname, email } = data;
     const query: Record<string, any> = {};
     if (account) {
       query.account = account;
@@ -199,13 +194,9 @@ export class UserService {
     if (email) {
       query.email = email;
     }
-    if (role_id) {
-      query.roles = role_id;
-    }
 
     const [list, total] = await Promise.all([
       this.userDao.findMany(query, current_page, page_size, '-password -salt', {
-        seq: 1,
         _id: 1,
       }),
       this.userDao.count(query),
@@ -231,15 +222,15 @@ export class UserService {
       throw BUSINESS_ERROR_CONSTANT.USER_NOT_EXIST();
     }
 
-    const roleIds = uniq(roles);
-    const roleCount = await this.roleService.countRolesByIds(roleIds);
-    if (roleCount !== roleIds.length) {
+    const roleCodes = uniq(roles);
+    const roleCount = await this.roleService.countRolesByCodes(roleCodes);
+    if (roleCount !== roleCodes.length) {
       throw BUSINESS_ERROR_CONSTANT.USER_ROLE_NOT_EXIST();
     }
 
     const updateUser = await this.userDao.findByIdAndUpdate(_id, {
       $set: {
-        roles: roleIds,
+        roles: roleCodes,
       },
     });
     if (!updateUser) {
@@ -249,12 +240,12 @@ export class UserService {
   }
 
   /**
-   * 按角色统计用户数量
-   * @param roleId 角色ID
+   * 按角色代码统计用户数量
+   * @param roleCode 角色代码
    * @returns 用户数量
    */
-  async countUsersByRoleId(roleId: string) {
-    return this.userDao.count({ roles: roleId });
+  async countUsersByRoleId(roleCode: string) {
+    return this.userDao.count({ roles: roleCode });
   }
 
   /**
@@ -449,9 +440,9 @@ export class UserService {
     }
     // 验证角色是否存在
     if (roles && roles.length > 0) {
-      const roleIds = uniq(roles);
-      const roleCount = await this.roleService.countRolesByIds(roleIds);
-      if (roleCount !== roleIds.length) {
+      const roleCodes = uniq(roles);
+      const roleCount = await this.roleService.countRolesByCodes(roleCodes);
+      if (roleCount !== roleCodes.length) {
         throw BUSINESS_ERROR_CONSTANT.USER_ROLE_NOT_EXIST();
       }
     }
@@ -497,9 +488,9 @@ export class UserService {
     }
     // 验证角色是否存在
     if (roles && roles.length > 0) {
-      const roleIds = uniq(roles);
-      const roleCount = await this.roleService.countRolesByIds(roleIds);
-      if (roleCount !== roleIds.length) {
+      const roleCodes = uniq(roles);
+      const roleCount = await this.roleService.countRolesByCodes(roleCodes);
+      if (roleCount !== roleCodes.length) {
         throw BUSINESS_ERROR_CONSTANT.USER_ROLE_NOT_EXIST();
       }
     }

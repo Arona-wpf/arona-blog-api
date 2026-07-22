@@ -11,9 +11,6 @@ export class UserEntity {
   @prop({ type: String, default: randomId })
   _id?: string;
 
-  @prop({ type: Number })
-  seq?: number;
-
   @prop({ type: String, unique: true })
   account: string; // 账号
 

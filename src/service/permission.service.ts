@@ -8,10 +8,9 @@ import {
   CreatePermissionDto,
   DeletePermissionDto,
   GetPermissionListDto,
+  UpdatePermissionDto,
 } from '@/dto/permission.dto';
 import { PermissionEntity } from '@/entity/permission.entity';
-
-import { CounterService } from './counter.service';
 
 @Provide()
 export class PermissionService {
@@ -20,9 +19,6 @@ export class PermissionService {
 
   @Inject()
   roleDao: RoleDao;
-
-  @Inject()
-  counterService: CounterService;
 
   /**
    * 根据权限 ID 列表构建权限映射
@@ -40,7 +36,7 @@ export class PermissionService {
       1,
       permissionIds.length,
       undefined,
-      { seq: 1, _id: 1 }
+      { _id: 1 }
     );
     return new Map(
       permissionList.map(permission => [permission._id, permission])
@@ -60,11 +56,8 @@ export class PermissionService {
       throw BUSINESS_ERROR_CONSTANT.PERMISSION_ALREADY_EXISTS();
     }
 
-    const permissionSeq =
-      await this.counterService.getEntityNextSequence('permission');
     const permissionEntity = new PermissionEntity();
     Object.assign(permissionEntity, data);
-    permissionEntity.seq = permissionSeq;
     return this.permissionDao.createOne(permissionEntity);
   }
 
@@ -92,6 +85,29 @@ export class PermissionService {
   }
 
   /**
+   * 更新权限
+   * @param data 更新参数
+   * @returns 更新后的权限
+   */
+  async updatePermission(data: UpdatePermissionDto) {
+    const { _id, ...updateData } = data;
+    const permission = await this.permissionDao.findById(_id);
+    if (!permission) {
+      throw BUSINESS_ERROR_CONSTANT.PERMISSION_NOT_EXIST();
+    }
+
+    // 检查名称是否与其他权限重复
+    if (data.name && data.name !== permission.name) {
+      const duplicate = await this.permissionDao.findOne({ name: data.name });
+      if (duplicate) {
+        throw BUSINESS_ERROR_CONSTANT.PERMISSION_ALREADY_EXISTS();
+      }
+    }
+
+    return this.permissionDao.findByIdAndUpdate(_id, { $set: updateData });
+  }
+
+  /**
    * 分页查询权限列表
    * @param data 查询参数
    * @returns 权限分页结果
@@ -99,7 +115,7 @@ export class PermissionService {
   async getPermissionList(
     data: GetPermissionListDto
   ): Promise<IPageResult<PermissionEntity>> {
-    const { current_page, page_size, group, type, code, action } = data;
+    const { current_page, page_size, group, type, action } = data;
     const query: Record<string, any> = {};
     if (group) {
       query.group = group;
@@ -107,16 +123,12 @@ export class PermissionService {
     if (type) {
       query.type = type;
     }
-    if (code) {
-      query.code = code;
-    }
     if (action) {
       query.action = action;
     }
 
     const [list, total] = await Promise.all([
       this.permissionDao.findMany(query, current_page, page_size, undefined, {
-        seq: 1,
         _id: 1,
       }),
       this.permissionDao.count(query),

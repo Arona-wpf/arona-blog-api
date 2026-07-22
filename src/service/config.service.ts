@@ -5,15 +5,10 @@ import { BUSINESS_ERROR_CONSTANT } from '@/definition/constants/common.constant'
 import { CreateConfigDto } from '@/dto/config.dto';
 import { ConfigEntity } from '@/entity/config.entity';
 
-import { CounterService } from './counter.service';
-
 @Provide()
 export class ConfigService {
   @Inject()
   configDao: ConfigDao;
-
-  @Inject()
-  counterService: CounterService;
 
   /**
    * 创建系统配置项
@@ -22,15 +17,12 @@ export class ConfigService {
    * @returns 新建后的配置实体
    */
   async createConfig(data: CreateConfigDto, account: string) {
-    const configSeq = await this.counterService.getEntityNextSequence('config');
-
     const configEntity = new ConfigEntity();
     Object.assign(configEntity, data);
     configEntity.value = data.value ?? '';
     configEntity.description = data.description ?? '';
     configEntity.creator = account;
     configEntity.updator = account;
-    configEntity.seq = configSeq;
 
     return this.configDao.createOne(configEntity);
   }
@@ -68,7 +60,7 @@ export class ConfigService {
   }
 
   async getGroupedConfigList() {
-    const configList = await this.configDao.findAll({}, undefined, { seq: 1 });
+    const configList = await this.configDao.findAll({}, undefined, { _id: 1 });
     const grouped: Record<string, ConfigEntity[]> = {};
 
     for (const config of configList) {

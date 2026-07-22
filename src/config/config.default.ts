@@ -5,11 +5,12 @@ import { LoggerInfo } from '@midwayjs/logger';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-import * as BasicConfig from '@/config/config.json';
 import { LocaleEnum, RedisStorageEnum } from '@/definition/enums/common.enum';
 import { GameTypeEnum } from '@/definition/enums/gacha.enum';
 import { en_US } from '@/locale/en';
 import { zh_CN } from '@/locale/zh';
+
+import BasicConfig from './config.json';
 
 const config = (appInfo: MidwayAppInfo): MidwayConfig => {
   const pkg = appInfo.pkg;
@@ -138,7 +139,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
     koa: {
       keys: BasicConfig.koa.keys,
       hostname: '0.0.0.0',
-      port: 22333,
+      port: Number(process.env.PORT) || 9999,
       proxy: true,
     },
 
@@ -146,7 +147,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
     midwayLogger: {
       default: {
         dir: logDir,
-        maxSize: null,
+        maxSize: '100M',
         level: 'info',
         consoleLevel: 'info',
         transports: {
@@ -295,7 +296,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
 
     // WebSocket
     webSocket: {
-      // 不配置 port 时会复用 Koa HTTP Server（即 22333）
+      // 不配置 port 时会复用 Koa HTTP Server（即 9999）
       enableServerHeartbeatCheck: true,
       serverHeartbeatInterval: 30 * 1000,
       maxPayload: 1 * 1024 * 1024, // 最大消息大小为 1MB

@@ -7,5 +7,6 @@
   "role.create.success": "创建角色成功",
   "role.update.success": "更新角色成功",
   "role.delete.success": "删除角色成功",
-  "role.list.success": "获取角色列表成功"
+  "role.list.success": "获取角色列表成功",
+  "role.all.success": "获取所有角色成功"
 }

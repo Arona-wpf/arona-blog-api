@@ -10,9 +10,6 @@ export class RoleEntity {
   @prop({ type: String, default: randomId })
   _id?: string;
 
-  @prop({ type: Number })
-  seq?: number;
-
   @prop({ type: String, unique: true })
   name: string; // 角色名称
 

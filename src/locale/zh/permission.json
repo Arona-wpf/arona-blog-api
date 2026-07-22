@@ -6,6 +6,7 @@
   "permission.code": "权限代码",
   "permission.action": "权限动作",
   "permission.create.success": "创建权限成功",
+  "permission.update.success": "更新权限成功",
   "permission.delete.success": "删除权限成功",
   "permission.list.success": "获取权限列表成功"
 }

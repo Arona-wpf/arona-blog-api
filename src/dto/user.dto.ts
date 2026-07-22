@@ -7,19 +7,14 @@ import { PageDto } from './page.dto';
 import { createArrayRuleType, createStringRuleType } from '.';
 
 export class GetUserListDto extends PageDto {
-  @Rule(
-    createStringRuleType('user.account', false, 'user', { min: 3, max: 20 })
-  )
+  @Rule(createStringRuleType('user.account', false, 'user'))
   account?: string;
 
-  @Rule(createStringRuleType('user.nickname', false, 'user', { max: 20 }))
+  @Rule(createStringRuleType('user.nickname', false, 'user'))
   nickname?: string;
 
-  @Rule(createStringRuleType('user.email', false, 'user', { email: true }))
+  @Rule(createStringRuleType('user.email', false, 'user'))
   email?: string;
-
-  @Rule(createStringRuleType('role._id', false, 'role'))
-  role_id?: string;
 }
 
 export class UpdateUserRolesDto {
@@ -105,7 +100,7 @@ export class CreateUserDto {
 
   @Rule(
     createArrayRuleType('user.roles', false, 'user', RuleType.string(), {
-      min: 0,
+      min: 1,
     })
   )
   roles?: string[];

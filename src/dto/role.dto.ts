@@ -71,25 +71,14 @@ export class UpdateRoleDto {
 }
 
 export class GetRoleListDto extends PageDto {
-  @Rule(
-    createStringRuleType('role.code', false, 'role', {
-      max: 50,
-      pattern: /^[a-z]+(:[a-z]+)*$/,
-    })
-  )
+  @Rule(createStringRuleType('role.code', false, 'role'))
   code?: string;
 
-  @Rule(
-    createNumberRuleType('common.start_at', false, 'common', {
-      max: new Date().valueOf(),
-    })
-  )
+  @Rule(createNumberRuleType('common.start_at', false, 'common'))
   start_at?: number;
 
-  @Rule(
-    createNumberRuleType('common.end_at', false, 'common', {
-      max: new Date().valueOf(),
-    })
-  )
+  @Rule(createNumberRuleType('common.end_at', false, 'common'))
   end_at?: number;
 }
+
+export class GetAllRolesDto {}

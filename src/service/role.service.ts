@@ -14,7 +14,6 @@ import {
 } from '@/dto/role.dto';
 import { RoleEntity } from '@/entity/role.entity';
 
-import { CounterService } from './counter.service';
 import { PermissionService } from './permission.service';
 import { UserService } from './user.service';
 
@@ -25,9 +24,6 @@ export class RoleService {
 
   @Inject()
   permissionDao: PermissionDao;
-
-  @Inject()
-  counterService: CounterService;
 
   @Inject()
   permissionService: PermissionService;
@@ -49,7 +45,7 @@ export class RoleService {
       1,
       roleIds.length,
       undefined,
-      { seq: 1, _id: 1 }
+      { _id: 1 }
     );
     return new Map(roleList.map(role => [role._id, role]));
   }
@@ -73,15 +69,15 @@ export class RoleService {
   }
 
   /**
-   * 统计指定角色 ID 列表中存在的角色数量
-   * @param roleIds 角色ID列表
+   * 统计指定角色代码列表中存在的角色数量
+   * @param roleCodes 角色代码列表
    * @returns 角色数量
    */
-  async countRolesByIds(roleIds: string[]) {
-    if (!roleIds.length) {
+  async countRolesByCodes(roleCodes: string[]) {
+    if (!roleCodes.length) {
       return 0;
     }
-    return this.roleDao.count({ _id: { $in: roleIds } });
+    return this.roleDao.count({ code: { $in: roleCodes } });
   }
 
   /**
@@ -122,12 +118,10 @@ export class RoleService {
       this.validatePermissionIds(menuPermissions, PermissionTypeEnum.MENU),
     ]);
 
-    const roleSeq = await this.counterService.getEntityNextSequence('role');
     const roleEntity = new RoleEntity();
     Object.assign(roleEntity, data, {
       api_permissions: apiPermissions,
       menu_permissions: menuPermissions,
-      seq: roleSeq,
     });
     return this.roleDao.createOne(roleEntity);
   }
@@ -174,7 +168,12 @@ export class RoleService {
       throw BUSINESS_ERROR_CONSTANT.ROLE_NOT_EXIST();
     }
 
-    const userCount = await this.userService.countUsersByRoleId(_id);
+    // 系统角色不允许删除
+    if (role.code === 'administrator' || role.code === 'user') {
+      throw BUSINESS_ERROR_CONSTANT.ROLE_IS_SYSTEM();
+    }
+
+    const userCount = await this.userService.countUsersByRoleId(role.code);
     if (userCount > 0) {
       throw BUSINESS_ERROR_CONSTANT.ROLE_IN_USE();
     }
@@ -206,7 +205,6 @@ export class RoleService {
 
     const [list, total] = await Promise.all([
       this.roleDao.findMany(query, current_page, page_size, undefined, {
-        seq: 1,
         _id: 1,
       }),
       this.roleDao.count(query),
@@ -218,5 +216,13 @@ export class RoleService {
       current_page,
       page_size,
     };
+  }
+
+  /**
+   * 获取所有角色列表（用于下拉选择）
+   * @returns 角色列表
+   */
+  async getAllRoles(): Promise<RoleEntity[]> {
+    return this.roleDao.findMany({}, 1, 100, 'name code', { _id: 1 });
   }
 }

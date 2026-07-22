@@ -21,6 +21,7 @@ import * as validate from '@midwayjs/validate';
 import * as ws from '@midwayjs/ws';
 import { Framework } from '@midwayjs/ws';
 import * as Typegoose from '@typegoose/typegoose';
+import type { IncomingMessage } from 'http';
 import redisStore from 'koa-redis';
 import { join } from 'path';
 
@@ -30,6 +31,7 @@ import {
   registerPermissionMethod,
 } from '@/decorator/permission.decorator';
 import { RedisStorageEnum } from '@/definition/enums/common.enum';
+import { WsUserInfo } from '@/definition/types/websocket.type';
 import { BusinessErrorFilter } from '@/filter/business-error.filter';
 import { DefaultErrorFilter } from '@/filter/default.filter';
 import { NotFoundFilter } from '@/filter/not-found.filter';
@@ -133,7 +135,8 @@ export class MainConfiguration {
     // WebSocket 升级鉴权（连接建立前）
     this.wsFramework.onWebSocketUpgrade(async request => {
       try {
-        const cookieHeader = request.headers.cookie;
+        const wsRequest = request as IncomingMessage & { wsUser?: WsUserInfo };
+        const cookieHeader = wsRequest.headers.cookie;
 
         if (!cookieHeader) {
           this.wsLogger.warn(
@@ -185,13 +188,13 @@ export class MainConfiguration {
         }
 
         // 将用户信息和 locale 附加到 request 对象上
-        request['wsUser'] = {
+        wsRequest.wsUser = {
           ...session.user,
           locale: localeCookie || session.locale || 'zh-cn',
         };
 
         this.wsLogger.info(
-          `[WS Upgrade] Authentication succeeded: user ${session.user.account}, locale ${request['wsUser'].locale}`
+          `[WS Upgrade] Authentication succeeded: user ${session.user.account}, locale ${wsRequest.wsUser.locale}`
         );
         return true;
       } catch (error) {

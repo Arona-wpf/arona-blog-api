@@ -1,5 +1,6 @@
 import { Body, Controller, Inject, Post, Session } from '@midwayjs/core';
 
+import { Permission } from '@/decorator/permission.decorator';
 import {
   ChangePasswordDto,
   CreateUserDto,
@@ -18,6 +19,7 @@ export class PriV1UserController {
   userService: UserService;
 
   @Post('/list')
+  @Permission({ permissionKeys: ['user:view'] })
   async getUserList(@Body() body: GetUserListDto) {
     const data = await this.userService.getUserList(body);
     return {
@@ -28,6 +30,7 @@ export class PriV1UserController {
   }
 
   @Post('/create')
+  @Permission({ permissionKeys: ['user:create'] })
   async createUser(@Body() body: CreateUserDto) {
     const data = await this.userService.createUser(body);
     return {
@@ -38,6 +41,7 @@ export class PriV1UserController {
   }
 
   @Post('/update')
+  @Permission({ permissionKeys: ['user:update'] })
   async updateUser(@Body() body: UpdateUserDto) {
     const data = await this.userService.updateUser(body);
     return {
@@ -48,6 +52,7 @@ export class PriV1UserController {
   }
 
   @Post('/delete')
+  @Permission({ permissionKeys: ['user:delete'] })
   async deleteUser(@Body() body: DeleteUserDto) {
     await this.userService.deleteUser(body);
     return {
@@ -58,6 +63,7 @@ export class PriV1UserController {
   }
 
   @Post('/update-roles')
+  @Permission({ permissionKeys: ['user:update'] })
   async updateUserRoles(@Body() body: UpdateUserRolesDto) {
     const data = await this.userService.updateUserRoles(body);
     return {

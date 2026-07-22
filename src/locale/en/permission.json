@@ -6,6 +6,7 @@
   "permission.code": "Permission Code",
   "permission.action": "Permission Action",
   "permission.create.success": "Create permission success",
+  "permission.update.success": "Update permission success",
   "permission.delete.success": "Delete permission success",
   "permission.list.success": "Get permission list success"
 }

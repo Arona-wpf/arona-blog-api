@@ -7,5 +7,6 @@
   "role.create.success": "Create role success",
   "role.update.success": "Update role success",
   "role.delete.success": "Delete role success",
-  "role.list.success": "Get role list success"
+  "role.list.success": "Get role list success",
+  "role.all.success": "Get all roles success"
 }

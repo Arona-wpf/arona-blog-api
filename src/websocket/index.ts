@@ -15,7 +15,6 @@ import {
   EventParseResult,
   LocaleUpdateData,
   WsMessageEvent,
-  WsUserInfo,
 } from '@/definition/types/websocket.type';
 import { SubscribeLogDto, UnsubscribeLogDto } from '@/dto/log.dto';
 import { WsConnectionManager } from '@/manage/ws-connection.manage';
@@ -43,7 +42,7 @@ export class WsController {
    */
   @OnWSConnection()
   async onConnection(ctx: Context) {
-    const user: WsUserInfo = ctx.request['wsUser'];
+    const user = ctx.request.wsUser;
 
     if (!user) {
       this.wsLogger.error(

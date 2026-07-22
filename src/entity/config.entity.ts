@@ -10,9 +10,6 @@ export class ConfigEntity {
   @prop({ type: String, default: randomId })
   _id?: string;
 
-  @prop({ type: Number })
-  seq?: number;
-
   @prop({ type: String, required: true, unique: true })
   name: string; // 配置名称
 
