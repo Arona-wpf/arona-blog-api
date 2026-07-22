@@ -45,7 +45,7 @@ export class SessionMiddleware implements IMiddleware<Context, NextFunction> {
         // 如果 session 中有 user 对象，继续处理请求
         await next();
       } finally {
-        if (!isPublicApiOrMinio) {
+        if (ctx.path.endsWith('/user/status') || !isPublicApiOrMinio) {
           if (!session?.user?.account && !session?.guest?.tmpId) {
             this.logger.warn(
               'Session exists but no user or guest info found, initializing guest session. current path: %s',

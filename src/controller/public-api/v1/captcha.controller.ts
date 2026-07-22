@@ -129,7 +129,7 @@ export class PubV1CaptchaController {
     redis.set(cacheKey, JSON.stringify(cacheValue), 'KEEPTTL');
 
     // 如果类型为验证身份，则将邮箱保存到 session.guest 中
-    if (body.type === CaptchaTypeEnum.VERIFY_SELF) {
+    if (body.type === CaptchaTypeEnum.VERIFY_SELF && session.guest) {
       session.guest.email = body.email;
     }
 
