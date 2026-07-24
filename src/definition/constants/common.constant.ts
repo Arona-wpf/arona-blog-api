@@ -217,6 +217,9 @@ export const BUSINESS_ERROR_CONSTANT = {
   // 祈愿链接已过期
   GACHA_AUTHKEY_EXPIRED: (args?: Record<string, string>) =>
     new BusinessError(1000914, 'error.gacha.authkey.expired', args),
+  // 祈愿 API 请求失败
+  GACHA_API_ERROR: (args?: Record<string, string>) =>
+    new BusinessError(1000915, 'error.gacha.api.error', args),
   // 系统配置不存在
   CONFIG_NOT_FOUND: (args?: Record<string, string>) =>
     new BusinessError(1001001, 'error.config.not.found', args),

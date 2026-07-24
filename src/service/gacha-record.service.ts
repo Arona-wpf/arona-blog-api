@@ -553,11 +553,14 @@ export class GachaRecordService {
         this.logger.error(
           `[GachaRecordService] API returned error for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, retcode: ${retcode}, message: ${message}`
         );
-        fetchMore = false;
-        // 如果是 authkey 过期的错误码，抛出业务异常
-        if (retcode === -101) {
+        // 检测 authkey 过期：原神 retcode === -101；星铁/绝区零 retcode === -1 且 message 包含 auth key
+        const isAuthKeyExpired =
+          retcode === -101 || (retcode === -1 && /auth\s*key/i.test(message));
+        if (isAuthKeyExpired) {
           throw BUSINESS_ERROR_CONSTANT.GACHA_AUTHKEY_EXPIRED();
         }
+        // 其他 API 错误也抛出异常，防止任务被错误标记为完成
+        throw BUSINESS_ERROR_CONSTANT.GACHA_API_ERROR();
       }
 
       // 等待1秒后继续获取下一页数据，防止请求过于频繁被封禁

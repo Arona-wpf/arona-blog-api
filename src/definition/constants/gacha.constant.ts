@@ -232,6 +232,11 @@ export const ZENLESS_ZONE_ZERO_ATTRIBUTE_MAP: Record<string, string> = {
   冰: 'Ice',
   电: 'Electric',
   以太: 'Ether',
+  烈霜: 'Frost',
+  凛刃: 'Rime',
+  风: 'Wind',
+  玄墨: 'Ink',
+  流明: 'Luminescence',
 };
 
 /**
@@ -244,6 +249,11 @@ export const ZENLESS_ZONE_ZERO_ATTRIBUTE_I18N_KEY_MAP: Record<string, string> =
     Ice: 'gacha.attribute.zenless_zone_zero.ice',
     Electric: 'gacha.attribute.zenless_zone_zero.electric',
     Ether: 'gacha.attribute.zenless_zone_zero.ether',
+    Frost: 'gacha.attribute.zenless_zone_zero.frost',
+    Rime: 'gacha.attribute.zenless_zone_zero.rime',
+    Wind: 'gacha.attribute.zenless_zone_zero.wind',
+    Ink: 'gacha.attribute.zenless_zone_zero.ink',
+    Luminescence: 'gacha.attribute.zenless_zone_zero.luminescence',
   };
 
 /**

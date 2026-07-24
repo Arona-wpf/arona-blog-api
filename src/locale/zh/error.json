@@ -61,6 +61,7 @@
   "error.gacha.sync.in.progress": "该游戏账号正在同步祈愿数据，请稍后再试",
   "error.gacha.script.not.found": "祈愿脚本文件不存在，请联系管理员",
   "error.gacha.authkey.expired": "祈愿链接已过期，请重新获取",
+  "error.gacha.api.error": "祈愿 API 请求失败，请稍后重试",
   "error.config.not.found": "系统配置不存在",
   "error.ws.unauthorized": "WebSocket 连接未授权，请先登录"
 }

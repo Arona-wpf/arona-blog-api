@@ -261,10 +261,10 @@ export class GachaTaskService {
       );
     } catch (error) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : error instanceof BusinessError
-            ? this.resultHelper.translate(error.message, 'error')
+        error instanceof BusinessError
+          ? this.resultHelper.translate(error.message, 'error', error.args)
+          : error instanceof Error
+            ? error.message
             : 'Unknown error';
 
       // 更新任务状态为失败

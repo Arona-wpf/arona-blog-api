@@ -61,6 +61,7 @@
   "error.gacha.sync.in.progress": "Gacha sync is already in progress for this game account, please try again later",
   "error.gacha.script.not.found": "Gacha script file not found, please contact the administrator",
   "error.gacha.authkey.expired": "Gacha link has expired, please get a new one",
+  "error.gacha.api.error": "Gacha API request failed, please try again later",
   "error.config.not.found": "System config not found",
   "error.ws.unauthorized": "WebSocket connection unauthorized, please login first"
 }

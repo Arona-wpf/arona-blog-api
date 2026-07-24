@@ -1,6 +1,5 @@
 import '@midwayjs/koa';
 import '@midwayjs/ws';
-import type { IncomingMessage } from 'http';
 import type { WsUserInfo } from '@/definition/types/websocket.type';
 
 declare module 'http' {
