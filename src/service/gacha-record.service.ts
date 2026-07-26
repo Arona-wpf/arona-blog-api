@@ -270,13 +270,23 @@ export class GachaRecordService {
   /**
    * 获取祈愿数据API路径
    * @param gameType 游戏类型
+   * @param gachaType 祈愿类型（崩铁联动卡池21、22使用不同的API路径）
    * @returns API路径
    */
-  private getGachaApiPath(gameType: GameType): string {
+  private getGachaApiPath(gameType: GameType, gachaType?: string): string {
     switch (gameType) {
       case GameTypeEnum.GENSHIN_IMPACT:
         return '/gacha_info/api/getGachaLog';
       case GameTypeEnum.HONKAI_STAR_RAIL:
+        // 崩铁联动卡池（角色联动21、光锥联动22）使用 getLdGachaLog 端点
+        if (
+          gachaType ===
+            HonkaiStarRailGachaTypeEnum.CHARACTER_COLLABORATION_WARP ||
+          gachaType ===
+            HonkaiStarRailGachaTypeEnum.LIGHT_CONE_COLLABORATION_WARP
+        ) {
+          return '/common/gacha_record/api/getLdGachaLog';
+        }
         return '/common/gacha_record/api/getGachaLog';
       case GameTypeEnum.ZENLESS_ZONE_ZERO:
         return '/common/gacha_record/api/getGachaLog';
@@ -306,7 +316,6 @@ export class GachaRecordService {
   }> {
     const gameTypeLabel = this.getGameTypeLabel(gameType);
     const gachaTypeList = this.getGachaTypeList(gameType);
-    const apiPath = this.getGachaApiPath(gameType);
 
     this.logger.info(
       `[GachaRecordService] Starting gacha sync with items for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, serverRegion: ${serverRegion}`
@@ -335,6 +344,7 @@ export class GachaRecordService {
     try {
       for (const gachaType of gachaTypeList) {
         const gachaTypeLabel = this.getGachaTypeLabel(gachaType, gameType);
+        const apiPath = this.getGachaApiPath(gameType, gachaType);
         const lockKey = this.generateLockKey(
           gameType,
           serverRegion,
