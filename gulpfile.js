@@ -34,7 +34,6 @@ gulp.task(
 );
 
 gulp.task('zip', async () => {
-  // const { ZipArchive } = await import('archiver');
   const archive = new ZipArchive({ zlib: { level: 9 } });
   const output = fs.createWriteStream(`build/${buildZip}`);
   output.on('close', () => {
