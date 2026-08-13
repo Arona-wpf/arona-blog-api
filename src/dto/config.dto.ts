@@ -12,7 +12,7 @@ export class CreateConfigDto {
 
   @Rule(
     createStringRuleType('config.key', true, 'config', {
-      max: 20,
+      max: 32,
       pattern: CONFIG_KEY_PATTERN,
     })
   )

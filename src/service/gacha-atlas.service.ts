@@ -4,7 +4,7 @@ import { ILogger } from '@midwayjs/logger';
 import { GachaAtlasDao } from '@/dao/gacha-atlas.dao';
 import { GACHA_ATLAS_GOLD_RANK_TYPE_MAP } from '@/definition/constants/gacha.constant';
 import { GachaItemTypeEnum } from '@/definition/enums/gacha.enum';
-import { GameType } from '@/definition/types/gacha.type';
+import { GachaItemType, GameType } from '@/definition/types/gacha.type';
 import { GetGachaAtlasDTO } from '@/dto/gacha.dto';
 import { GachaAtlasEntity } from '@/entity/gacha-atlas.entity';
 
@@ -120,6 +120,21 @@ export class GachaAtlasService {
       1,
       content_ids.length
     );
+  }
+
+  /**
+   * 查询指定游戏中 item_id 为空字符串的祈愿物品图鉴
+   * @param game_type 游戏类型
+   * @param item_type 物品类型（可选）
+   * @returns 祈愿物品图鉴列表
+   */
+  async findByEmptyItemId(game_type: GameType, item_type?: GachaItemType) {
+    const query: Record<string, any> = {
+      game_type,
+      item_id: { $in: ['', null] },
+    };
+    if (item_type) query.item_type = item_type;
+    return this.gachaAtlasDao.findAll(query, 'item_name item_id');
   }
 
   /**

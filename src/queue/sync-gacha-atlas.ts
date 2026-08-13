@@ -26,7 +26,10 @@ import {
 } from '@/definition/constants/gacha.constant';
 import { GachaItemTypeEnum, GameTypeEnum } from '@/definition/enums/gacha.enum';
 import { QueueNameEnum } from '@/definition/enums/queue.enum';
+import { SystemConfigKeyEnum } from '@/definition/enums/system-config.enum';
 import {
+  GachaItemType,
+  GameType,
   IGenshinImpactAltasItem,
   IGenshinImpactAltasResponse,
   IMiyousheGenshinImpactWikiResponse,
@@ -38,6 +41,7 @@ import {
   ISyncGachaAtlasConfig,
   ISyncGenshinImpactAtlasConfig,
 } from '@/interface';
+import { ConfigService } from '@/service/config.service';
 import { GachaAtlasService } from '@/service/gacha-atlas.service';
 
 @Processor(QueueNameEnum.SYNC_GACHA_ATLAS, {
@@ -58,6 +62,9 @@ export class SyncGachaAtlasProcessor implements IProcessor {
 
   @Inject()
   gachaAtlasService: GachaAtlasService;
+
+  @Inject()
+  configService: ConfigService;
 
   @Inject()
   i18nService: MidwayI18nService;
@@ -161,8 +168,9 @@ export class SyncGachaAtlasProcessor implements IProcessor {
     // 获取原神祈愿物品图鉴角色数据
     let characterItems: IGenshinImpactAltasItem[] = [];
     try {
-      const thirdPartyCharacterPath =
-        this.syncGenshinImpactAtlasConfig.api_path.character;
+      const thirdPartyCharacterPath = await this.getGenshinAtlasPath(
+        this.syncGenshinImpactAtlasConfig.api_path.character
+      );
       if (!thirdPartyCharacterPath) {
         this.queueLogger.warn(
           '[SyncGachaAtlasProcessor] Third party character path is not set, skipping character sync'
@@ -235,10 +243,24 @@ export class SyncGachaAtlasProcessor implements IProcessor {
           existingCharacters.map(item => [item.content_id, item])
         );
 
-        // 找出新增的角色
-        const newCharacters = validCharacters.filter(
-          item => !existingMap.has(item.content_id)
+        // 第三方图鉴名称映射，用于匹配 item_id
+        const characterAtlasMap = new Map(
+          characterItems.map(item => [item.name, item])
         );
+
+        // 找出新增的角色（过滤掉无法从第三方图鉴匹配到 item_id 的角色）
+        const newCharacters = validCharacters.filter(item => {
+          if (existingMap.has(item.content_id)) return false;
+          const characterAtlasItem = characterAtlasMap.get(item.title);
+          if (!characterAtlasItem || !characterAtlasItem.id) {
+            this.queueLogger.warn(
+              '[SyncGachaAtlasProcessor] Skipping new character %s: item_id not found in third-party atlas',
+              item.title
+            );
+            return false;
+          }
+          return true;
+        });
 
         // 找出需要更新的角色（icon_url、rank_type、character_element或weapon_type有变化）
         const charactersToUpdate = validCharacters.filter(item => {
@@ -261,15 +283,7 @@ export class SyncGachaAtlasProcessor implements IProcessor {
           // 创建新增角色的图鉴数据
           const gachaAtlasEntities: GachaAtlasEntity[] = newCharacters.map(
             item => {
-              const characterAtlasItem = characterItems.find(
-                atlasItem => atlasItem.name === item.title
-              );
-              if (!characterAtlasItem) {
-                this.queueLogger.warn(
-                  '[SyncGachaAtlasProcessor] Character item not found: %s',
-                  item.title
-                );
-              }
+              const characterAtlasItem = characterAtlasMap.get(item.title);
 
               const rankType = parseGenshinAndStarRailRankType(item.ext, 25);
               const characterElement = parseGenshinImpactCharacterElement(
@@ -342,11 +356,19 @@ export class SyncGachaAtlasProcessor implements IProcessor {
       }
     }
 
+    // 过滤出 item_id 为空字符串的已有角色数据，与第三方图鉴数据比对后更新 item_id
+    await this.updateEmptyItemIds(
+      GameTypeEnum.GENSHIN_IMPACT,
+      GachaItemTypeEnum.CHARACTER,
+      characterItems
+    );
+
     // 获取原神祈愿物品图鉴武器数据
     let weaponItems: IGenshinImpactAltasItem[] = [];
     try {
-      const thirdPartyWeaponPath =
-        this.syncGenshinImpactAtlasConfig.api_path.weapon;
+      const thirdPartyWeaponPath = await this.getGenshinAtlasPath(
+        this.syncGenshinImpactAtlasConfig.api_path.weapon
+      );
       if (!thirdPartyWeaponPath) {
         this.queueLogger.warn(
           '[SyncGachaAtlasProcessor] Third party weapon path is not set, skipping weapon sync'
@@ -409,10 +431,24 @@ export class SyncGachaAtlasProcessor implements IProcessor {
           existingWeapons.map(item => [item.content_id, item])
         );
 
-        // 找出新增的武器
-        const newWeapons = weaponCategory.list.filter(
-          item => !existingMap.has(item.content_id)
+        // 第三方图鉴名称映射，用于匹配 item_id
+        const weaponAtlasMap = new Map(
+          weaponItems.map(item => [item.name, item])
         );
+
+        // 找出新增的武器（过滤掉无法从第三方图鉴匹配到 item_id 的武器）
+        const newWeapons = weaponCategory.list.filter(item => {
+          if (existingMap.has(item.content_id)) return false;
+          const weaponAtlasItem = weaponAtlasMap.get(item.title);
+          if (!weaponAtlasItem || !weaponAtlasItem.id) {
+            this.queueLogger.warn(
+              '[SyncGachaAtlasProcessor] Skipping new weapon %s: item_id not found in third-party atlas',
+              item.title
+            );
+            return false;
+          }
+          return true;
+        });
 
         // 找出需要更新的武器（icon_url、rank_type或weapon_type有变化）
         const weaponsToUpdate = weaponCategory.list.filter(item => {
@@ -431,15 +467,7 @@ export class SyncGachaAtlasProcessor implements IProcessor {
           // 创建新增武器的图鉴数据
           const gachaAtlasEntities: GachaAtlasEntity[] = newWeapons.map(
             item => {
-              const weaponAtlasItem = weaponItems.find(
-                atlasItem => atlasItem.name === item.title
-              );
-              if (!weaponAtlasItem) {
-                this.queueLogger.warn(
-                  '[SyncGachaAtlasProcessor] Weapon item not found: %s',
-                  item.title
-                );
-              }
+              const weaponAtlasItem = weaponAtlasMap.get(item.title);
 
               const rankType = parseGenshinImpactWeaponRankType(item.ext);
               const weaponType = parseGenshinImpactWeaponType(item.ext);
@@ -501,12 +529,99 @@ export class SyncGachaAtlasProcessor implements IProcessor {
       }
     }
 
+    // 过滤出 item_id 为空字符串的已有武器数据，与第三方图鉴数据比对后更新 item_id
+    await this.updateEmptyItemIds(
+      GameTypeEnum.GENSHIN_IMPACT,
+      GachaItemTypeEnum.WEAPON,
+      weaponItems
+    );
+
     this.queueLogger.info(
       '[SyncGachaAtlasProcessor] Genshin impact gacha atlas sync completed: %d new characters, %d updated characters, %d new weapons, %d updated weapons',
       newCharacterCount,
       updatedCharacterCount,
       newWeaponCount,
       updatedWeaponCount
+    );
+  }
+
+  /**
+   * 获取原神图鉴第三方 API 完整请求路径
+   * 从系统配置中读取请求参数（不含问号），在代码中拼接 ? 后使用
+   * @param path 基础路径
+   * @returns 完整请求路径
+   */
+  private async getGenshinAtlasPath(path: string): Promise<string> {
+    const config = await this.configService.getConfigByKey(
+      SystemConfigKeyEnum.GACHA_GENSHIN_ATLAS_PARAMS
+    );
+    const params = config?.value?.trim() || '';
+    if (params) {
+      this.queueLogger.info(
+        '[SyncGachaAtlasProcessor] Building genshin atlas path: %s?%s',
+        path,
+        params
+      );
+    } else {
+      this.queueLogger.warn(
+        '[SyncGachaAtlasProcessor] Genshin atlas params config (%s) is empty, requesting path without query params: %s',
+        SystemConfigKeyEnum.GACHA_GENSHIN_ATLAS_PARAMS,
+        path
+      );
+    }
+    return params ? `${path}?${params}` : path;
+  }
+
+  /**
+   * 过滤出 item_id 为空字符串的图鉴数据，并与第三方图鉴数据比对后更新 item_id
+   * @param game_type 游戏类型
+   * @param itemType 物品类型
+   * @param atlasItems 第三方图鉴数据列表
+   */
+  private async updateEmptyItemIds(
+    game_type: GameType,
+    itemType: GachaItemType,
+    atlasItems: IGenshinImpactAltasItem[]
+  ) {
+    if (atlasItems.length === 0) return;
+
+    // 第三方图鉴名称 -> 图鉴条目 映射
+    const atlasItemMap = new Map(atlasItems.map(item => [item.name, item]));
+
+    // 查询 item_id 为空字符串的已有图鉴数据
+    const emptyItemIdRecords = await this.gachaAtlasService.findByEmptyItemId(
+      game_type,
+      itemType
+    );
+
+    // 与第三方图鉴数据比对，匹配到 item_id 的才进行更新
+    const itemUpdates = emptyItemIdRecords
+      .map(item => {
+        const atlasItem = atlasItemMap.get(item.item_name);
+        if (!atlasItem || !atlasItem.id) return null;
+        this.queueLogger.info(
+          '[SyncGachaAtlasProcessor] Updating %s item_id: %s, new item_id: %s',
+          itemType,
+          item.item_name,
+          atlasItem.id
+        );
+        return { item_name: item.item_name, item_id: atlasItem.id };
+      })
+      .filter(
+        (item): item is { item_name: string; item_id: string } => item !== null
+      );
+
+    if (itemUpdates.length === 0) return;
+
+    await this.gachaAtlasService.batchUpdateItemIdByName(
+      game_type,
+      itemUpdates
+    );
+    this.queueLogger.info(
+      '[SyncGachaAtlasProcessor] Updated %d %s item_id for game_type=%s',
+      itemUpdates.length,
+      itemType,
+      game_type
     );
   }
 
