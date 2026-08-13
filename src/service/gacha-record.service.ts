@@ -35,7 +35,7 @@ import { RedisHelper } from '@/helper/redis.helper';
 import { GachaAtlasService } from '@/service/gacha-atlas.service';
 import { GachaConfigService } from '@/service/gacha-config.service';
 import { MinioService } from '@/service/minio.service';
-import { delay } from '@/utils/common';
+import { delay, randomId } from '@/utils/common';
 
 const GACHA_LOCK_PREFIX = 'gacha:lock';
 const GACHA_LOCK_TTL = 300; // 5 minutes
@@ -163,27 +163,52 @@ export class GachaRecordService {
   }
 
   /**
-   * 尝试获取锁
+   * 尝试获取锁（使用唯一令牌标识持有者，用于安全续期与释放）
    * @param lockKey 锁的 key
-   * @returns 是否成功获取锁
+   * @returns 获取成功返回令牌，失败返回空字符串
    */
-  private async acquireLock(lockKey: string): Promise<boolean> {
+  private async acquireLock(lockKey: string): Promise<string> {
     const redis = await this.redisHelper.getRedisInstance(
       RedisStorageEnum.SCRIPT
     );
-    const result = await redis.set(lockKey, '1', 'EX', GACHA_LOCK_TTL, 'NX');
-    return result === 'OK';
+    const token = randomId();
+    const result = await redis.set(lockKey, token, 'EX', GACHA_LOCK_TTL, 'NX');
+    return result === 'OK' ? token : '';
   }
 
   /**
-   * 释放锁
+   * 续期锁（仅当当前持有令牌匹配时续期，避免误续他人锁）
    * @param lockKey 锁的 key
+   * @param token 锁令牌
    */
-  private async releaseLock(lockKey: string): Promise<void> {
+  private async renewLock(lockKey: string, token: string): Promise<void> {
     const redis = await this.redisHelper.getRedisInstance(
       RedisStorageEnum.SCRIPT
     );
-    await redis.del(lockKey);
+    await redis.eval(
+      "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('expire', KEYS[1], ARGV[2]) else return 0 end",
+      1,
+      lockKey,
+      token,
+      GACHA_LOCK_TTL
+    );
+  }
+
+  /**
+   * 释放锁（仅当当前持有令牌匹配时释放，避免误删他人锁）
+   * @param lockKey 锁的 key
+   * @param token 锁令牌
+   */
+  private async releaseLock(lockKey: string, token: string): Promise<void> {
+    const redis = await this.redisHelper.getRedisInstance(
+      RedisStorageEnum.SCRIPT
+    );
+    await redis.eval(
+      "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
+      1,
+      lockKey,
+      token
+    );
   }
 
   /**
@@ -326,8 +351,8 @@ export class GachaRecordService {
       serverRegion,
       uid
     );
-    const accountLockAcquired = await this.acquireLock(accountLockKey);
-    if (!accountLockAcquired) {
+    const accountLockToken = await this.acquireLock(accountLockKey);
+    if (!accountLockToken) {
       this.logger.warn(
         `[GachaRecordService] Account lock acquisition failed for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, serverRegion: ${serverRegion} (sync may be in progress)`
       );
@@ -352,8 +377,8 @@ export class GachaRecordService {
           gachaType
         );
 
-        const lockAcquired = await this.acquireLock(lockKey);
-        if (!lockAcquired) {
+        const lockToken = await this.acquireLock(lockKey);
+        if (!lockToken) {
           this.logger.warn(
             `[GachaRecordService] Lock acquisition failed for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}, skipping (may be in progress)`
           );
@@ -373,19 +398,24 @@ export class GachaRecordService {
             serverRegion,
             gachaType,
             apiPath,
-            onProgress
+            onProgress,
+            async () => {
+              // 每页续期账号级锁与当前祈愿类型锁，避免长同步过程中锁提前过期
+              await this.renewLock(accountLockKey, accountLockToken);
+              await this.renewLock(lockKey, lockToken);
+            }
           );
           totalNewRecords += result.totalNewRecords;
           syncedItems.push(...result.syncedItems);
         } finally {
-          await this.releaseLock(lockKey);
+          await this.releaseLock(lockKey, lockToken);
           this.logger.info(
             `[GachaRecordService] Released lock for gachaType: ${gachaTypeLabel.en}/${gachaTypeLabel.zh}`
           );
         }
       }
     } finally {
-      await this.releaseLock(accountLockKey);
+      await this.releaseLock(accountLockKey, accountLockToken);
       this.logger.info(
         `[GachaRecordService] Released account lock for uid: ${uid}, gameType: ${gameTypeLabel.en}/${gameTypeLabel.zh}, serverRegion: ${serverRegion}`
       );
@@ -416,7 +446,8 @@ export class GachaRecordService {
     serverRegion: string,
     gachaType: string,
     apiPath: string,
-    onProgress?: (payload: GachaSyncProgressPayload) => void
+    onProgress?: (payload: GachaSyncProgressPayload) => void,
+    renewLock?: () => Promise<void>
   ): Promise<{
     totalNewRecords: number;
     syncedItems: Array<{ name: string; item_id: string }>;
@@ -466,6 +497,11 @@ export class GachaRecordService {
     currentSearchParams.set('size', size.toString());
 
     while (fetchMore) {
+      // 每抓取一页续期一次锁，防止长同步过程中锁提前过期导致并发重入
+      if (renewLock) {
+        await renewLock();
+      }
+
       onProgress?.({
         type: 'fetch_page',
         gachaTypeLabel,
