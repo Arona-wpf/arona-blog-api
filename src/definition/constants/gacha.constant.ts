@@ -237,6 +237,7 @@ export const ZENLESS_ZONE_ZERO_ATTRIBUTE_MAP: Record<string, string> = {
   风: 'Wind',
   玄墨: 'Ink',
   流明: 'Luminescence',
+  锋御: 'Edgeguard',
 };
 
 /**
@@ -254,6 +255,7 @@ export const ZENLESS_ZONE_ZERO_ATTRIBUTE_I18N_KEY_MAP: Record<string, string> =
     Wind: 'gacha.attribute.zenless_zone_zero.wind',
     Ink: 'gacha.attribute.zenless_zone_zero.ink',
     Luminescence: 'gacha.attribute.zenless_zone_zero.luminescence',
+    Edgeguard: 'gacha.attribute.zenless_zone_zero.edgeguard',
   };
 
 /**
