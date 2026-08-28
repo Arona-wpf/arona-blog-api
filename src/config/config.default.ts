@@ -94,10 +94,7 @@ const config = (appInfo: MidwayAppInfo): MidwayConfig => {
 
     // CDN
     cdn: {
-      prefix: {
-        file: BasicConfig.cdn.prefix.file,
-        media: BasicConfig.cdn.prefix.media,
-      },
+      domain: BasicConfig.cdn.domain,
     },
 
     // 腾讯云COS存储桶

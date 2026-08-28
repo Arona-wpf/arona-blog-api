@@ -1,0 +1,12 @@
+{
+  "cos.path": "相对路径",
+  "cos.type": "对象类型",
+  "cos.deep": "是否递归",
+  "cos.expires": "链接有效期（秒）",
+  "cos.list.success": "获取目录内容成功",
+  "cos.folder.create.success": "创建文件夹成功",
+  "cos.delete.success": "删除成功",
+  "cos.exists.success": "对象存在性检查成功",
+  "cos.url.success": "获取访问链接成功",
+  "cos.credential.success": "获取临时凭证成功"
+}

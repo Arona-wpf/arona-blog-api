@@ -1,6 +1,7 @@
 import captcha from './captcha.json';
 import common from './common.json';
 import config from './config.json';
+import cos from './cos.json';
 import error from './error.json';
 import file from './file.json';
 import gacha from './gacha.json';
@@ -20,6 +21,7 @@ export const zh_CN = {
   gacha,
   minio,
   config,
+  cos,
   file,
   user,
   role,

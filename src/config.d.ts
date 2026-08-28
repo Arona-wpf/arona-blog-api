@@ -5,11 +5,7 @@
 
 export interface ConfigJson {
   cdn: {
-    prefix: {
-      file: string;
-      media: string;
-    };
-    allowedOrigins: string[];
+    domain: string;
   };
   cos: {
     allowActions: string[];

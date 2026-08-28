@@ -1,6 +1,7 @@
 import captcha from './captcha.json';
 import common from './common.json';
 import config from './config.json';
+import cos from './cos.json';
 import locale from './en_US.json';
 import error from './error.json';
 import file from './file.json';
@@ -20,6 +21,7 @@ export const en_US = {
   gacha,
   minio,
   config,
+  cos,
   file,
   user,
   role,

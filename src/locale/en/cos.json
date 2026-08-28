@@ -1,0 +1,12 @@
+{
+  "cos.path": "Path",
+  "cos.type": "Object type",
+  "cos.deep": "Recursive",
+  "cos.expires": "Link expiry (seconds)",
+  "cos.list.success": "Get directory contents success",
+  "cos.folder.create.success": "Create folder success",
+  "cos.delete.success": "Delete success",
+  "cos.exists.success": "Object existence check success",
+  "cos.url.success": "Get access URL success",
+  "cos.credential.success": "Get temporary credential success"
+}

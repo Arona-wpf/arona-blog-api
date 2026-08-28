@@ -15,7 +15,6 @@ import { UserEntity } from '@/entity/user.entity';
 import { RedisHelper } from '@/helper/redis.helper';
 import { ICDNConfig, ICosConfig } from '@/interface';
 import { CosInstanceManager } from '@/manage/cos-instance.manage';
-import { replaceUrl } from '@/utils/common';
 
 @Provide()
 export class CosService {
@@ -224,78 +223,6 @@ export class CosService {
   // ==================== 文件操作 ====================
 
   /**
-   * 上传文件（支持批量）
-   * @param user 用户实体
-   * @param isAdmin 是否管理员
-   * @param fileArray 文件数组
-   * @returns COS 上传结果
-   */
-  async uploadFiles(
-    user: UserEntity,
-    isAdmin: boolean,
-    fileArray: Array<{
-      filename: string;
-      path: string;
-      buffer: Buffer<ArrayBufferLike>;
-    }>
-  ): Promise<COS.UploadFilesResult> {
-    const account = user.account;
-    const cosInstance = await this.getCosInstance(user, isAdmin);
-
-    // 收集上传失败的文件信息
-    const failedList: typeof fileArray = [];
-
-    // 构建上传任务列表
-    const bufferList = fileArray.map(file => ({
-      Bucket: this.cosConfig.bucket,
-      Region: this.cosConfig.region,
-      Key: `${account}/${file.path}`,
-      Body: file.buffer,
-      onFileFinish: (err: Error) => {
-        if (err) {
-          this.logger.error(
-            `[CosService] upload file failed, account: ${account}, path: ${file.path}, err: ${err.message}`
-          );
-          failedList.push(file);
-        } else {
-          this.logger.info(
-            `[CosService] upload file success, account: ${account}`
-          );
-        }
-      },
-    }));
-
-    return new Promise<COS.UploadFilesResult>((resolve, reject) => {
-      cosInstance.uploadFiles(
-        {
-          files: bufferList,
-          SliceSize: 10 * 1024 * 1024,
-        },
-        (err, data) => {
-          if (err) {
-            this.logger.error(
-              `[CosService] upload files failed, account: ${account}, err: ${err.message}`
-            );
-            reject(BUSINESS_ERROR_CONSTANT.COS_UPLOAD_FAILED());
-          } else {
-            // 检查是否有单个文件失败
-            if (failedList.length > 0) {
-              this.logger.error(
-                `[CosService] upload files partially failed, account: ${account}, failedList: ${JSON.stringify(
-                  failedList
-                )}`
-              );
-              reject(BUSINESS_ERROR_CONSTANT.COS_UPLOAD_FAILED());
-            } else {
-              resolve(data);
-            }
-          }
-        }
-      );
-    });
-  }
-
-  /**
    * 检查对象是否存在
    * @param user 用户实体
    * @param isAdmin 是否管理员
@@ -340,14 +267,14 @@ export class CosService {
    * @param user 用户实体
    * @param isAdmin 是否管理员
    * @param objectKey 对象 key
-   * @param type 对象类型
+   * @param expires 链接有效期（秒），默认取配置 durationSeconds
    * @returns CDN 签名 URL
    */
   async getObjectUrlWithSignature(
     user: UserEntity,
     isAdmin: boolean,
     objectKey: string,
-    type: 'file' | 'media'
+    expires?: number
   ): Promise<string> {
     const cosInstance = await this.getCosInstance(user, isAdmin);
 
@@ -358,7 +285,8 @@ export class CosService {
           Region: this.cosConfig.region,
           Key: objectKey,
           Sign: true,
-          Expires: this.cosConfig.durationSeconds,
+          Expires: expires ?? this.cosConfig.durationSeconds,
+          Domain: this.cdnConfig.domain,
         },
         (err, data) => {
           if (err) {
@@ -372,9 +300,8 @@ export class CosService {
             );
             reject(BUSINESS_ERROR_CONSTANT.COS_GET_URL_FAILED());
           } else {
-            // 替换为 CDN 域名
-            const cdnUrl = replaceUrl(data.Url, this.cdnConfig.prefix[type]);
-            resolve(cdnUrl);
+            // 返回 自定义域名的签名 URL
+            resolve(data.Url);
           }
         }
       );

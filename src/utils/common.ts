@@ -149,7 +149,7 @@ export function randomId(): string {
 /**
  * 替换URL域名
  * @param url 原始URL
- * @param replace 替换内容
+ * @param replace 替换域名（如 https://cdn.arona-blog.com）
  * @returns 新URL
  */
 export function replaceUrl(url: string, replace: string) {
@@ -159,14 +159,14 @@ export function replaceUrl(url: string, replace: string) {
   try {
     // 解析URL
     const urlObj = new URL(cleanUrl);
+    const replaceObj = new URL(replace);
 
-    // 构建新的URL，保持原有的路径、查询参数和哈希
-    const newUrl = new URL(
-      urlObj.pathname + urlObj.search + urlObj.hash,
-      replace
-    );
+    // 替换域名，保持原有的路径、查询参数和哈希
+    replaceObj.pathname = urlObj.pathname;
+    replaceObj.search = urlObj.search;
+    replaceObj.hash = urlObj.hash;
 
-    return newUrl.toString();
+    return replaceObj.toString();
   } catch {
     // URL解析失败，抛出通用业务错误
     throw BUSINESS_ERROR_CONSTANT.URL_REPLACE_FAILED();
